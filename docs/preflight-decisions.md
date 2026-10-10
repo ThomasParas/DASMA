@@ -29,6 +29,15 @@ DASMA listens to a live voice feed and compares it against a script or monologue
 | D10 | Line-note output | **Printable PDF per actor** + copy to clipboard. No email/cloud. | Matches how SMs deliver notes; keeps everything offline. |
 | D11 | Platform | **Browser-first offline web app (PWA) in TypeScript, packaged later as a Tauri desktop app** | Zero-install link sharing suits a free MVP; Tauri reuses the same UI, so the desktop/air-gapped build is packaging, not a rewrite. Mobile comes later. |
 | D12 | First milestone | **Engine test harness before any UI**: record a real scene from the director's table (with deliberate errors), run it through recognizer + aligner, measure false alarms per run and errors caught | Far-field accuracy from a laptop is the single biggest technical unknown. Find out in week one. |
+| D13 | Solo-mode cues | **Layered:** cue line always on screen; on-device TTS reads it aloud by default (distinct voice per character where possible, mutable); optional self-recorded cues per character replace TTS. Settings: cue length (full line / last few words), hide-my-lines (shown / first letters / hidden-until-said). Matching pauses while a cue plays. | Covers every preference; TTS/display machinery is shared with director-mode on-book prompting. |
+| D14 | Grace window | **User-adjustable slider** ("Patience": instant ↔ relaxed), default set from test-harness results. Affects only the live alert; the after-run report always judges with full context. | Optimal pause is unknown and likely varies by person and cast. |
+| D15 | Speaker attribution (director mode) | **Script order + self-recovery** with a visible "lost" state showing best-guess positions; **manual jump** (click/search a line) anytime, also used to start mid-scene. Notes are attributed to the character who owns the line. Per-actor voice ID **deferred**. | Covers a normal run; the director keeps an escape hatch. Voice ID is costly and unreliable far-field. |
+| D16 | Overlapping dialogue | **Overlap zones are "unchecked":** detected from `/` overlap marks on import or tagged in the correction screen; no alerts, cursor holds position, report says "overlap — not checked". Two-cursor matching **revisited once per-actor audio exists**. | One far-field mic can't separate simultaneous voices; protects the false-alarm budget. |
+| D17 | Audio retention & consent | **Rolling in-memory buffer; only short clips around each line note / quick-mark are saved** (≈5 s before, 3 s after), playable from the note. Kept with the session until deleted, with an **optional auto-delete after N days**. **"No audio clips" switch** per production (text + timestamps only). Full-run recording off by default, opt-in. Always: audio never leaves the device, visible listening indicator, first-run reminder to inform the cast. | Clips make notes verifiable (and expose app mishears); the switch and auto-delete respect actors, unions, and privacy. |
+| D18 | Sharing scripts with the cast | **Export/import a `.dasma` script file** (text + tags + overlaps + cuts), passed around by whatever means the director already uses (AirDrop, USB, email, shared drive). Re-import shows a "script updated: N lines changed" summary. Line notes stay separate (D10). Practice stats flowing back to the director **deferred**. | No hosting (scripts are copyrighted; offline-first); tagging is done once by the director. |
+| D19 | Cuts | **In MVP:** director can mark passages as cut; cut text is never expected, alerted, or noted. Cuts travel in the `.dasma` file. | Directors routinely cut licensed scripts; one unhandled cut would break notes for a whole scene. |
+| D20 | Browser support | **Chrome & Edge: supported and tested. Safari & Firefox: best effort.** Always request persistent storage (warn if denied); backup/export of scripts and sessions is first-class. Tauri desktop build is the real fix for Safari users and air-gapped machines. | Chromium has the strongest WASM/WebGPU/PWA support; Safari may evict site data after ~7 days unused. |
+| D21 | Test audio | **Synthetic first:** public-domain scenes with planted, auto-labeled errors (drops, swaps, paraphrases, skips, self-corrections, long pauses), multiple TTS voices, simulated room (reverb, distance, noise, laptop-mic response). **Real rehearsal recordings later** from the user (target 10–15 min, 2–3 scenes, a couple of rooms) to set defaults and validate far-field viability. | Synthetic audio is unlimited and labeled but optimistic; real audio is the truth test. |
 
 ---
 
@@ -134,6 +143,7 @@ There's no formal industry standard; this superset reflects common SM practice:
 
 **In MVP**
 - Script import: text PDF, Word/Google Docs (exported file), pasted text; auto-tag + correction screen
+- Cuts; overlap marking; `.dasma` script export/import for the cast
 - Solo mode with close mic: instant alert and after-run report
 - Director mode from one laptop: live view, on-book prompting, quick-mark, optional buzz
 - Line notes per actor (PDF + clipboard)
@@ -152,14 +162,14 @@ There's no formal industry standard; this superset reflects common SM practice:
 
 ## 8. Open questions (to resolve in design)
 
-1. **Solo-mode cues:** how does a solo user hear the other characters' lines — on-screen cue, on-device TTS, or self-recorded cues?
-2. **Grace window:** how many confirming words / how many ms before a word is flagged? (To be tuned with the test harness.)
-3. **Speaker attribution in director mode:** relying on script order + re-anchoring — what does the UI do when it's unsure whose line it is?
-4. **Overlapping dialogue:** how to handle lines that are deliberately spoken over each other.
-5. **Audio retention & consent:** quick-mark keeps audio clips — how long, and how do actors know?
-6. **Sharing scripts with the cast:** export/import of the DASMA script file (scripts are copyrighted; DASMA never uploads them anywhere).
-7. **Browser support targets:** Chrome/Edge first? Safari support level?
-8. **Test recordings:** obtain a few minutes of real rehearsal audio from the director's table (with actors' permission) for the engine harness.
+1. ~~Solo-mode cues~~ → resolved, see D13.
+2. ~~Grace window~~ → resolved, see D14.
+3. ~~Speaker attribution~~ → resolved, see D15.
+4. ~~Overlapping dialogue~~ → resolved, see D16.
+5. ~~Audio retention & consent~~ → resolved, see D17.
+6. ~~Sharing scripts with the cast~~ → resolved, see D18 (and cuts, D19).
+7. ~~Browser support targets~~ → resolved, see D20.
+8. ~~Test recordings~~ → resolved, see D21.
 
 ---
 
