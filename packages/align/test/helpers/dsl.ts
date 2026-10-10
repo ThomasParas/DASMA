@@ -33,16 +33,22 @@ export function heard(text: string, opts: HeardOptions = {}): HeardWord[] {
   return out;
 }
 
-/** Feed words one at a time (ticking after each), then flush and finalize. */
+/** Feed words one at a time on a 0.1 s clock (ticking between and after words), then flush and finalize. */
 export function runScenario(lines: ScriptLineInput[], words: HeardWord[], opts: Partial<AlignOptions> = {}) {
   const options: AlignOptions = { ...DEFAULT_ALIGN_OPTIONS, ...opts };
   const expected = buildExpected(lines, options.strictness);
   const aligner = createAligner(expected, options);
   const events: AlignEvent[] = [];
   aligner.onEvent((e) => events.push(e));
+  let clock = 0;
   for (const w of words) {
+    // Advance a realistic clock so grace timeouts fire during pauses.
+    for (clock = Math.round((clock + 0.1) * 10) / 10; clock < w.start; clock = Math.round((clock + 0.1) * 10) / 10) {
+      aligner.tick(clock);
+    }
     aligner.push([w]);
     aligner.tick(w.end);
+    clock = w.end;
   }
   const end = (words.at(-1)?.end ?? 0) + 10;
   aligner.tick(end);

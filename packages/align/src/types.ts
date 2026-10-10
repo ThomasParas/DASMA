@@ -70,6 +70,7 @@ export type AlignEvent =
   | { type: 'reanchored'; fromIdx: number; toIdx: number; lostFor: number; at: number }
   | { type: 'notRun'; fromIdx: number; toIdx: number; at: number }
   | { type: 'calledForLine'; idx: number; at: number }
+  /** A later lineDone for the same lineId supersedes earlier ones (e.g. after a restart); consumers keep the last. */
   | { type: 'lineDone'; lineId: string; notes: NoteDraft[]; at: number };
 
 export interface AlignOptions {

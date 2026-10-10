@@ -2,7 +2,7 @@ import { classifyOps } from './classify';
 import { commitPoint, commitPointOnTimeout } from './commit';
 import { countCheckedWords, displayExpected, toHeardTokens } from './expected';
 import { finalizeLine, type LineState } from './finalize-line';
-import { MATCH_THRESHOLD } from './phonetic';
+import { MATCH_THRESHOLD, wordScore } from './phonetic';
 import { TrigramIndex } from './trigram-index';
 import type { AlignEvent, AlignOptions, ExpectedWord, HeardToken, HeardWord, NoteDraft } from './types';
 import { alignWindow, hasE, hasH, isMatch, type Op } from './window-align';
@@ -22,6 +22,10 @@ export interface Aligner {
 
 const LOST_BUFFER = 12;
 const LINE_CALL_GAP_SEC = 1;
+/** Words of the anchor trigram that located a forward re-anchor candidate. */
+const ANCHOR_WORDS = 3;
+/** Further heard words that must follow the trigram in the script before a forward re-anchor is trusted. */
+const FORWARD_CONFIRM_WORDS = 2;
 
 export function patienceToGrace(patience: number): { confirmWords: number; timeoutSec: number } {
   const p = Math.min(1, Math.max(0, patience));
@@ -55,6 +59,8 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
   let H: HeardToken[] = [];
   let lost = false;
   let lostSince = 0;
+  /** A forward re-anchor candidate awaiting confirmation: script index of its first word, and confirmations so far. */
+  let pending: { c: number; confirmed: number; need: number } | null = null;
   let paused = false;
   let started = false;
   let skipPlease = false;
@@ -159,7 +165,8 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
   function step(at: number, timeout: boolean): void {
     const ops = alignWindow(H, windowAt());
     const end = timeout ? commitPointOnTimeout(ops) : commitPoint(ops, confirmWords);
-    if (end >= 0) commit(ops.slice(0, end + 1), at);
+    // Before anything has matched, unmatched talk is pre-roll chatter: a timeout must not commit it as errors.
+    if (end >= 0 && (started || ops.slice(0, end + 1).some(isMatch))) commit(ops.slice(0, end + 1), at);
     if (!H.length || lost) return;
     const rest = alignWindow(H, windowAt());
     const fresh = rest
@@ -177,6 +184,7 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
 
   function enterLost(at: number): void {
     lost = true;
+    pending = null;
     lostSince = H[0]?.start ?? at;
     suspected.clear();
     emit({ type: 'lost', guesses: index.find(H, cursor, MATCH_THRESHOLD).slice(0, 3), at });
@@ -184,13 +192,40 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
   }
 
   function tryReanchor(at: number): void {
+    const tok = H.at(-1)!;
+    if (pending) {
+      const next = expected[pending.c + ANCHOR_WORDS + pending.confirmed];
+      if (next && wordScore(tok, next) >= MATCH_THRESHOLD) {
+        pending.confirmed++;
+        if (pending.confirmed < pending.need) return;
+        const { c, confirmed } = pending;
+        pending = null;
+        anchorAt(c, ANCHOR_WORDS + confirmed, at);
+        return;
+      }
+      pending = null;
+    }
     const c = index.find(H, cursor, MATCH_THRESHOLD)[0];
     if (c === undefined) return;
-    const anchor = H.slice(-3);
-    const before = H.slice(0, -3);
+    if (c > cursor) {
+      // A forward snap is only trusted once the words after the trigram match too; stray off-script
+      // talk that happens to echo three script words must not skip lines.
+      const need = Math.min(FORWARD_CONFIRM_WORDS, expected.length - (c + ANCHOR_WORDS));
+      if (need > 0) {
+        pending = { c, confirmed: 0, need };
+        return;
+      }
+    }
+    anchorAt(c, ANCHOR_WORDS, at);
+  }
+
+  /** Snap to script index c, treating the last `len` heard tokens as matching c..c+len-1. */
+  function anchorAt(c: number, len: number, at: number): void {
+    const anchor = H.slice(-len);
+    const before = H.slice(0, -len);
     const lostFor = anchor[0]!.start - lostSince;
     lost = false;
-    emit({ type: 'reanchored', fromIdx: cursor, toIdx: c + 3, lostFor, at });
+    emit({ type: 'reanchored', fromIdx: cursor, toIdx: c + len, lostFor, at });
     const anchorOps = (eOffset: number, hOffset: number): Op[] =>
       anchor.map((_, k) => ({ kind: 'match' as const, h: hOffset + k, e: eOffset + k, score: 1 }));
     if (c > cursor && lostFor < options.longLossSec) {
@@ -237,6 +272,9 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
       if (tok.norm === 'please') return;
     }
     if (
+      started &&
+      !lost &&
+      cursor < expected.length &&
       tok.norm === 'line' &&
       gap >= LINE_CALL_GAP_SEC &&
       !expected.slice(cursor, cursor + 4).some((w) => w.norm === 'line')
@@ -272,6 +310,7 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
       if (!expected.length) return;
       if (!lost && H.length) step(now, true);
       lost = false;
+      pending = null;
       H = [];
       if (cursor < expected.length) emit({ type: 'notRun', fromIdx: cursor, toIdx: expected.length, at: now });
       checkLinesDone(now, true);
@@ -289,6 +328,7 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
       cursor = target;
       H = [];
       lost = false;
+      pending = null;
       started = false;
       recentMatched = [];
       suspected.clear();

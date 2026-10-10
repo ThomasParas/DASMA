@@ -33,16 +33,29 @@ describe('aligner: clean runs', () => {
 
   it('ignores fillers', () => {
     const text = ['Did you um hear what I was uh playing, Lane?', perf('L2', 'L3', 'L4', 'L5')].join(' ');
-    expect(runScenario(EARNEST, heard(text), P0).lineNotes).toEqual([]);
+    const r = runScenario(EARNEST, heard(text), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
   });
 
   it('accepts homophones', () => {
     const KNIGHT: ScriptLineInput[] = [{ id: 'K1', characterId: 'NARRATOR', text: 'The knight rode out into the night.' }];
-    expect(runScenario(KNIGHT, heard('the night rode out into the knight'), P0).lineNotes).toEqual([]);
+    const r = runScenario(KNIGHT, heard('the night rode out into the knight'), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
   });
 
   it('pre-roll chatter: talk before the first line produces no notes', () => {
-    expect(runScenario(EARNEST, heard(`Okay are we starting now | ${perf('L1', 'L2', 'L3', 'L4', 'L5')}`), P0).lineNotes).toEqual([]);
+    const r = runScenario(EARNEST, heard(`Okay are we starting now | ${perf('L1', 'L2', 'L3', 'L4', 'L5')}`), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
+  });
+
+  it('pre-roll chatter containing "line" is not a call for line', () => {
+    const r = runScenario(EARNEST, heard(`Okay everyone | line up over there | ${perf('L1', 'L2', 'L3', 'L4', 'L5')}`), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
+    expect(r.types).not.toContain('calledForLine');
   });
 
   it('empty script: nothing to align, nothing breaks', () => {
@@ -52,13 +65,17 @@ describe('aligner: clean runs', () => {
 
   it('cut lines are never expected', () => {
     const lines = EARNEST.map((l) => (l.id === 'L3' ? { ...l, cut: true } : l));
-    expect(runScenario(lines, heard(perf('L1', 'L2', 'L4', 'L5')), P0).lineNotes).toEqual([]);
+    const r = runScenario(lines, heard(perf('L1', 'L2', 'L4', 'L5')), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
   });
 
   it('overlap zones are not checked', () => {
     const lines = EARNEST.map((l) => (l.id === 'L2' ? { ...l, overlapRanges: [[4, 8]] as Array<[number, number]> } : l));
     const text = [perf('L1'), "I didn't think it rather mumbled noise here", perf('L3', 'L4', 'L5')].join(' ');
-    expect(runScenario(lines, heard(text), P0).lineNotes).toEqual([]);
+    const r = runScenario(lines, heard(text), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
   });
 });
 
@@ -131,7 +148,8 @@ describe('aligner: line errors', () => {
 
 describe('aligner: stumbles, calls, chatter, restarts', () => {
   it('pause-and-correct is a stumble, not a note', () => {
-    const r = runScenario(EARNEST, heard(['Did you hear what you | I was playing, Lane?', perf('L2', 'L3', 'L4', 'L5')].join(' ')), P0);
+    // Default patience: instant patience would commit the substitution during the 1 s pause.
+    const r = runScenario(EARNEST, heard(['Did you hear what you | I was playing, Lane?', perf('L2', 'L3', 'L4', 'L5')].join(' ')));
     expect(r.lineNotes).toEqual([]);
     expect(r.types).toContain('stumble');
   });
@@ -154,14 +172,38 @@ describe('aligner: stumbles, calls, chatter, restarts', () => {
     const text = `${perf('L1', 'L2')} Okay everybody hold on let me fix this chair ||| ${perf('L4', 'L5')}`;
     const r = runScenario(EARNEST, heard(text), P0);
     expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
     expect(r.types).toContain('lost');
     expect(r.events).toContainEqual(expect.objectContaining({ type: 'notRun', fromIdx: 16, toIdx: 27 }));
+  });
+
+  it('off-script chatter that echoes script words does not skip lines', () => {
+    const text = `${perf('L1')} hold on everybody my phone is ringing sorry I play with my phone ${perf('L2', 'L3', 'L4', 'L5')}`;
+    const r = runScenario(EARNEST, heard(text), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
+  });
+
+  it('off-script talk containing "line" is not a call for line', () => {
+    const text = `${perf('L1', 'L2')} Okay everybody hold on line up the chair ||| ${perf('L4', 'L5')}`;
+    const r = runScenario(EARNEST, heard(text), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
+    expect(r.types).not.toContain('calledForLine');
   });
 
   it('going back to an earlier line is a restart, not an error', () => {
     const r = runScenario(EARNEST, heard(perf('L1', 'L2', 'L3', 'L1', 'L2')), P0);
     expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
     expect(r.types).toContain('reanchored');
+  });
+
+  it('after a restart, lines are completed again (the last lineDone per line wins)', () => {
+    const r = runScenario(EARNEST, heard(perf('L1', 'L2', 'L3', 'L1', 'L2', 'L3', 'L4', 'L5')), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
+    expect(r.events.flatMap((e) => (e.type === 'lineDone' ? [e.lineId] : []))).toEqual(['L1', 'L2', 'L1', 'L2', 'L3', 'L4', 'L5']);
   });
 });
 
