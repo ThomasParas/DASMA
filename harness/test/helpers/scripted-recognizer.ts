@@ -1,5 +1,6 @@
 import type { HeardWord } from '@dasma/align';
 import type { Recognizer } from '@dasma/asr';
+import type { RenderedPerformance } from '../../src/tts';
 
 /** A fake recognizer that "hears" a fixed word list with a fixed delay. */
 export class ScriptedRecognizer implements Recognizer<null> {
@@ -53,4 +54,21 @@ export class ScriptedRecognizer implements Recognizer<null> {
     while (this.next < this.words.length && this.words[this.next]!.end <= t) out.push(this.words[this.next++]!);
     if (out.length) for (const l of this.listeners) l(out);
   }
+}
+
+/** Words exactly as performed, spaced evenly through each rendered segment — a perfect recognizer. */
+export function oracleWords(rendered: RenderedPerformance, confidence = 0.95): HeardWord[] {
+  return rendered.segments
+    .flatMap(({ seg, start, end }) => {
+      const toks = seg.text.split(/[\s-]+/).filter(Boolean);
+      const d = (end - start) / Math.max(1, toks.length);
+      return toks.map((t, k) => ({
+        text: t.replace(/[^A-Za-z0-9']/g, ''),
+        start: start + k * d,
+        end: start + (k + 1) * d - 0.02,
+        confidence,
+        final: true,
+      }));
+    })
+    .filter((w) => w.text);
 }

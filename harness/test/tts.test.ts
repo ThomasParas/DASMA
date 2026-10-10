@@ -1,14 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { Performance } from '../src/perturb';
 import { mulberry32 } from '../src/rng';
-import { VOICE_POOL, assignVoices, renderPerformance, type TtsEngine } from '../src/tts';
-
-const fakeTts: TtsEngine = {
-  synth: (text) => ({
-    samples: new Float32Array(Math.round(16000 * 0.32 * text.split(/\s+/).filter(Boolean).length)).fill(0.1),
-    sampleRate: 16000,
-  }),
-};
+import { VOICE_POOL, assignVoices, renderPerformance } from '../src/tts';
+import { fakeTts } from './helpers/fake-tts';
 
 describe('renderPerformance', () => {
   it('lays segments out on one timeline with their pauses', () => {
