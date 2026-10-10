@@ -1,0 +1,177 @@
+{
+  "createdAt": "2026-10-10T18:24:22.967Z",
+  "config": {
+    "sceneIds": "all",
+    "seeds": 10,
+    "rooms": [
+      "close-mic",
+      "far-field",
+      "far-field-hard"
+    ],
+    "patience": 0.5,
+    "strictness": {
+      "mode": "word-perfect"
+    },
+    "errorRate": 0.35,
+    "benignRate": 0.2,
+    "model": "zipformer-en-2023-06-21"
+  },
+  "conditions": {
+    "close-mic": {
+      "runs": 20,
+      "audioMinutes": 24.607312925170064,
+      "errorLabels": 91,
+      "recall": 0.8571428571428571,
+      "recallInclChecks": 0.967032967032967,
+      "coreRecall": 0.8,
+      "sameCategoryRate": 0.7912087912087912,
+      "perCategory": {
+        "added-words": {
+          "labels": 9,
+          "detected": 8
+        },
+        "dropped-words": {
+          "labels": 12,
+          "detected": 11
+        },
+        "called-for-line": {
+          "labels": 12,
+          "detected": 10
+        },
+        "dropped-line": {
+          "labels": 14,
+          "detected": 14
+        },
+        "jumped-cue": {
+          "labels": 13,
+          "detected": 13
+        },
+        "transposed": {
+          "labels": 11,
+          "detected": 9
+        },
+        "paraphrase": {
+          "labels": 6,
+          "detected": 6
+        },
+        "wrong-words": {
+          "labels": 14,
+          "detected": 7
+        }
+      },
+      "falseNotesPerRun": 1.15,
+      "falseAlertsPerRun": 0.45,
+      "falseChecksPerRun": 5.65,
+      "benignViolationsPerRun": 0.35,
+      "falseNotesPer10Min": 9.34681493665812,
+      "falseAlertsPer10Min": 3.6574493230401344,
+      "latencyP50": 1.2562896825396805,
+      "latencyP95": 9.601587301587301,
+      "rtfMean": 0.026787123557227583
+    },
+    "far-field": {
+      "runs": 20,
+      "audioMinutes": 24.607312925170064,
+      "errorLabels": 91,
+      "recall": 0.7912087912087912,
+      "recallInclChecks": 1,
+      "coreRecall": 0.85,
+      "sameCategoryRate": 0.6483516483516484,
+      "perCategory": {
+        "added-words": {
+          "labels": 9,
+          "detected": 6
+        },
+        "dropped-words": {
+          "labels": 12,
+          "detected": 11
+        },
+        "called-for-line": {
+          "labels": 12,
+          "detected": 6
+        },
+        "dropped-line": {
+          "labels": 14,
+          "detected": 14
+        },
+        "jumped-cue": {
+          "labels": 13,
+          "detected": 13
+        },
+        "transposed": {
+          "labels": 11,
+          "detected": 8
+        },
+        "paraphrase": {
+          "labels": 6,
+          "detected": 5
+        },
+        "wrong-words": {
+          "labels": 14,
+          "detected": 9
+        }
+      },
+      "falseNotesPerRun": 1.85,
+      "falseAlertsPerRun": 1,
+      "falseChecksPerRun": 11,
+      "benignViolationsPerRun": 0.7,
+      "falseNotesPer10Min": 15.036180550276107,
+      "falseAlertsPer10Min": 8.127665162311411,
+      "latencyP50": 1.7075485008818347,
+      "latencyP95": 5.4495611577964524,
+      "rtfMean": 0.027081633432491453
+    },
+    "far-field-hard": {
+      "runs": 20,
+      "audioMinutes": 24.607312925170064,
+      "errorLabels": 91,
+      "recall": 0.5604395604395604,
+      "recallInclChecks": 0.7802197802197802,
+      "coreRecall": 0.6,
+      "sameCategoryRate": 0.27472527472527475,
+      "perCategory": {
+        "added-words": {
+          "labels": 9,
+          "detected": 4
+        },
+        "dropped-words": {
+          "labels": 12,
+          "detected": 9
+        },
+        "called-for-line": {
+          "labels": 12,
+          "detected": 5
+        },
+        "dropped-line": {
+          "labels": 14,
+          "detected": 10
+        },
+        "jumped-cue": {
+          "labels": 13,
+          "detected": 8
+        },
+        "transposed": {
+          "labels": 11,
+          "detected": 8
+        },
+        "paraphrase": {
+          "labels": 6,
+          "detected": 2
+        },
+        "wrong-words": {
+          "labels": 14,
+          "detected": 5
+        }
+      },
+      "falseNotesPerRun": 4.8,
+      "falseAlertsPerRun": 5.15,
+      "falseChecksPerRun": 17.25,
+      "benignViolationsPerRun": 1.35,
+      "falseNotesPer10Min": 39.01279277909477,
+      "falseAlertsPer10Min": 41.85747558590376,
+      "latencyP50": 2.5948390022675767,
+      "latencyP95": 8.11578231292517,
+      "rtfMean": 0.026539001792407375
+    }
+  }
+}
