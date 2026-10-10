@@ -151,6 +151,11 @@ describe('perturbScene: solo', () => {
         expect(isBenign(label.kind)).toBe(true);
         const after = p.segments[label.segmentIndex + 1]!;
         expect(after.lineId).toBe(label.lineId);
+        const lineWords = tokenize(SCENE.lines.find((l) => l.id === label.lineId)!.text);
+        const fragment = tokenize(p.segments[label.segmentIndex - 1]!.text);
+        expect(fragment).toEqual(lineWords.slice(0, fragment.length));
+        const rest = tokenize(after.text).join(' ');
+        expect([lineWords.join(' '), lineWords.slice(fragment.length).join(' ')]).toContain(rest);
       }
     }
   });
@@ -175,11 +180,17 @@ describe('perturbScene: sound-alikes and quoting chatter', () => {
     expect(seen).toBeGreaterThan(20);
   });
 
-  it('the sound-alike list holds distinct, non-identical spellings', () => {
+  it('the sound-alike list holds distinct, non-identical spellings, and no true homophones', () => {
+    const homophones = [
+      ['father', 'farther'], ['arms', 'alms'], ['piece', 'peace'], ['there', 'their'], ['night', 'knight'], ['sea', 'see'],
+      ['counsel', 'council'], ['pale', 'pail'], ['hue', 'hew'], ['great', 'grate'], ['week', 'weak'], ['write', 'right'],
+    ];
+    const banned = new Set(homophones.flatMap(([a, b]) => [`${a}/${b}`, `${b}/${a}`]));
     for (const [a, b] of SOUND_ALIKES) {
       expect(a).not.toBe(b);
       expect(a).toBe(a.toLowerCase());
       expect(b).toBe(b.toLowerCase());
+      expect(banned.has(`${a}/${b}`), `${a}/${b} is a true homophone pair`).toBe(false);
     }
   });
 

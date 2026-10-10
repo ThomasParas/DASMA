@@ -75,10 +75,10 @@ export const SOUND_ALIKES: ReadonlyArray<readonly [string, string]> = [
   ['inscription', 'subscription'], ['rule', 'role'], ['culture', 'vulture'], ['private', 'pirate'], ['matter', 'mutter'],
   ['decide', 'divide'], ['uncle', 'ankle'], ['cards', 'carts'], ['deny', 'defy'], ['country', 'county'],
   ['false', 'falls'], ['suspected', 'expected'], ['secret', 'sacred'], ['reveal', 'revel'], ['meaning', 'moaning'],
-  ['explanation', 'expectation'], ['improbable', 'impossible'], ['slings', 'stings'], ['arms', 'alms'], ['sleep', 'slip'],
+  ['explanation', 'expectation'], ['improbable', 'impossible'], ['slings', 'stings'], ['arms', 'aims'], ['sleep', 'slip'],
   ['rub', 'rob'], ['bear', 'beer'], ['whips', 'wipes'], ['wrong', 'ring'], ['weary', 'worry'],
   ['dread', 'bread'], ['conscience', 'conscious'], ['thought', 'taught'], ['moment', 'movement'], ['lose', 'loose'],
-  ['action', 'auction'], ['father', 'farther'], ['speak', 'sneak'], ['word', 'world'], ['walls', 'wells'],
+  ['action', 'auction'], ['father', 'feather'], ['speak', 'sneak'], ['word', 'world'], ['walls', 'wells'],
   ['sweet', 'sweat'], ['then', 'than'], ['love', 'live'], ['light', 'like'], ['hand', 'band'],
 ];
 const SOUND_ALIKE = new Map(SOUND_ALIKES.flatMap(([a, b]) => [[a, b], [b, a]] as Array<[string, string]>));
