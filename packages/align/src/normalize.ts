@@ -23,7 +23,7 @@ export function tokenize(text: string): string[] {
 
 export function normalizeToken(raw: string): string[] {
   const lowered = raw.replace(APOSTROPHES, "'").toLowerCase().replace(/&/g, ' and ');
-  const cleaned = lowered.replace(/[^a-z0-9' ]+/g, ' ');
+  const cleaned = lowered.replace(/(\d),(?=\d{3}(?!\d))/g, '$1').replace(/[^a-z0-9' ]+/g, ' ');
   const out: string[] = [];
   for (const piece of cleaned.split(' ')) {
     if (!piece) continue;
@@ -67,8 +67,7 @@ const SPECIAL: Record<string, string[]> = {
 const S_EXPANDS = new Set(['it', 'he', 'she', 'that', 'there', 'what', 'here', 'where', 'who', 'how', 'this']);
 
 export function expandContraction(norm: string): string[] {
-  const special = SPECIAL[norm];
-  if (special) return special;
+  if (Object.hasOwn(SPECIAL, norm)) return SPECIAL[norm]!;
   let m: RegExpExecArray | null;
   if ((m = /^(.+)n't$/.exec(norm))) return [m[1]!, 'not'];
   if ((m = /^(.+)'ll$/.exec(norm))) return [m[1]!, 'will'];
@@ -81,5 +80,5 @@ export function expandContraction(norm: string): string[] {
 }
 
 export function isContraction(norm: string): boolean {
-  return norm in SPECIAL || expandContraction(norm).length > 1;
+  return Object.hasOwn(SPECIAL, norm) || expandContraction(norm).length > 1;
 }

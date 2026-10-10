@@ -71,6 +71,15 @@ describe('normalizeToken', () => {
     expect(normalizeToken('—')).toEqual([]);
     expect(normalizeToken('…')).toEqual([]);
   });
+
+  it('reads thousands separators as part of one number', () => {
+    expect(normalizeToken('1,000')).toEqual(['one', 'thousand']);
+    expect(normalizeToken('12,500')).toEqual(['twelve', 'thousand', 'five', 'hundred']);
+  });
+
+  it('still splits comma-joined words', () => {
+    expect(normalizeToken('one,two')).toEqual(['one', 'two']);
+  });
 });
 
 describe('contractions', () => {
@@ -93,6 +102,14 @@ describe('contractions', () => {
     expect(isContraction("o'er")).toBe(true);
     expect(isContraction("lane's")).toBe(false);
   });
+
+  it.each(['constructor', 'tostring', 'hasownproperty', '__proto__'])(
+    'does not look up %s as a contraction via Object.prototype',
+    (w) => {
+      expect(expandContraction(w)).toEqual([w]);
+      expect(isContraction(w)).toBe(false);
+    },
+  );
 });
 
 describe('word lists', () => {
