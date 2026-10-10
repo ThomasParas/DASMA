@@ -27,14 +27,31 @@ export function labelTime(label: Label, segments: RenderedSegment[]): number | n
   return s.start + ((Math.min(label.wordIndex, n - 1) + 1) / n) * (s.end - s.start);
 }
 
-export function scoreRun(labels: Label[], events: TimedEvent[], segments: RenderedSegment[]): ScoredRun {
-  // A later lineDone for the same line supersedes earlier ones (the aligner restarts a line after a backward jump).
+export interface FlagRecord {
+  note: NoteDraft;
+  alert: boolean;
+  audioTime: number;
+}
+
+/** The notes that stand at the end of a run: a later lineDone for the same line supersedes earlier ones. */
+export function finalNotes(events: TimedEvent[]): NoteDraft[] {
   const finalByLine = new Map<string, NoteDraft[]>();
   for (const { event } of events) if (event.type === 'lineDone') finalByLine.set(event.lineId, event.notes);
-  const notes: NoteDraft[] = [...finalByLine.values()].flat();
-  const flags = events.flatMap(({ event, audioTime }) => (event.type === 'flag' ? [{ note: event.note, alert: event.alert, audioTime }] : []));
+  return [...finalByLine.values()].flat();
+}
+
+export function flagRecords(events: TimedEvent[]): FlagRecord[] {
+  return events.flatMap(({ event, audioTime }) => (event.type === 'flag' ? [{ note: event.note, alert: event.alert, audioTime }] : []));
+}
+
+export function scoreRun(labels: Label[], events: TimedEvent[], segments: RenderedSegment[]): ScoredRun {
+  return scoreOutcome(labels, finalNotes(events), flagRecords(events), segments);
+}
+
+export function scoreOutcome(labels: Label[], notes: NoteDraft[], flags: FlagRecord[], segments: RenderedSegment[]): ScoredRun {
   const errors = labels.filter((l) => !isBenign(l.kind));
-  const errorLines = new Set(errors.map((l) => l.lineId));
+  const errorsPerLine = new Map<string, number>();
+  for (const l of errors) errorsPerLine.set(l.lineId, (errorsPerLine.get(l.lineId) ?? 0) + 1);
   const benignLines = new Set(labels.filter((l) => isBenign(l.kind)).map((l) => l.lineId));
   const s: ScoredRun = {
     errorLabels: 0, detected: 0, detectedInclChecks: 0, sameCategory: 0, coreLabels: 0, coreDetected: 0,
@@ -60,14 +77,31 @@ export function scoreRun(labels: Label[], events: TimedEvent[], segments: Render
     const alert = flags.find((f) => f.alert && f.note.lineId === label.lineId);
     if (t !== null && alert) s.alertLatencies.push(Math.max(0, alert.audioTime - t));
   }
+  // Fair counting (pass spec §4.4): on a line with k planted errors, the first k notes and the first k alerts
+  // can be detections; any beyond that are false. Lines with no planted error count every note and alert as false.
+  const notesSeen = new Map<string, number>();
   for (const n of notes) {
-    if (errorLines.has(n.lineId)) continue;
-    if (n.status === 'note') {
+    const k = errorsPerLine.get(n.lineId) ?? 0;
+    if (n.status !== 'note') {
+      if (k === 0) s.falseChecks++;
+      continue;
+    }
+    if (k === 0) {
       s.falseNotes++;
       if (benignLines.has(n.lineId)) s.benignViolations++;
-    } else s.falseChecks++;
+      continue;
+    }
+    const seen = (notesSeen.get(n.lineId) ?? 0) + 1;
+    notesSeen.set(n.lineId, seen);
+    if (seen > k) s.falseNotes++;
   }
-  s.falseAlerts = flags.filter((f) => f.alert && !errorLines.has(f.note.lineId)).length;
+  const alertsSeen = new Map<string, number>();
+  for (const f of flags) {
+    if (!f.alert) continue;
+    const seen = (alertsSeen.get(f.note.lineId) ?? 0) + 1;
+    alertsSeen.set(f.note.lineId, seen);
+    if (seen > (errorsPerLine.get(f.note.lineId) ?? 0)) s.falseAlerts++;
+  }
   return s;
 }
 

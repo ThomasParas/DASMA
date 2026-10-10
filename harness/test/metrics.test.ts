@@ -1,6 +1,6 @@
 import type { NoteDraft } from '@dasma/align';
 import { describe, expect, it } from 'vitest';
-import { aggregate, checkTargets, compareToBaseline, formatReport, scoreRun, type EvalReport } from '../src/metrics';
+import { aggregate, checkTargets, compareToBaseline, finalNotes, flagRecords, formatReport, scoreOutcome, scoreRun, type EvalReport } from '../src/metrics';
 import type { Label } from '../src/perturb';
 import type { TimedEvent } from '../src/run-engine';
 import type { RenderedSegment } from '../src/tts';
@@ -44,6 +44,33 @@ describe('scoreRun', () => {
     const s = scoreRun(labels.slice(0, 1), superseded, segments);
     expect(s.detected).toBe(0);
     expect(s.falseNotes).toBe(0);
+  });
+
+  it('counts notes and alerts beyond the planted errors on an error line as false (fair counting)', () => {
+    const extra: TimedEvent[] = [
+      { event: { type: 'flag', note: note('A', 'wrong-words'), alert: true, at: 1.5 }, audioTime: 1.6 },
+      { event: { type: 'flag', note: note('A', 'dropped-words'), alert: true, at: 1.7 }, audioTime: 1.8 },
+      {
+        event: { type: 'lineDone', lineId: 'A', notes: [note('A', 'wrong-words'), note('A', 'dropped-words'), note('A', 'added-words'), note('A', 'added-words', 'check')], at: 2 },
+        audioTime: 2.1,
+      },
+    ];
+    const s = scoreRun(labels.slice(0, 1), extra, segments);
+    expect(s).toMatchObject({ detected: 1, falseNotes: 2, falseAlerts: 1, falseChecks: 0 });
+  });
+
+  it('two planted errors on one line allow two notes and two alerts', () => {
+    const two: Label[] = [labels[0]!, { ...labels[0]!, kind: 'dropped-words', wordIndex: 3 }];
+    const evs: TimedEvent[] = [
+      { event: { type: 'flag', note: note('A', 'wrong-words'), alert: true, at: 1.5 }, audioTime: 1.6 },
+      { event: { type: 'flag', note: note('A', 'dropped-words'), alert: true, at: 1.7 }, audioTime: 1.8 },
+      { event: { type: 'lineDone', lineId: 'A', notes: [note('A', 'wrong-words'), note('A', 'dropped-words')], at: 2 }, audioTime: 2.1 },
+    ];
+    expect(scoreRun(two, evs, segments)).toMatchObject({ errorLabels: 2, detected: 2, falseNotes: 0, falseAlerts: 0 });
+  });
+
+  it('scoreOutcome scores stored notes and flags the same way as scoreRun scores events', () => {
+    expect(scoreOutcome(labels, finalNotes(events), flagRecords(events), segments)).toEqual(scoreRun(labels, events, segments));
   });
 });
 

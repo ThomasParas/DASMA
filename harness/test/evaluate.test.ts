@@ -24,8 +24,9 @@ describe('evaluate (end to end, perfect recognizer)', () => {
     expect(agg.errorLabels).toBeGreaterThan(10);
     expect(agg.coreRecall!).toBeGreaterThanOrEqual(0.7);
     expect(agg.recallInclChecks!).toBeGreaterThanOrEqual(0.8);
-    expect(agg.falseAlertsPerRun).toBeLessThanOrEqual(0.5);
-    expect(agg.falseNotesPerRun).toBeLessThanOrEqual(0.5);
+    // Fair counting (pass spec §4.4): planted paraphrases that don't collapse into one paraphrase note leave extra word-level notes/alerts, which now count as false.
+    expect(agg.falseAlertsPerRun).toBeLessThanOrEqual(1.5);
+    expect(agg.falseNotesPerRun).toBeLessThanOrEqual(1.5);
   });
 
   it('is deterministic', () => {
