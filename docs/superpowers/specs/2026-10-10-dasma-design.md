@@ -94,8 +94,12 @@ interface HeardWord {
 }
 interface Recognizer {
   load(model: ModelRef, onProgress?: (p: number) => void): Promise<void>;
-  accept(pcm16k: Float32Array, t0: number): void;
-  onWords(cb: (words: HeardWord[]) => void): void;
+  accept(samples: Float32Array, sampleRate: number): void; // recognizer keeps its own run clock
+  flush(): void;   // end of input
+  reset(): void;   // new run
+  dispose(): void;
+  readonly supportsHotwords: boolean;
+  onWords(cb: (words: HeardWord[]) => void): () => void;
   setHotwords(words: string[], boost: number): void; // see risk R2
   realtimeFactor(): number;
 }
@@ -109,21 +113,24 @@ interface ExpectedWord {
 type AlignEvent =
   | { type: 'matched'; idx: number; at: number }
   | { type: 'suspect'; idxs: number[]; at: number }
-  | { type: 'flag'; note: NoteDraft; confidence: number; at: number }
+  | { type: 'flag'; note: NoteDraft; alert: boolean; at: number }
   | { type: 'stumble'; idx: number; heard: string; at: number }
   | { type: 'lost'; at: number; guesses: number[] }
   | { type: 'reanchored'; fromIdx: number; toIdx: number; lostFor: number; at: number }
-  | { type: 'notRun'; fromIdx: number; toIdx: number }
+  | { type: 'notRun'; fromIdx: number; toIdx: number; at: number }
   | { type: 'calledForLine'; idx: number; at: number }
-  | { type: 'lineDone'; lineId: string; at: number };
+  | { type: 'lineDone'; lineId: string; notes: NoteDraft[]; at: number };
 
 interface Aligner {
+  readonly cursor: number;
   push(words: HeardWord[]): void;
   tick(now: number): void;            // drives time-based confirmation / loss
+  finalize(now: number): void;          // end of run
+  setAudioQuality(q: number): void;     // 0..1
   jumpTo(idx: number): void;          // manual jump (always wins)
   pause(): void; resume(): void;      // used while cues/alerts play
   lookahead(): ExpectedWord[];        // for recognizer hotwords
-  onEvent(cb: (e: AlignEvent) => void): void;
+  onEvent(cb: (e: AlignEvent) => void): () => void;
 }
 function createAligner(expected: ExpectedWord[], opts: AlignOptions): Aligner;
 ```
@@ -292,7 +299,7 @@ Each milestone gets its own implementation plan.
 | # | Risk | Mitigation / when we'll know |
 |---|---|---|
 | R1 | Far-field accuracy from a laptop mic is too low for useful notes | M1 synthetic numbers (optimistic), then real recordings; fallback is per-actor audio sooner |
-| R2 | sherpa-onnx WASM may not support changing hotwords mid-stream cheaply | Verify in M1; fall back to no biasing (alignment does not depend on it) |
+| R2 | sherpa-onnx WASM may not support changing hotwords mid-stream cheaply | Verify in M1; fall back to no biasing (alignment does not depend on it). Verified 2026-10-10: the Node binding has no per-stream hotwords; the engine does not depend on them. |
 | R3 | English streaming Zipformer accuracy weaker than larger models | M1 measures it; candidates to swap behind `Recognizer`: Nemotron streaming, Moonshine streaming |
 | R4 | Local TTS voices missing on some machines | Display-only cues with explanation; Kokoro post-MVP |
 | R5 | Publisher PDF layouts defeat auto-tagging | Correction screen; grow fixture library from real scripts users report |

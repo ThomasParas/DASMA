@@ -1,1 +1,16 @@
 export const VERSION = '0.0.0';
+export * from './types';
+export { numberToWords } from './numbers';
+export { FILLERS, FUNCTION_WORDS, expandContraction, isContraction, normalizeToken, tokenize } from './normalize';
+export { MATCH_THRESHOLD, phoneticKey, wordScore } from './phonetic';
+export { buildExpected, countCheckedWords, displayExpected, displayHeard, toHeardTokens } from './expected';
+export { DEFAULT_ALIGN_PARAMS, alignWindow, hasE, hasH, isMatch } from './window-align';
+export type { AlignParams, Op } from './window-align';
+export { commitPoint, commitPointOnTimeout } from './commit';
+export { BASE_CONFIDENCE, CONTRACTION_CAP, WORD_LEVEL_CATEGORIES, classifyOps, makeNote } from './classify';
+export type { ClassifyContext, Classified } from './classify';
+export { finalizeLine } from './finalize-line';
+export type { FinalizeContext, LineState } from './finalize-line';
+export { TrigramIndex } from './trigram-index';
+export { createAligner, patienceToGrace } from './aligner';
+export type { Aligner } from './aligner';

@@ -1,0 +1,221 @@
+import { describe, expect, it } from 'vitest';
+import { createAligner, patienceToGrace } from '../src/aligner';
+import { buildExpected } from '../src/expected';
+import { DEFAULT_ALIGN_OPTIONS, type AlignEvent, type ScriptLineInput, type Strictness } from '../src/types';
+import { heard, runScenario } from './helpers/dsl';
+import { EARNEST, textOf } from './helpers/fixtures';
+
+const WP: Strictness = { mode: 'word-perfect' };
+const P0 = { patience: 0 };
+const perf = (...ids: string[]) => ids.map((id) => textOf(id)).join(' ');
+const WITH_FEELING = [perf('L1', 'L2', 'L3'), 'Anyone can play accurately, but I play with wonderful feeling.', perf('L5')].join(' ');
+// Word indices in EARNEST: L1 0–7, L2 8–15, L3 16–26, L4 27–36, L5 37–38.
+
+describe('patienceToGrace', () => {
+  it('maps the slider to confirmation words and timeout', () => {
+    expect(patienceToGrace(0)).toEqual({ confirmWords: 1, timeoutSec: 0.4 });
+    const mid = patienceToGrace(0.5);
+    expect(mid.confirmWords).toBe(3);
+    expect(mid.timeoutSec).toBeCloseTo(1.7);
+    expect(patienceToGrace(1)).toEqual({ confirmWords: 4, timeoutSec: 3 });
+    expect(patienceToGrace(7)).toEqual({ confirmWords: 4, timeoutSec: 3 });
+  });
+});
+
+describe('aligner: clean runs', () => {
+  it.each([0, 0.5, 1])('a perfect run produces no notes and completes every line (patience %s)', (patience) => {
+    const r = runScenario(EARNEST, heard(perf('L1', 'L2', 'L3', 'L4', 'L5')), { patience });
+    expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
+    expect(r.events.flatMap((e) => (e.type === 'lineDone' ? [e.lineId] : []))).toEqual(['L1', 'L2', 'L3', 'L4', 'L5']);
+    expect(r.types).not.toContain('lost');
+  });
+
+  it('ignores fillers', () => {
+    const text = ['Did you um hear what I was uh playing, Lane?', perf('L2', 'L3', 'L4', 'L5')].join(' ');
+    expect(runScenario(EARNEST, heard(text), P0).lineNotes).toEqual([]);
+  });
+
+  it('accepts homophones', () => {
+    const KNIGHT: ScriptLineInput[] = [{ id: 'K1', characterId: 'NARRATOR', text: 'The knight rode out into the night.' }];
+    expect(runScenario(KNIGHT, heard('the night rode out into the knight'), P0).lineNotes).toEqual([]);
+  });
+
+  it('pre-roll chatter: talk before the first line produces no notes', () => {
+    expect(runScenario(EARNEST, heard(`Okay are we starting now | ${perf('L1', 'L2', 'L3', 'L4', 'L5')}`), P0).lineNotes).toEqual([]);
+  });
+
+  it('empty script: nothing to align, nothing breaks', () => {
+    const r = runScenario(EARNEST.map((l) => ({ ...l, cut: true })), heard(perf('L1')));
+    expect(r.events).toEqual([]);
+  });
+
+  it('cut lines are never expected', () => {
+    const lines = EARNEST.map((l) => (l.id === 'L3' ? { ...l, cut: true } : l));
+    expect(runScenario(lines, heard(perf('L1', 'L2', 'L4', 'L5')), P0).lineNotes).toEqual([]);
+  });
+
+  it('overlap zones are not checked', () => {
+    const lines = EARNEST.map((l) => (l.id === 'L2' ? { ...l, overlapRanges: [[4, 8]] as Array<[number, number]> } : l));
+    const text = [perf('L1'), "I didn't think it rather mumbled noise here", perf('L3', 'L4', 'L5')].join(' ');
+    expect(runScenario(lines, heard(text), P0).lineNotes).toEqual([]);
+  });
+});
+
+describe('aligner: line errors', () => {
+  it.each([0, 0.5, 1])('wrong word (patience %s)', (patience) => {
+    const r = runScenario(EARNEST, heard(WITH_FEELING), { patience });
+    expect(r.lineNotes).toEqual([
+      expect.objectContaining({ lineId: 'L4', category: 'wrong-words', expected: 'expression', heard: 'feeling', status: 'note' }),
+    ]);
+    expect(r.flags).toHaveLength(1);
+    expect(r.flags[0]!.alert).toBe(true);
+  });
+
+  it('dropped words', () => {
+    const r = runScenario(EARNEST, heard([perf('L1', 'L2'), "I'm sorry for that. I don't play accurately.", perf('L4', 'L5')].join(' ')), P0);
+    expect(r.lineNotes).toHaveLength(1);
+    expect(r.lineNotes[0]).toMatchObject({ lineId: 'L3', category: 'dropped-words' });
+    expect(r.lineNotes[0]!.expected).toContain('your sake');
+  });
+
+  it('dropped line', () => {
+    const r = runScenario(EARNEST, heard(perf('L1', 'L2', 'L4', 'L5')), P0);
+    expect(r.lineNotes).toEqual([expect.objectContaining({ lineId: 'L3', characterId: 'ALGERNON', category: 'dropped-line' })]);
+  });
+
+  it('jumped cue', () => {
+    const r = runScenario(EARNEST, heard(perf('L1', 'L3', 'L4', 'L5')), P0);
+    expect(r.lineNotes).toEqual([expect.objectContaining({ lineId: 'L3', characterId: 'ALGERNON', category: 'jumped-cue' })]);
+  });
+
+  it('a dried actor (long silence) gets a dropped line, not a jumped cue', () => {
+    const r = runScenario(EARNEST, heard(`${perf('L1')} || ${perf('L3', 'L4', 'L5')}`), P0);
+    expect(r.lineNotes).toEqual([expect.objectContaining({ lineId: 'L2', characterId: 'LANE', category: 'dropped-line' })]);
+  });
+
+  it('added words at the end of a line', () => {
+    const r = runScenario(EARNEST, heard(`${perf('L1', 'L2', 'L3', 'L4')} Yes, sir, of course.`), P0);
+    expect(r.lineNotes).toEqual([expect.objectContaining({ lineId: 'L5', category: 'added-words', heard: 'of course' })]);
+  });
+
+  it.each([0, 0.5])('transposed words (patience %s)', (patience) => {
+    const text = [perf('L1', 'L2', 'L3'), 'Anyone can play accurately, but I play with expression wonderful.', perf('L5')].join(' ');
+    const r = runScenario(EARNEST, heard(text), { patience });
+    expect(r.lineNotes).toEqual([expect.objectContaining({ lineId: 'L4', category: 'transposed', status: 'note' })]);
+  });
+
+  it.each([0, 0.5])('paraphrase (patience %s)', (patience) => {
+    const text = [perf('L1', 'L2', 'L3'), 'Anyone can play correctly, though my playing has marvellous expression.', perf('L5')].join(' ');
+    const r = runScenario(EARNEST, heard(text), { patience });
+    expect(r.lineNotes).toEqual([expect.objectContaining({ lineId: 'L4', category: 'paraphrase', status: 'note' })]);
+  });
+
+  it('contractions are "check" in word-perfect and forgiven in lenient', () => {
+    const text = [perf('L1', 'L2'), "I am sorry for that, for your sake. I don't play accurately.", perf('L4', 'L5')].join(' ');
+    expect(runScenario(EARNEST, heard(text), P0).lineNotes).toEqual([
+      expect.objectContaining({ lineId: 'L3', category: 'wrong-words', status: 'check' }),
+    ]);
+    expect(runScenario(EARNEST, heard(text), { ...P0, strictness: { mode: 'lenient', lineMatchThreshold: 0.8 } }).lineNotes).toEqual([]);
+  });
+
+  it('repeated words: one dropped repetition is exactly one dropped-words note', () => {
+    const WELL: ScriptLineInput[] = [
+      { id: 'W1', characterId: 'HAMLET', text: 'I humbly thank you; well, well, well.' },
+      { id: 'W2', characterId: 'OPHELIA', text: 'My lord, I have remembrances of yours.' },
+    ];
+    const r = runScenario(WELL, heard('I humbly thank you, well, well. My lord, I have remembrances of yours.'), P0);
+    expect(r.lineNotes).toEqual([expect.objectContaining({ lineId: 'W1', category: 'dropped-words', expected: 'well' })]);
+  });
+});
+
+describe('aligner: stumbles, calls, chatter, restarts', () => {
+  it('pause-and-correct is a stumble, not a note', () => {
+    const r = runScenario(EARNEST, heard(['Did you hear what you | I was playing, Lane?', perf('L2', 'L3', 'L4', 'L5')].join(' ')), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.types).toContain('stumble');
+  });
+
+  it('repetition is a stumble, not a note', () => {
+    const r = runScenario(EARNEST, heard(['Did you hear did you hear what I was playing, Lane?', perf('L2', 'L3', 'L4', 'L5')].join(' ')), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.types).toContain('stumble');
+  });
+
+  it('called for line', () => {
+    const text = [perf('L1', 'L2'), "I'm sorry for that, for your sake. || Line! | I don't play accurately.", perf('L4', 'L5')].join(' ');
+    const r = runScenario(EARNEST, heard(text), P0);
+    expect(r.lineNotes).toEqual([expect.objectContaining({ lineId: 'L3', category: 'called-for-line', status: 'note' })]);
+    expect(r.types).toContain('calledForLine');
+    expect(r.flags.every((f) => !f.alert)).toBe(true);
+  });
+
+  it('long off-script talk then a jump: skipped text is "not run", with no notes', () => {
+    const text = `${perf('L1', 'L2')} Okay everybody hold on let me fix this chair ||| ${perf('L4', 'L5')}`;
+    const r = runScenario(EARNEST, heard(text), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.types).toContain('lost');
+    expect(r.events).toContainEqual(expect.objectContaining({ type: 'notRun', fromIdx: 16, toIdx: 27 }));
+  });
+
+  it('going back to an earlier line is a restart, not an error', () => {
+    const r = runScenario(EARNEST, heard(perf('L1', 'L2', 'L3', 'L1', 'L2')), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.types).toContain('reanchored');
+  });
+});
+
+describe('aligner: controls', () => {
+  const setup = () => {
+    const expected = buildExpected(EARNEST, WP);
+    const aligner = createAligner(expected, { ...DEFAULT_ALIGN_OPTIONS, patience: 0 });
+    const events: AlignEvent[] = [];
+    aligner.onEvent((e) => events.push(e));
+    return { expected, aligner, events };
+  };
+
+  it('jumpTo skips ahead without notes', () => {
+    const { expected, aligner, events } = setup();
+    const l4 = expected.findIndex((w) => w.lineId === 'L4');
+    aligner.push(heard(perf('L1')));
+    aligner.jumpTo(l4);
+    aligner.push(heard(perf('L4', 'L5'), { start: 10 }));
+    aligner.finalize(30);
+    expect(events.flatMap((e) => (e.type === 'lineDone' ? e.notes : []))).toEqual([]);
+    expect(events).toContainEqual(expect.objectContaining({ type: 'notRun', fromIdx: 8, toIdx: l4 }));
+    expect(aligner.cursor).toBe(expected.length);
+  });
+
+  it('ignores words while paused', () => {
+    const { aligner, events } = setup();
+    const words = heard(perf('L1', 'L2', 'L3'));
+    aligner.push(words.slice(0, 8));
+    aligner.pause();
+    aligner.push(words.slice(8, 16));
+    aligner.resume();
+    aligner.push(words.slice(16));
+    aligner.finalize(60);
+    const matched = events.flatMap((e) => (e.type === 'matched' ? [e.idx] : []));
+    expect(matched.some((i) => i >= 8 && i < 16)).toBe(false);
+    expect(matched).toContain(16);
+  });
+
+  it('instant patience flags a wrong word as soon as the next word confirms it', () => {
+    const r = runScenario(EARNEST, heard(WITH_FEELING), { patience: 0 });
+    const flagAt = r.events.findIndex((e) => e.type === 'flag');
+    const sirMatchedAt = r.events.findIndex((e) => e.type === 'matched' && e.idx === 38);
+    expect(flagAt).toBeGreaterThan(-1);
+    expect(flagAt).toBeLessThan(sirMatchedAt);
+  });
+
+  it('relaxed patience shows a suspect before confirming', () => {
+    const r = runScenario(EARNEST, heard(WITH_FEELING), { patience: 1 });
+    expect(r.types.indexOf('suspect')).toBeGreaterThan(-1);
+    expect(r.types.indexOf('suspect')).toBeLessThan(r.types.indexOf('flag'));
+  });
+
+  it('exposes the look-ahead window for recognizer hotwords', () => {
+    const { aligner } = setup();
+    expect(aligner.lookahead().map((w) => w.norm).slice(0, 3)).toEqual(['did', 'you', 'hear']);
+  });
+});

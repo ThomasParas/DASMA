@@ -1,4 +1,12 @@
-import type { HeardWord } from '../../src/types';
+import { createAligner } from '../../src/aligner';
+import { buildExpected } from '../../src/expected';
+import {
+  DEFAULT_ALIGN_OPTIONS,
+  type AlignEvent,
+  type AlignOptions,
+  type HeardWord,
+  type ScriptLineInput,
+} from '../../src/types';
 
 export interface HeardOptions {
   start?: number;
@@ -23,4 +31,28 @@ export function heard(text: string, opts: HeardOptions = {}): HeardWord[] {
     t += wordDur + gap;
   }
   return out;
+}
+
+/** Feed words one at a time (ticking after each), then flush and finalize. */
+export function runScenario(lines: ScriptLineInput[], words: HeardWord[], opts: Partial<AlignOptions> = {}) {
+  const options: AlignOptions = { ...DEFAULT_ALIGN_OPTIONS, ...opts };
+  const expected = buildExpected(lines, options.strictness);
+  const aligner = createAligner(expected, options);
+  const events: AlignEvent[] = [];
+  aligner.onEvent((e) => events.push(e));
+  for (const w of words) {
+    aligner.push([w]);
+    aligner.tick(w.end);
+  }
+  const end = (words.at(-1)?.end ?? 0) + 10;
+  aligner.tick(end);
+  aligner.finalize(end);
+  return {
+    expected,
+    aligner,
+    events,
+    lineNotes: events.flatMap((e) => (e.type === 'lineDone' ? e.notes : [])),
+    flags: events.flatMap((e) => (e.type === 'flag' ? [e] : [])),
+    types: events.map((e) => e.type),
+  };
 }
