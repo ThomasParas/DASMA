@@ -1,7 +1,7 @@
 import { MODEL_CATALOG, type ModelSpec } from '@dasma/asr';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { createReadStream, createWriteStream, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { createReadStream, createWriteStream, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
@@ -35,6 +35,29 @@ async function sha256File(path: string): Promise<string> {
   return hash.digest('hex');
 }
 
+export type Extractor = (archive: string, destDir: string) => void;
+
+const tarExtract: Extractor = (archive, destDir) => {
+  execFileSync('tar', ['-xjf', archive, '-C', destDir]);
+};
+
+/**
+ * Extract into a fresh temp directory, check the expected model directory came out, then move it into place.
+ * A failed or interrupted extraction never leaves a partial `<modelsDir>/<dirName>` behind.
+ */
+export function extractAndInstall(archive: string, modelsDir: string, id: string, dirName: string, extract: Extractor = tarExtract): void {
+  const temp = join(modelsDir, `.extract-${id}`);
+  rmSync(temp, { recursive: true, force: true });
+  mkdirSync(temp, { recursive: true });
+  try {
+    extract(archive, temp);
+    if (!existsSync(join(temp, dirName))) throw new Error(`Archive for ${id} did not contain ${dirName}/`);
+    renameSync(join(temp, dirName), join(modelsDir, dirName));
+  } finally {
+    rmSync(temp, { recursive: true, force: true });
+  }
+}
+
 export async function fetchModels(only?: string, log: (msg: string) => void = console.log): Promise<void> {
   mkdirSync(MODELS_DIR, { recursive: true });
   const lock: Record<string, string> = existsSync(LOCK_FILE) ? JSON.parse(readFileSync(LOCK_FILE, 'utf8')) : {};
@@ -46,14 +69,17 @@ export async function fetchModels(only?: string, log: (msg: string) => void = co
     }
     const archive = join(MODELS_DIR, `${spec.dirName}.tar.bz2`);
     log(`↓ ${spec.id}\n  ${spec.url}`);
-    const res = await fetch(spec.url);
-    if (!res.ok || !res.body) throw new Error(`Download failed for ${spec.id}: HTTP ${res.status}`);
-    await pipeline(Readable.fromWeb(res.body as unknown as WebReadableStream), createWriteStream(archive));
-    const sha = await sha256File(archive);
-    log(`  sha256 ${sha} (${checkLock(lock, spec.id, sha)})`);
-    execFileSync('tar', ['-xjf', archive, '-C', MODELS_DIR]);
-    rmSync(archive);
-    writeFileSync(LOCK_FILE, `${JSON.stringify(lock, null, 2)}\n`);
+    try {
+      const res = await fetch(spec.url);
+      if (!res.ok || !res.body) throw new Error(`Download failed for ${spec.id}: HTTP ${res.status}`);
+      await pipeline(Readable.fromWeb(res.body as unknown as WebReadableStream), createWriteStream(archive));
+      const sha = await sha256File(archive);
+      log(`  sha256 ${sha} (${checkLock(lock, spec.id, sha)})`);
+      extractAndInstall(archive, MODELS_DIR, spec.id, spec.dirName);
+      writeFileSync(LOCK_FILE, `${JSON.stringify(lock, null, 2)}\n`);
+    } finally {
+      rmSync(archive, { force: true });
+    }
   }
   writeFileSync(LOCK_FILE, `${JSON.stringify(lock, null, 2)}\n`);
 }
