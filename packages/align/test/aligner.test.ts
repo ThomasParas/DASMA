@@ -455,6 +455,17 @@ describe('aligner: instant patience at line boundaries (pass spec §6.4)', () =>
   it('a wrong word in a line’s last two words is confirmed by two words at patience 0', () => {
     const r = runScenario(EARNEST, heard(WITH_FEELING), P0);
     const flagAt = r.events.findIndex((e) => e.type === 'flag');
-    expect(flagAt).toBeGreaterThan(r.events.findIndex((e) => e.type === 'matched' && e.idx === 38));
+    const matchedAt = r.events.findIndex((e) => e.type === 'matched' && e.idx === 38);
+    expect(matchedAt).toBeGreaterThanOrEqual(0);
+    expect(flagAt).toBeGreaterThan(matchedAt);
+  });
+
+  it('does not rebuild the alignment when the prefix before the trailing block is itself unclean', () => {
+    const r = runScenario(LONG_SCENE, heard(`${perfLong('L1', 'L2', 'L3', 'L4')} | Yes, sore. | ${perfLong('L7', 'L8', 'L9', 'L10')}`), { patience: 0.5 });
+    expect(r.lineNotes.filter((n) => n.status === 'note')).toEqual([
+      expect.objectContaining({ lineId: 'L5', category: 'wrong-words', expected: 'sir', heard: 'sore' }),
+      expect.objectContaining({ lineId: 'L7', category: 'jumped-cue' }),
+    ]);
+    expect(r.flags.filter((f) => f.alert && ['L6', 'L8'].includes(f.note.lineId))).toEqual([]);
   });
 });

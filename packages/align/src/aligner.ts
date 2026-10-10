@@ -347,6 +347,8 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     let b = k;
     while (b >= 0 && ops[b]!.kind !== 'match') b--;
     const block = ops.slice(b + 1, k + 1);
+    // Only rebuild when everything before the block aligned cleanly: the block must sit after a confirmed prefix (§6.4).
+    if (ops.slice(0, b + 1).some((o) => o.kind !== 'match')) return ops;
     if (!block.some((o) => o.kind === 'sub')) return ops;
     const firstH = block.find(hasH)?.h;
     const firstE = block.find(hasE)?.e;
