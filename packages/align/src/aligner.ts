@@ -155,6 +155,7 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
       noteMin: options.noteMinConfidence,
       at,
       started,
+      heardConfidenceFloor: options.heardConfidenceFloor,
     });
     let attach = recentMatched.at(-1)?.lineId ?? expected[cursor]?.lineId;
     let maxE = cursor - 1;

@@ -25,13 +25,12 @@ describe('evaluate (end to end, perfect recognizer)', () => {
     expect(runs).toHaveLength(6);
     expect(runs.every((r) => r.condition === 'director-close-mic' && r.mode === 'director' && r.character === null)).toBe(true);
     expect(agg.errorLabels).toBeGreaterThan(10);
-    // Measured 7/11 = 0.636 (same before and after the Task 8 letter guard): 0.7 is not reached; restored by Task 9 (per-pair similarity downgrade). Misses: sir→sore (E5, now a 'check' not a note), 1 sound-alike wrong word with no note (R1), dropped-words 'not, be but' (R2, 'check' only), speak→sneak (R3, 'check' only).
-    expect(agg.coreRecall!).toBeGreaterThanOrEqual(0.6);
+    expect(agg.coreRecall!).toBeGreaterThanOrEqual(0.7);
     expect(agg.recallInclChecks!).toBeGreaterThanOrEqual(0.8);
-    // Fair counting (pass spec §4.4): planted paraphrases that don't collapse into one paraphrase note leave extra word-level notes/alerts, which now count as false.
-    // Quoting director chatter ("Go back to ...") sends the engine back and cascades false dropped-line alerts; restored to 1.5 by safer backward jumps (Task 14).
-    expect(agg.falseAlertsPerRun).toBeLessThanOrEqual(2.0);
-    expect(agg.falseNotesPerRun).toBeLessThanOrEqual(1.5);
+    // director chatter words substituted into script lines are no longer downgraded when heard confidently (pass spec §5.4); anchoring/off-script (Tasks 12–13) target them.
+    expect(agg.falseAlertsPerRun).toBeLessThanOrEqual(2.5);
+    // director chatter words substituted into script lines are no longer downgraded when heard confidently (pass spec §5.4); anchoring/off-script (Tasks 12–13) target them.
+    expect(agg.falseNotesPerRun).toBeLessThanOrEqual(2.0);
   });
 
   it('solo mode runs once per character with ≥ 4 lines, expecting only that character’s lines', () => {

@@ -8,7 +8,7 @@ export { DEFAULT_ALIGN_PARAMS, alignWindow, hasE, hasH, isMatch } from './window
 export type { AlignParams, Op } from './window-align';
 export { commitPoint, commitPointOnTimeout } from './commit';
 export { BASE_CONFIDENCE, CONTRACTION_CAP, WORD_LEVEL_CATEGORIES, classifyOps, makeNote } from './classify';
-export type { ClassifyContext, Classified } from './classify';
+export type { ClassifyContext, Classified, NoteMeta } from './classify';
 export { finalizeLine } from './finalize-line';
 export type { FinalizeContext, LineState } from './finalize-line';
 export { TrigramIndex } from './trigram-index';

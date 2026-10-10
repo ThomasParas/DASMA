@@ -12,13 +12,22 @@ const perf = (...ids: string[]) => ids.map((id) => textOf(id)).join(' ');
 
 function classify(
   heardText: string,
-  opts: { lines?: ScriptLineInput[]; strictness?: Strictness; heardOpts?: HeardOptions; ctx?: Partial<ClassifyContext> } = {},
+  opts: {
+    lines?: ScriptLineInput[];
+    strictness?: Strictness;
+    heardOpts?: HeardOptions;
+    confidenceAt?: Record<number, number>;
+    ctx?: Partial<ClassifyContext>;
+  } = {},
 ) {
   const strictness = opts.strictness ?? WP;
   const expected = buildExpected(opts.lines ?? EARNEST, strictness);
-  const toks = toHeardTokens(heard(heardText, opts.heardOpts), strictness);
+  const words = heard(heardText, opts.heardOpts).map((w, k) =>
+    opts.confidenceAt?.[k] !== undefined ? { ...w, confidence: opts.confidenceAt[k]! } : w,
+  );
+  const toks = toHeardTokens(words, strictness);
   const ops = alignWindow(toks, expected);
-  return classifyOps(ops, {
+  const result = classifyOps(ops, {
     expected,
     heard: toks,
     recentMatched: [],
@@ -29,15 +38,20 @@ function classify(
     noteMin: 0.5,
     at: 0,
     started: false,
+    heardConfidenceFloor: 0,
     ...opts.ctx,
   });
+  return { ...result, ops };
 }
+const wordCount = (text: string) => heard(text).length;
 
 const L4_FEELING = 'Anyone can play accurately, but I play with wonderful feeling.';
 
 describe('classifyOps', () => {
   it('finds nothing in a perfect run', () => {
-    expect(classify(perf('L1', 'L2', 'L3', 'L4', 'L5'))).toEqual({ notes: [], stumbles: [] });
+    const r = classify(perf('L1', 'L2', 'L3', 'L4', 'L5'));
+    expect(r.notes).toEqual([]);
+    expect(r.stumbles).toEqual([]);
   });
 
   it('wrong word', () => {
@@ -135,5 +149,50 @@ describe('classifyOps', () => {
     const lines = EARNEST.map((l) => (l.id === 'L2' ? { ...l, overlapRanges: [[4, 8]] as Array<[number, number]> } : l));
     const text = [perf('L1'), "I didn't think it rather mumbled noise here", perf('L3', 'L4', 'L5')].join(' ');
     expect(classify(text, { lines }).notes).toEqual([]);
+  });
+});
+
+describe('classifyOps: note metadata and confidence', () => {
+  it('records which ops each note came from', () => {
+    const r = classify([perf('L1', 'L2', 'L3'), L4_FEELING, perf('L5')].join(' '));
+    const m = r.meta.get(r.notes[0]!)!;
+    expect(m.quiet).toBe(false);
+    expect(r.ops[m.from]).toMatchObject({ kind: 'sub' });
+    expect(m.to).toBe(m.from);
+  });
+
+  it('a heard-confidence floor softens the penalty on content words only', () => {
+    const content = classify([perf('L1', 'L2', 'L3'), L4_FEELING, perf('L5')].join(' '), {
+      heardOpts: { confidence: 0.5 },
+      ctx: { heardConfidenceFloor: 0.6 },
+    });
+    expect(content.notes).toEqual([expect.objectContaining({ category: 'wrong-words', status: 'note', confidence: 0.68 })]);
+    const fn = classify(['Did you hear what a was playing, Lane?', perf('L2', 'L3', 'L4', 'L5')].join(' '), {
+      heardOpts: { confidence: 0.5 },
+      ctx: { heardConfidenceFloor: 0.6 },
+    });
+    expect(fn.notes.length).toBeGreaterThan(0);
+    expect(fn.notes.every((n) => n.status === 'check')).toBe(true);
+  });
+
+  it('the default floor (0) keeps the full penalty: today\u2019s behaviour', () => {
+    const r = classify([perf('L1', 'L2', 'L3'), L4_FEELING, perf('L5')].join(' '), { heardOpts: { confidence: 0.5 } });
+    expect(r.notes).toEqual([expect.objectContaining({ status: 'check', confidence: 0.425 })]);
+  });
+
+  it('a misheard function word no longer downgrades a real wrong word beside it (per-pair similarity)', () => {
+    // "I don't" → "a dreadful": "a"/"I" sounds alike (unsure, 0.6), "dreadful"/"don't" does not (confident, 0.97).
+    const before = wordCount([perf('L1', 'L2'), "I'm sorry for that, for your sake."].join(' '));
+    const r = classify([perf('L1', 'L2'), "I'm sorry for that, for your sake. a dreadful play accurately.", perf('L4', 'L5')].join(' '), {
+      confidenceAt: { [before]: 0.6, [before + 1]: 0.97 },
+    });
+    expect(r.notes).toEqual([expect.objectContaining({ lineId: 'L3', category: 'wrong-words', status: 'note' })]);
+  });
+
+  it('a similar-sounding substitution is downgraded only when the recognizer was unsure of it', () => {
+    const at = wordCount(perf('L1', 'L2', 'L3', 'L4')) + 1; // the word after "Yes"
+    const text = `${perf('L1', 'L2', 'L3', 'L4')} Yes, sore.`;
+    expect(classify(text, { confidenceAt: { [at]: 0.95 } }).notes).toEqual([expect.objectContaining({ heard: 'sore', status: 'note' })]);
+    expect(classify(text, { confidenceAt: { [at]: 0.6 } }).notes).toEqual([expect.objectContaining({ heard: 'sore', status: 'check' })]);
   });
 });

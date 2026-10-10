@@ -82,6 +82,8 @@ export interface AlignOptions {
   longLossSec: number;
   alertMinConfidence: number;
   noteMinConfidence: number;
+  /** Pass spec §5.3: floor of the heard-confidence multiplier for content-word notes (0 = full penalty). */
+  heardConfidenceFloor: number;
 }
 
 export const DEFAULT_ALIGN_OPTIONS: AlignOptions = {
@@ -92,4 +94,5 @@ export const DEFAULT_ALIGN_OPTIONS: AlignOptions = {
   longLossSec: 10,
   alertMinConfidence: 0.75,
   noteMinConfidence: 0.5,
+  heardConfidenceFloor: 0,
 };
