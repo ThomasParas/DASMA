@@ -11,20 +11,27 @@ export type ErrorKind =
   | 'paraphrase'
   | 'jumped-cue'
   | 'called-for-line';
-export type BenignKind = 'stumble' | 'chatter' | 'long-pause';
+export type BenignKind = 'stumble' | 'chatter' | 'long-pause' | 'aside';
 export type LabelKind = ErrorKind | BenignKind;
 
 export const ERROR_KINDS: ErrorKind[] = [
   'dropped-line', 'dropped-words', 'added-words', 'wrong-words', 'transposed', 'paraphrase', 'jumped-cue', 'called-for-line',
 ];
+/** Director-mode default. */
 export const BENIGN_KINDS: BenignKind[] = ['stumble', 'long-pause', 'chatter'];
-export const isBenign = (kind: LabelKind): kind is BenignKind => (BENIGN_KINDS as string[]).includes(kind);
+/** Solo has no scene partner (no jumped cue) and no director (no chatter); an actor's own asides replace chatter. */
+export const SOLO_ERROR_KINDS: ErrorKind[] = ERROR_KINDS.filter((k) => k !== 'jumped-cue');
+export const SOLO_BENIGN_KINDS: BenignKind[] = ['stumble', 'long-pause', 'aside'];
+const ALL_BENIGN: readonly string[] = ['stumble', 'long-pause', 'chatter', 'aside'];
+export const isBenign = (kind: LabelKind): kind is BenignKind => ALL_BENIGN.includes(kind);
 
 export interface Segment {
   speaker: string;
   text: string;
   pauseBefore: number;
   lineId?: string;
+  /** A cue the app would play in solo mode: rendered as silence of the same length (the app ignores the mic meanwhile). */
+  silent?: true;
 }
 
 export interface Label {
@@ -33,6 +40,8 @@ export interface Label {
   characterId: string;
   segmentIndex: number;
   wordIndex: number;
+  /** A wrong word that is a near sound-alike of the scripted word (reported separately). */
+  soundAlike?: true;
 }
 
 export interface Performance {
@@ -45,6 +54,8 @@ export interface PerturbOptions {
   benignRate: number;
   errorKinds?: ErrorKind[];
   benignKinds?: BenignKind[];
+  /** Solo mode: the character being rehearsed. Other characters' lines become silent cues. */
+  solo?: string;
 }
 
 const ADDED = ['really', 'you know', 'indeed', 'of course', 'truly'];
@@ -55,6 +66,27 @@ const SUBSTITUTES = [
 const CHATTER = [
   'Okay hold on everybody, let me fix this chair before we keep going with the scene.',
   'Sorry, sorry, can we take that bit again from just before the entrance please?',
+];
+/** Near sound-alikes that an actor can plausibly say instead and a listener can still tell apart (no true homophones). */
+export const SOUND_ALIKES: ReadonlyArray<readonly [string, string]> = [
+  ['accept', 'except'], ['expression', 'impression'], ['feeling', 'filling'], ['playing', 'praying'], ['play', 'pray'],
+  ['bottles', 'battles'], ['pint', 'paint'], ['rarely', 'really'], ['pleasant', 'present'], ['sake', 'shake'],
+  ['sir', 'sore'], ['quite', 'quiet'], ['fellow', 'follow'], ['letters', 'litters'], ['reward', 'regard'],
+  ['inscription', 'subscription'], ['rule', 'role'], ['culture', 'vulture'], ['private', 'pirate'], ['matter', 'mutter'],
+  ['decide', 'divide'], ['uncle', 'ankle'], ['cards', 'carts'], ['deny', 'defy'], ['country', 'county'],
+  ['false', 'falls'], ['suspected', 'expected'], ['secret', 'sacred'], ['reveal', 'revel'], ['meaning', 'moaning'],
+  ['explanation', 'expectation'], ['improbable', 'impossible'], ['slings', 'stings'], ['arms', 'alms'], ['sleep', 'slip'],
+  ['rub', 'rob'], ['bear', 'beer'], ['whips', 'wipes'], ['wrong', 'ring'], ['weary', 'worry'],
+  ['dread', 'bread'], ['conscience', 'conscious'], ['thought', 'taught'], ['moment', 'movement'], ['lose', 'loose'],
+  ['action', 'auction'], ['father', 'farther'], ['speak', 'sneak'], ['word', 'world'], ['walls', 'wells'],
+  ['sweet', 'sweat'], ['then', 'than'], ['love', 'live'], ['light', 'like'], ['hand', 'band'],
+];
+const SOUND_ALIKE = new Map(SOUND_ALIKES.flatMap(([a, b]) => [[a, b], [b, a]] as Array<[string, string]>));
+
+export const ASIDES: readonly string[] = [
+  'Wait, sorry, let me go again.',
+  'Hang on, sorry, sorry.',
+  'Oh no, what comes next, give me a second.',
 ];
 const WORD = /^([^A-Za-z']*)([A-Za-z']+)([^A-Za-z']*)$/;
 
@@ -92,7 +124,7 @@ function feasible(kind: ErrorKind, line: SceneLine, next: SceneLine | undefined)
     case 'added-words':
       return words.length >= 3;
     case 'wrong-words':
-      return words.some(isContent);
+      return words.some(isContent) || words.some((w) => SOUND_ALIKE.has(core(w)));
     case 'transposed':
       return words.some((_, i) => swappable(words, i));
     case 'paraphrase':
@@ -100,6 +132,18 @@ function feasible(kind: ErrorKind, line: SceneLine, next: SceneLine | undefined)
     case 'called-for-line':
       return words.length >= 4;
   }
+}
+
+/** Director chatter; a third of the time it quotes the opening words of an earlier line (measures backward-jump safety). */
+function chatterText(scene: Scene, i: number, rng: Rng): string {
+  if (i > 0 && rng() < 1 / 3) {
+    const earlier = scene.lines[Math.floor(rng() * i)]!;
+    const words = tokenize(earlier.text);
+    const n = Math.min(words.length, 4 + Math.floor(rng() * 3));
+    const quote = words.slice(0, n).join(' ').replace(/[^A-Za-z']+$/, '');
+    return `Go back to "${quote}", please.`;
+  }
+  return pick(CHATTER, rng);
 }
 
 export function perturbScene(scene: Scene, rng: Rng, opts: PerturbOptions): Performance {
@@ -110,19 +154,34 @@ export function perturbScene(scene: Scene, rng: Rng, opts: PerturbOptions): Perf
   let carriedPause: number | null = null;
   let pendingJump = false;
   let afterDrop = false;
+  let pendingDrop: Label | null = null;
 
   for (let i = 0; i < scene.lines.length; i++) {
     const line = scene.lines[i]!;
-    const next = scene.lines[i + 1];
+    const nextOwn = scene.lines.slice(i + 1).find((l) => l.character === line.character);
+    const next = opts.solo ? nextOwn : scene.lines[i + 1];
     const words = tokenize(line.text);
     const pauseBefore = carriedPause ?? 0.3 + 0.6 * rng();
     carriedPause = null;
-    const label = (kind: LabelKind, segmentIndex: number, wordIndex: number) =>
-      labels.push({ kind, lineId: line.id, characterId: line.character, segmentIndex, wordIndex });
+    const label = (kind: LabelKind, segmentIndex: number, wordIndex: number, extra: Partial<Label> = {}): Label => {
+      const l: Label = { kind, lineId: line.id, characterId: line.character, segmentIndex, wordIndex, ...extra };
+      labels.push(l);
+      return l;
+    };
     const speak = (text: string, pause: number, speaker = line.character): number => {
       segments.push({ speaker, text, pauseBefore: pause, ...(speaker === line.character ? { lineId: line.id } : {}) });
-      return segments.length - 1;
+      const index = segments.length - 1;
+      if (pendingDrop) {
+        pendingDrop.segmentIndex = index;
+        pendingDrop = null;
+      }
+      return index;
     };
+
+    if (opts.solo && line.character !== opts.solo) {
+      segments.push({ speaker: line.character, text: line.text, pauseBefore, silent: true });
+      continue;
+    }
 
     if (pendingJump) {
       pendingJump = false;
@@ -151,7 +210,7 @@ export function perturbScene(scene: Scene, rng: Rng, opts: PerturbOptions): Perf
         speak(line.text, pauseBefore);
         break;
       case 'dropped-line':
-        label('dropped-line', segments.length, 0);
+        pendingDrop = label('dropped-line', -1, 0);
         carriedPause = 2.5 + rng();
         afterDrop = true;
         break;
@@ -174,11 +233,18 @@ export function perturbScene(scene: Scene, rng: Rng, opts: PerturbOptions): Perf
         break;
       }
       case 'wrong-words': {
-        const idxs = words.map((w, k) => (isContent(w) ? k : -1)).filter((k) => k >= 0);
-        const k = pick(idxs, rng);
+        const contentIdxs = words.map((w, k) => (isContent(w) ? k : -1)).filter((k) => k >= 0);
+        const alikeIdxs = words.map((w, k) => (SOUND_ALIKE.has(core(w)) ? k : -1)).filter((k) => k >= 0);
         const out = [...words];
-        out[k] = replaceCore(words[k]!, pick(SUBSTITUTES.filter((s) => s !== core(words[k]!)), rng));
-        label('wrong-words', speak(out.join(' '), pauseBefore), k);
+        if (alikeIdxs.length && (!contentIdxs.length || rng() < 0.5)) {
+          const k = pick(alikeIdxs, rng);
+          out[k] = replaceCore(words[k]!, SOUND_ALIKE.get(core(words[k]!))!);
+          label('wrong-words', speak(out.join(' '), pauseBefore), k, { soundAlike: true });
+        } else {
+          const k = pick(contentIdxs, rng);
+          out[k] = replaceCore(words[k]!, pick(SUBSTITUTES.filter((s) => s !== core(words[k]!)), rng));
+          label('wrong-words', speak(out.join(' '), pauseBefore), k);
+        }
         break;
       }
       case 'transposed': {
@@ -212,10 +278,23 @@ export function perturbScene(scene: Scene, rng: Rng, opts: PerturbOptions): Perf
         label('long-pause', speak(line.text, 4 + 2 * rng()), 0);
         break;
       case 'chatter':
-        speak(pick(CHATTER, rng), pauseBefore, 'DIRECTOR');
+        speak(chatterText(scene, i, rng), pauseBefore, 'DIRECTOR');
         label('chatter', speak(line.text, 1.5), 0);
         break;
+      case 'aside': {
+        if (words.length < 3) {
+          speak(line.text, pauseBefore);
+          break;
+        }
+        const pos = 1 + Math.floor(rng() * (words.length - 2));
+        const restart = rng() < 0.5;
+        speak(words.slice(0, pos).join(' '), pauseBefore);
+        label('aside', speak(pick(ASIDES, rng), 0.4), 0);
+        speak((restart ? words : words.slice(pos)).join(' '), 0.6);
+        break;
+      }
     }
   }
+  if (pendingDrop) throw new Error(`perturbScene: dropped-line on ${(pendingDrop as Label).lineId} has no later spoken line`);
   return { segments, labels };
 }

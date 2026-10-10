@@ -12,6 +12,7 @@ export interface ScoredRun {
   sameCategory: number;
   coreLabels: number;
   coreDetected: number;
+  soundAlike: { labels: number; detected: number };
   perCategory: Record<string, { labels: number; detected: number }>;
   falseNotes: number;
   falseChecks: number;
@@ -54,7 +55,7 @@ export function scoreOutcome(labels: Label[], notes: NoteDraft[], flags: FlagRec
   for (const l of errors) errorsPerLine.set(l.lineId, (errorsPerLine.get(l.lineId) ?? 0) + 1);
   const benignLines = new Set(labels.filter((l) => isBenign(l.kind)).map((l) => l.lineId));
   const s: ScoredRun = {
-    errorLabels: 0, detected: 0, detectedInclChecks: 0, sameCategory: 0, coreLabels: 0, coreDetected: 0,
+    errorLabels: 0, detected: 0, detectedInclChecks: 0, sameCategory: 0, coreLabels: 0, coreDetected: 0, soundAlike: { labels: 0, detected: 0 },
     perCategory: {}, falseNotes: 0, falseChecks: 0, falseAlerts: 0, benignViolations: 0, alertLatencies: [],
   };
   for (const label of errors) {
@@ -66,6 +67,10 @@ export function scoreOutcome(labels: Label[], notes: NoteDraft[], flags: FlagRec
     if (hit) {
       s.detected++;
       cat.detected++;
+    }
+    if (label.soundAlike) {
+      s.soundAlike.labels++;
+      if (hit) s.soundAlike.detected++;
     }
     if (onLine.length) s.detectedInclChecks++;
     if (onLine.some((n) => n.status === 'note' && n.category === label.kind)) s.sameCategory++;
@@ -114,6 +119,8 @@ export interface Aggregate {
   recallInclChecks: number | null;
   coreRecall: number | null;
   sameCategoryRate: number | null;
+  soundAlikeLabels: number;
+  soundAlikeRecall: number | null;
   perCategory: Record<string, { labels: number; detected: number }>;
   falseNotesPerRun: number;
   falseAlertsPerRun: number;
@@ -151,6 +158,8 @@ export function aggregate(runs: Array<ScoredRun & { durationSec: number; rtf: nu
     recallInclChecks: ratio(sum((r) => r.detectedInclChecks), errorLabels),
     coreRecall: ratio(sum((r) => r.coreDetected), sum((r) => r.coreLabels)),
     sameCategoryRate: ratio(sum((r) => r.sameCategory), errorLabels),
+    soundAlikeLabels: sum((r) => r.soundAlike.labels),
+    soundAlikeRecall: ratio(sum((r) => r.soundAlike.detected), sum((r) => r.soundAlike.labels)),
     perCategory,
     falseNotesPerRun: sum((r) => r.falseNotes) / n,
     falseAlertsPerRun: sum((r) => r.falseAlerts) / n,
@@ -206,7 +215,7 @@ export function formatReport(report: EvalReport): string {
     out.push('| Target | Value | Required | Result |', '|---|---|---|---|');
     for (const row of checkTargets(room, agg)) out.push(`| ${row.label} | ${fmt(row.value)} | ${row.target} | ${row.pass ? 'PASS' : 'FAIL'} |`);
     out.push('', '| Metric | Value |', '|---|---|');
-    for (const key of ['recall', 'recallInclChecks', 'sameCategoryRate', 'falseNotesPerRun', 'falseAlertsPerRun', 'falseChecksPerRun', 'benignViolationsPerRun', 'latencyP50', 'latencyP95'] as const) {
+    for (const key of ['recall', 'recallInclChecks', 'sameCategoryRate', 'soundAlikeRecall', 'falseNotesPerRun', 'falseAlertsPerRun', 'falseChecksPerRun', 'benignViolationsPerRun', 'latencyP50', 'latencyP95'] as const) {
       out.push(`| ${key} | ${fmt(agg[key])} |`);
     }
     out.push('', '| Category | Planted | Detected | Rate |', '|---|---|---|---|');

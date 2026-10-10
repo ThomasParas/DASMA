@@ -1,6 +1,6 @@
 import { normalizeToken, tokenize } from '@dasma/align';
 import { describe, expect, it } from 'vitest';
-import { perturbScene, type Performance } from '../src/perturb';
+import { perturbScene, SOLO_BENIGN_KINDS, SOLO_ERROR_KINDS, SOUND_ALIKES, isBenign, type Performance } from '../src/perturb';
 import { mulberry32 } from '../src/rng';
 import { loadScenes, type Scene } from '../src/scenes';
 
@@ -99,6 +99,99 @@ describe('perturbScene', () => {
           }
         }
       }
+      for (const character of [...new Set(scene.lines.map((l) => l.character))]) {
+        for (let seed = 1; seed <= 50; seed++) {
+          const p = perturbScene(scene, mulberry32(seed), {
+            errorRate: 0.4, benignRate: 0.3, solo: character, errorKinds: SOLO_ERROR_KINDS, benignKinds: SOLO_BENIGN_KINDS,
+          });
+          for (const label of p.labels) {
+            const seg = p.segments[label.segmentIndex];
+            expect(seg, `solo ${character} ${scene.id} #${seed}: ${label.kind} points past the end`).toBeDefined();
+            expect(seg!.silent, `solo ${character} ${scene.id} #${seed}: ${label.kind} points at a cue`).toBeUndefined();
+            expect(label.characterId).toBe(character);
+          }
+        }
+      }
     }
+  });
+});
+
+describe('perturbScene: solo', () => {
+  it("the other characters' lines become silent cues; only the soloist's lines are spoken or labelled", () => {
+    const p = run({ errorRate: 0.6, benignRate: 0.3, solo: 'ANN', errorKinds: SOLO_ERROR_KINDS, benignKinds: SOLO_BENIGN_KINDS }, 3);
+    for (const seg of p.segments) {
+      if (seg.speaker === 'BEN') {
+        expect(seg.silent).toBe(true);
+        expect(seg.lineId).toBeUndefined();
+      } else {
+        expect(seg.silent).toBeUndefined();
+      }
+    }
+    expect(p.segments.filter((s) => s.silent).map((s) => s.text)).toEqual([SCENE.lines[1]!.text, SCENE.lines[3]!.text]);
+    for (const label of p.labels) {
+      expect(label.characterId).toBe('ANN');
+      expect(p.segments[label.segmentIndex]!.silent).toBeUndefined();
+    }
+  });
+
+  it('a dropped line in solo points at the soloist’s next spoken line, past the cue', () => {
+    const p = run({ errorRate: 1, benignRate: 0, solo: 'ANN', errorKinds: ['dropped-line'] });
+    expect(p.labels.map((l) => l.lineId)).toEqual(['A1']);
+    const seg = p.segments[p.labels[0]!.segmentIndex]!;
+    expect(seg.lineId).toBe('A2');
+    expect(seg.silent).toBeUndefined();
+  });
+
+  it('an aside is benign, interrupts the line, and is followed by the rest of the line or a restart', () => {
+    for (let seed = 1; seed <= 20; seed++) {
+      const p = run({ errorRate: 0, benignRate: 1, solo: 'ANN', benignKinds: ['aside'] }, seed);
+      const asides = p.labels.filter((l) => l.kind === 'aside');
+      expect(asides.length).toBeGreaterThan(0);
+      for (const label of asides) {
+        expect(isBenign(label.kind)).toBe(true);
+        const after = p.segments[label.segmentIndex + 1]!;
+        expect(after.lineId).toBe(label.lineId);
+      }
+    }
+  });
+});
+
+describe('perturbScene: sound-alikes and quoting chatter', () => {
+  it('sound-alike substitutions come from the list, change one word, and are flagged', () => {
+    const alike = new Map(SOUND_ALIKES.flatMap(([a, b]) => [[a, b], [b, a]] as Array<[string, string]>));
+    let seen = 0;
+    for (const scene of loadScenes('all')) {
+      for (let seed = 1; seed <= 40; seed++) {
+        const p = perturbScene(scene, mulberry32(seed), { errorRate: 1, benignRate: 0, errorKinds: ['wrong-words'] });
+        for (const label of p.labels.filter((l) => l.soundAlike)) {
+          seen++;
+          const original = tokenize(scene.lines.find((l) => l.id === label.lineId)!.text);
+          const spoken = tokenize(p.segments[label.segmentIndex]!.text);
+          const core = (w: string) => w.replace(/[^A-Za-z']/g, '').toLowerCase();
+          expect(alike.get(core(original[label.wordIndex]!))).toBe(core(spoken[label.wordIndex]!));
+        }
+      }
+    }
+    expect(seen).toBeGreaterThan(20);
+  });
+
+  it('the sound-alike list holds distinct, non-identical spellings', () => {
+    for (const [a, b] of SOUND_ALIKES) {
+      expect(a).not.toBe(b);
+      expect(a).toBe(a.toLowerCase());
+      expect(b).toBe(b.toLowerCase());
+    }
+  });
+
+  it('some director chatter quotes the opening words of an earlier line', () => {
+    const scene = loadScenes(['earnest-act1'])[0]!;
+    const quotes: string[] = [];
+    for (let seed = 1; seed <= 40; seed++) {
+      const p = perturbScene(scene, mulberry32(seed), { errorRate: 0, benignRate: 1, benignKinds: ['chatter'] });
+      quotes.push(...p.segments.filter((s) => s.speaker === 'DIRECTOR' && s.text.startsWith('Go back to')).map((s) => s.text));
+    }
+    expect(quotes.length).toBeGreaterThan(5);
+    const openings = scene.lines.map((l) => tokenize(l.text).slice(0, 4).join(' ').replace(/[^A-Za-z']+$/, ''));
+    for (const q of quotes) expect(openings.some((o) => q.includes(o))).toBe(true);
   });
 });

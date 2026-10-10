@@ -149,3 +149,13 @@ describe('recall with no labels', () => {
     }
   });
 });
+
+describe('sound-alike detection rate', () => {
+  it('is reported separately and is null when none were planted', () => {
+    const alike: Label[] = [{ ...labels[0]!, soundAlike: true }];
+    const s = scoreRun(alike, events, segments);
+    expect(s.soundAlike).toEqual({ labels: 1, detected: 1 });
+    expect(aggregate([{ ...s, durationSec: 60, rtf: 0 }]).soundAlikeRecall).toBe(1);
+    expect(aggregate([{ ...scoreRun([], [], segments), durationSec: 60, rtf: 0 }]).soundAlikeRecall).toBeNull();
+  });
+});
