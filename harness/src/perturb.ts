@@ -76,6 +76,10 @@ function swapCores(a: string, b: string): [string, string] {
   return [`${ma[1]}${mb[2]}${ma[3]}`, `${mb[1]}${ma[2]}${mb[3]}`];
 }
 
+/** Two adjacent content words that differ in core, so swapping them is a real change. */
+const swappable = (words: string[], k: number): boolean =>
+  k + 1 < words.length && isContent(words[k]!) && isContent(words[k + 1]!) && core(words[k]!) !== core(words[k + 1]!);
+
 function feasible(kind: ErrorKind, line: SceneLine, next: SceneLine | undefined): boolean {
   const words = tokenize(line.text);
   switch (kind) {
@@ -90,7 +94,7 @@ function feasible(kind: ErrorKind, line: SceneLine, next: SceneLine | undefined)
     case 'wrong-words':
       return words.some(isContent);
     case 'transposed':
-      return words.some((w, i) => i + 1 < words.length && isContent(w) && isContent(words[i + 1]!));
+      return words.some((_, i) => swappable(words, i));
     case 'paraphrase':
       return Boolean(line.paraphrase);
     case 'called-for-line':
@@ -105,6 +109,7 @@ export function perturbScene(scene: Scene, rng: Rng, opts: PerturbOptions): Perf
   const labels: Label[] = [];
   let carriedPause: number | null = null;
   let pendingJump = false;
+  let afterDrop = false;
 
   for (let i = 0; i < scene.lines.length; i++) {
     const line = scene.lines[i]!;
@@ -124,6 +129,13 @@ export function perturbScene(scene: Scene, rng: Rng, opts: PerturbOptions): Perf
       label('jumped-cue', speak(line.text, pauseBefore), 0);
       continue;
     }
+    if (afterDrop) {
+      // The line after a dropped line is performed clean, so the dropped-line label's
+      // segment is this line's own segment and the carried gap is the one the aligner sees.
+      afterDrop = false;
+      speak(line.text, pauseBefore);
+      continue;
+    }
 
     let kind: LabelKind | null = null;
     const roll = rng();
@@ -141,6 +153,7 @@ export function perturbScene(scene: Scene, rng: Rng, opts: PerturbOptions): Perf
       case 'dropped-line':
         label('dropped-line', segments.length, 0);
         carriedPause = 2.5 + rng();
+        afterDrop = true;
         break;
       case 'jumped-cue':
         carriedPause = 0.2;
@@ -169,9 +182,7 @@ export function perturbScene(scene: Scene, rng: Rng, opts: PerturbOptions): Perf
         break;
       }
       case 'transposed': {
-        const idxs = words
-          .map((w, k) => (k + 1 < words.length && isContent(w) && isContent(words[k + 1]!) ? k : -1))
-          .filter((k) => k >= 0);
+        const idxs = words.map((_, k) => (swappable(words, k) ? k : -1)).filter((k) => k >= 0);
         const k = pick(idxs, rng);
         const out = [...words];
         [out[k], out[k + 1]] = swapCores(words[k]!, words[k + 1]!);

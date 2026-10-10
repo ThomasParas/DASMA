@@ -1,8 +1,8 @@
-import { tokenize } from '@dasma/align';
+import { normalizeToken, tokenize } from '@dasma/align';
 import { describe, expect, it } from 'vitest';
 import { perturbScene, type Performance } from '../src/perturb';
 import { mulberry32 } from '../src/rng';
-import type { Scene } from '../src/scenes';
+import { loadScenes, type Scene } from '../src/scenes';
 
 const SCENE: Scene = {
   id: 't',
@@ -38,10 +38,12 @@ describe('perturbScene', () => {
 
   it('dropped-line skips the line and points at the next spoken segment', () => {
     const p = run({ errorRate: 1, benignRate: 0, errorKinds: ['dropped-line'] });
-    expect(p.labels.map((l) => l.lineId)).toEqual(['A1', 'B1', 'A2']);
-    expect(p.segments.map((s) => s.lineId)).toEqual(['B2']);
-    expect(p.labels.every((l) => l.segmentIndex === 0)).toBe(true);
+    // The line after a dropped line is always performed clean (controller ruling), so B1 is spoken.
+    expect(p.labels.map((l) => l.lineId)).toEqual(['A1', 'A2']);
+    expect(p.segments.map((s) => s.lineId)).toEqual(['B1', 'B2']);
+    expect(p.labels.map((l) => l.segmentIndex)).toEqual([0, 1]);
     expect(p.segments[0]!.pauseBefore).toBeGreaterThanOrEqual(2.5);
+    expect(p.segments[0]!.pauseBefore).toBeLessThanOrEqual(3.5);
   });
 
   it('jumped-cue labels the next (different-character) line, performed cleanly after a short gap', () => {
@@ -75,5 +77,28 @@ describe('perturbScene', () => {
   it('is deterministic for a seed', () => {
     const opts = { errorRate: 0.5, benignRate: 0.3 };
     expect(run(opts, 99)).toEqual(run(opts, 99));
+  });
+
+  it('keeps every label anchored to a real, correctly timed moment across bundled scenes and seeds', () => {
+    const norm = (text: string) => tokenize(text).flatMap(normalizeToken);
+    for (const scene of loadScenes('all')) {
+      const original = new Map(scene.lines.map((l) => [l.id, l.text]));
+      for (let seed = 1; seed <= 200; seed++) {
+        const where = `scene ${scene.id}, seed ${seed}`;
+        const p = perturbScene(scene, mulberry32(seed), { errorRate: 0.4, benignRate: 0.3 });
+        for (const label of p.labels) {
+          const seg = p.segments[label.segmentIndex];
+          expect(seg, `${where}: ${label.kind} on ${label.lineId} points past the performance`).toBeDefined();
+          expect(seg!.speaker, `${where}: ${label.kind} on ${label.lineId} points at the director`).not.toBe('DIRECTOR');
+          if (label.kind === 'dropped-line') {
+            expect(seg!.pauseBefore, `${where}: dropped-line gap`).toBeGreaterThanOrEqual(2.5);
+            expect(seg!.pauseBefore, `${where}: dropped-line gap`).toBeLessThanOrEqual(3.5);
+          }
+          if (label.kind === 'transposed') {
+            expect(norm(seg!.text), `${where}: transposed ${label.lineId} is a no-op`).not.toEqual(norm(original.get(label.lineId)!));
+          }
+        }
+      }
+    }
   });
 });
