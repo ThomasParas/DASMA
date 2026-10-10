@@ -15,6 +15,8 @@ export class NodeSherpaRecognizer implements Recognizer<ResolvedAsrModel> {
   private readonly listeners = new Set<(words: HeardWord[]) => void>();
   private stabilizer = new Stabilizer(2);
   private fedSec = 0;
+  /** Rate of the last accepted chunk: sherpa aborts the process if one stream is fed two different rates. */
+  private feedRate = SAMPLE_RATE;
   private segmentStart = 0;
   private procMs = 0;
 
@@ -42,6 +44,7 @@ export class NodeSherpaRecognizer implements Recognizer<ResolvedAsrModel> {
     this.stream = this.rec.createStream();
     this.stabilizer = new Stabilizer(2);
     this.fedSec = 0;
+    this.feedRate = SAMPLE_RATE;
     this.segmentStart = 0;
     this.procMs = 0;
   }
@@ -50,6 +53,7 @@ export class NodeSherpaRecognizer implements Recognizer<ResolvedAsrModel> {
     const { rec, stream } = this.ready();
     const t0 = performance.now();
     stream.acceptWaveform({ samples, sampleRate });
+    this.feedRate = sampleRate;
     this.fedSec += samples.length / sampleRate;
     while (rec.isReady(stream)) rec.decode(stream);
     this.procMs += performance.now() - t0;
@@ -58,7 +62,7 @@ export class NodeSherpaRecognizer implements Recognizer<ResolvedAsrModel> {
 
   flush(): void {
     const { rec, stream } = this.ready();
-    stream.acceptWaveform({ samples: new Float32Array(Math.round(SAMPLE_RATE * FLUSH_PAD_SEC)), sampleRate: SAMPLE_RATE });
+    stream.acceptWaveform({ samples: new Float32Array(Math.round(this.feedRate * FLUSH_PAD_SEC)), sampleRate: this.feedRate });
     this.fedSec += FLUSH_PAD_SEC;
     while (rec.isReady(stream)) rec.decode(stream);
     this.collect(true);
@@ -95,7 +99,8 @@ export class NodeSherpaRecognizer implements Recognizer<ResolvedAsrModel> {
     const { rec, stream } = this.ready();
     const r = rec.getResult(stream);
     const timestamps = typeof r.timestamps === 'string' ? (JSON.parse(r.timestamps) as number[]) : (r.timestamps ?? []);
-    // Token timestamps are relative to sherpa's own segment start, which lags the feed (chunk + right context).
+    // Verified with sherpa-onnx-node 1.13.8: start_time is stream-absolute (seconds since the stream began) and
+    // token timestamps are relative to it. It lags the fed-sample clock slightly (chunk + right context).
     const offset = typeof r.start_time === 'number' ? r.start_time : this.segmentStart;
     const words = tokensToWords(r.tokens ?? [], timestamps, offset, Array.isArray(r.ys_probs) ? r.ys_probs : undefined);
     const fresh = this.stabilizer.update(words, endpoint);

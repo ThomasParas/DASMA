@@ -45,6 +45,22 @@ describe.skipIf(!present)('NodeSherpaRecognizer (needs `npm run harness -- fetch
     expect(rtf).toBeLessThan(1);
   });
 
+  it('flushes at the sample rate it was fed (e.g. 22.05 kHz TTS audio)', async () => {
+    const wave = testWave();
+    const rate = 22050;
+    const n = Math.floor((wave.samples.length * rate) / wave.sampleRate);
+    const samples = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      const x = (i * wave.sampleRate) / rate;
+      const j = Math.floor(x);
+      const a = wave.samples[j] ?? 0;
+      samples[i] = a + ((wave.samples[j + 1] ?? a) - a) * (x - j);
+    }
+    const { words } = await transcribe([{ samples, sampleRate: rate }]);
+    expect(words.length).toBeGreaterThan(3);
+    expect(words.at(-1)!.start).toBeLessThan(n / rate + 0.5);
+  });
+
   it('keeps one continuous clock across an endpoint', async () => {
     const wave = testWave();
     const dur = wave.samples.length / wave.sampleRate;
