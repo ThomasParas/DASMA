@@ -28,10 +28,8 @@ describe('evaluate (end to end, perfect recognizer)', () => {
     expect(agg.errorLabels).toBeGreaterThan(10);
     expect(agg.coreRecall!).toBeGreaterThanOrEqual(0.7);
     expect(agg.recallInclChecks!).toBeGreaterThanOrEqual(0.8);
-    // director chatter words substituted into script lines are no longer downgraded when heard confidently (pass spec §5.4); anchoring/off-script (Tasks 12–13) target them.
-    expect(agg.falseAlertsPerRun).toBeLessThanOrEqual(2.5);
-    // director chatter words substituted into script lines are no longer downgraded when heard confidently (pass spec §5.4); anchoring/off-script (Tasks 12–13) target them.
-    expect(agg.falseNotesPerRun).toBeLessThanOrEqual(2.0);
+    expect(agg.falseAlertsPerRun).toBeLessThanOrEqual(0.5);
+    expect(agg.falseNotesPerRun).toBeLessThanOrEqual(0.5);
   });
 
   it('solo mode runs once per character with ≥ 4 lines, expecting only that character’s lines', () => {
