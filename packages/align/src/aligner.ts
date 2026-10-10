@@ -2,7 +2,7 @@ import { WORD_LEVEL_CATEGORIES, classifyOps } from './classify';
 import { commitPoint, commitPointOnTimeout } from './commit';
 import { countCheckedWords, displayExpected, toHeardTokens } from './expected';
 import { finalizeLine, type LineState } from './finalize-line';
-import { MATCH_THRESHOLD, wordScore } from './phonetic';
+import { MATCH_THRESHOLD, phoneticKey, wordScore } from './phonetic';
 import { TrigramIndex } from './trigram-index';
 import type { AlignEvent, AlignOptions, ExpectedWord, HeardToken, HeardWord, NoteDraft } from './types';
 import { alignWindow, hasE, hasH, isMatch, type Op } from './window-align';
@@ -21,6 +21,8 @@ export interface Aligner {
 }
 
 const LOST_BUFFER = 12;
+/** Longest silence between two heard words that may still be one word the recognizer split. */
+const REJOIN_GAP_SEC = 0.3;
 const LINE_CALL_GAP_SEC = 1;
 /** Words of the anchor trigram that located a forward re-anchor candidate. */
 const ANCHOR_WORDS = 3;
@@ -73,6 +75,35 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     for (const l of listeners) l(e);
   };
   const windowAt = () => expected.slice(cursor, cursor + options.windowSize);
+
+  /** "any one" heard for a scripted "anyone" (pass spec §5.5); never when the first word alone is scripted here. */
+  function rejoin(a: HeardToken, b: HeardToken): HeardToken | null {
+    if (b.start - a.end > REJOIN_GAP_SEC) return null;
+    const norm = a.norm + b.norm;
+    const win = windowAt();
+    const j = win.findIndex((w) => w.norm === norm);
+    if (j < 0 || win.slice(0, j + 1).some((w) => wordScore(a, w) >= MATCH_THRESHOLD)) return null;
+    return { text: `${a.text}${b.text}`, norm, phon: phoneticKey(norm), start: a.start, end: b.end, confidence: Math.min(a.confidence, b.confidence) };
+  }
+
+  /** "norhan" heard for a scripted "nor hand" (pass spec §5.1): one script word run into the start of the next. */
+  function split(tok: HeardToken): HeardToken[] | null {
+    const win = windowAt();
+    if (win.some((w) => wordScore(tok, w) >= MATCH_THRESHOLD)) return null;
+    for (let k = 0; k + 1 < win.length; k++) {
+      const a = win[k]!;
+      const b = win[k + 1]!;
+      if (!tok.norm.startsWith(a.norm)) continue;
+      const rest = tok.norm.slice(a.norm.length);
+      if (rest.length < 2 || !(b.norm.startsWith(rest) || phoneticKey(rest)[0] === b.phon[0])) continue;
+      const mid = tok.start + (tok.end - tok.start) * (a.norm.length / tok.norm.length);
+      return [
+        { ...tok, norm: a.norm, phon: a.phon, end: mid },
+        { ...tok, norm: b.norm, phon: b.phon, start: mid },
+      ];
+    }
+    return null;
+  }
 
   function emitLineDone(id: string, at: number): void {
     done.add(id);
@@ -285,13 +316,24 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
       calledForLine(tok);
       return;
     }
-    H.push(tok);
     if (lost) {
+      H.push(tok);
       if (H.length > LOST_BUFFER) H.shift();
       tryReanchor(tok.end);
       return;
     }
-    step(tok.end, false);
+    for (const piece of split(tok) ?? [tok]) {
+      if (lost) {
+        H.push(piece);
+        tryReanchor(piece.end);
+        continue;
+      }
+      const last = H.at(-1);
+      const joined = last ? rejoin(last, piece) : null;
+      if (joined) H[H.length - 1] = joined;
+      else H.push(piece);
+      step(piece.end, false);
+    }
   }
 
   return {

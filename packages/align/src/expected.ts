@@ -13,9 +13,9 @@ export function buildExpected(lines: ScriptLineInput[], strictness: Strictness):
   for (const line of lines) {
     if (line.cut) continue;
     const ranges = line.overlapRanges ?? [];
-    tokenize(line.text).forEach((raw, wordInLine) => {
+    tokenize(line.text).forEach((raw, wordInLine, all) => {
       const overlap = ranges.some(([s, e]) => wordInLine >= s && wordInLine < e);
-      for (const n of normalizeToken(raw)) {
+      for (const n of normalizeToken(raw, all[wordInLine + 1])) {
         // A scripted filler ("Um", "Hmm") is never expected: heard fillers are dropped, so expecting one would flag every actor.
         if (FILLERS.has(n)) continue;
         for (const norm of expand(n, strictness)) {

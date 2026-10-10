@@ -120,3 +120,30 @@ describe('word lists', () => {
     expect(FUNCTION_WORDS.has('expression')).toBe(false);
   });
 });
+
+describe('normalizeToken: accents, symbols, abbreviations', () => {
+  it('folds accents', () => {
+    expect(normalizeToken('café')).toEqual(['cafe']);
+    expect(normalizeToken('naïve')).toEqual(['naive']);
+    expect(normalizeToken('Zoë')).toEqual(['zoe']);
+  });
+
+  it('reads dollars and percent', () => {
+    expect(normalizeToken('$5')).toEqual(['five', 'dollars']);
+    expect(normalizeToken('$1')).toEqual(['one', 'dollar']);
+    expect(normalizeToken('$5.50')).toEqual(['five', 'dollars', 'fifty']);
+    expect(normalizeToken('10%')).toEqual(['ten', 'percent']);
+  });
+
+  it('expands Mr, Mrs and Dr', () => {
+    expect(normalizeToken('Mr.')).toEqual(['mister']);
+    expect(normalizeToken('Mrs')).toEqual(['missus']);
+    expect(normalizeToken('Dr.')).toEqual(['doctor']);
+  });
+
+  it('reads St as saint before a capitalized word, otherwise street', () => {
+    expect(normalizeToken('St.', 'Paul')).toEqual(['saint']);
+    expect(normalizeToken('St.', 'and')).toEqual(['street']);
+    expect(normalizeToken('St.')).toEqual(['street']);
+  });
+});

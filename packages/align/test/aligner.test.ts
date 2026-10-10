@@ -3,11 +3,13 @@ import { createAligner, patienceToGrace } from '../src/aligner';
 import { buildExpected } from '../src/expected';
 import { DEFAULT_ALIGN_OPTIONS, type AlignEvent, type ScriptLineInput, type Strictness } from '../src/types';
 import { heard, runScenario } from './helpers/dsl';
-import { EARNEST, textOf } from './helpers/fixtures';
+import { EARNEST, LONG_SCENE, textOf } from './helpers/fixtures';
 
 const WP: Strictness = { mode: 'word-perfect' };
 const P0 = { patience: 0 };
 const perf = (...ids: string[]) => ids.map((id) => textOf(id)).join(' ');
+const perfLong = (...ids: string[]) => ids.map((id) => textOf(id, LONG_SCENE)).join(' ');
+const NOR: ScriptLineInput[] = [{ id: 'N1', characterId: 'JULIET', text: 'It is nor hand, nor foot, nor arm, nor face.' }];
 const WITH_FEELING = [perf('L1', 'L2', 'L3'), 'Anyone can play accurately, but I play with wonderful feeling.', perf('L5')].join(' ');
 // Word indices in EARNEST: L1 0–7, L2 8–15, L3 16–26, L4 27–36, L5 37–38.
 
@@ -299,5 +301,41 @@ describe('aligner: controls', () => {
   it('exposes the look-ahead window for recognizer hotwords', () => {
     const { aligner } = setup();
     expect(aligner.lookahead().map((w) => w.norm).slice(0, 3)).toEqual(['did', 'you', 'hear']);
+  });
+});
+
+describe('aligner: recognizer word boundaries and abbreviations', () => {
+  it.each([0, 0.5])('rejoins a word the recognizer split ("any one" for "Anyone", patience %s)', (patience) => {
+    const text = [perf('L1', 'L2', 'L3'), 'any one can play accurately, but I play with wonderful expression.', perf('L5')].join(' ');
+    const r = runScenario(EARNEST, heard(text), { patience });
+    expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
+  });
+
+  it('keeps two heard words apart when the script has them as two words (Review Focus 2)', () => {
+    const ANY: ScriptLineInput[] = [
+      { id: 'A1', characterId: 'X', text: 'Pick any one card you like.' },
+      { id: 'A2', characterId: 'Y', text: 'Anyone can do that.' },
+    ];
+    const r = runScenario(ANY, heard('Pick any one card you like. Anyone can do that.'), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
+  });
+
+  it.each([0, 0.5])('splits a heard word that runs one script word into the next ("norhan", patience %s)', (patience) => {
+    const r = runScenario(NOR, heard('It is norhan nor foot nor arm nor face'), { patience });
+    expect(r.lineNotes).toEqual([]);
+    expect(r.flags.filter((f) => f.alert)).toEqual([]);
+  });
+
+  it('does not split a real different word that merely starts the same ("normal")', () => {
+    const r = runScenario(NOR, heard('It is normal nor foot nor arm nor face'), P0);
+    expect(r.lineNotes.length).toBeGreaterThan(0);
+  });
+
+  it('reads "Mr." in the script as "mister"', () => {
+    const l10 = textOf('L10', LONG_SCENE).replace('Mr.', 'mister');
+    const text = [perfLong('L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9'), l10, perfLong('L11')].join(' ');
+    expect(runScenario(LONG_SCENE, heard(text), P0).lineNotes).toEqual([]);
   });
 });

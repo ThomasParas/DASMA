@@ -21,14 +21,32 @@ export function tokenize(text: string): string[] {
     .filter((t) => t.length > 0);
 }
 
-export function normalizeToken(raw: string): string[] {
-  const lowered = raw.replace(APOSTROPHES, "'").toLowerCase().replace(/&/g, ' and ');
+const ABBREVIATIONS: Record<string, string> = { mr: 'mister', mrs: 'missus', dr: 'doctor' };
+
+/** `next` is the following raw token, used only to read "St" as saint (before a capitalized name) or street. */
+export function normalizeToken(raw: string, next?: string): string[] {
+  const lowered = raw
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(APOSTROPHES, "'")
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/\$(\d[\d,]*)/g, (_, n: string) => ` ${n} ${n === '1' ? 'dollar' : 'dollars'} `)
+    .replace(/(\d)\s*%/g, '$1 percent');
   const cleaned = lowered.replace(/(\d),(?=\d{3}(?!\d))/g, '$1').replace(/[^a-z0-9' ]+/g, ' ');
   const out: string[] = [];
   for (const piece of cleaned.split(' ')) {
     if (!piece) continue;
     const part = KEEP_LEADING.has(piece) ? piece : piece.replace(/^'+/, '').replace(/'+$/, '');
     if (!part) continue;
+    if (Object.hasOwn(ABBREVIATIONS, part)) {
+      out.push(ABBREVIATIONS[part]!);
+      continue;
+    }
+    if (part === 'st') {
+      out.push(next !== undefined && /^[A-Z]/.test(next) ? 'saint' : 'street');
+      continue;
+    }
     const ord = /^(\d+)(st|nd|rd|th)$/.exec(part);
     if (ord) {
       out.push(...numberToWords(Number(ord[1]), 'ordinal'));

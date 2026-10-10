@@ -80,7 +80,7 @@ describe('perturbScene', () => {
   });
 
   it('keeps every label anchored to a real, correctly timed moment across bundled scenes and seeds', () => {
-    const norm = (text: string) => tokenize(text).flatMap(normalizeToken);
+    const norm = (text: string) => tokenize(text).flatMap((raw, i, all) => normalizeToken(raw, all[i + 1]));
     for (const scene of loadScenes('all')) {
       const original = new Map(scene.lines.map((l) => [l.id, l.text]));
       for (let seed = 1; seed <= 200; seed++) {
