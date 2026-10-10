@@ -1,0 +1,14 @@
+{
+  "name": "@dasma/harness",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cli": "tsx src/cli.ts",
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@dasma/align": "*",
+    "@dasma/asr": "*"
+  }
+}

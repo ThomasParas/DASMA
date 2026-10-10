@@ -1,0 +1,21 @@
+{
+  "id": "romeo-balcony",
+  "title": "Romeo and Juliet — the balcony (Act II, Scene ii)",
+  "source": "William Shakespeare, Romeo and Juliet (c. 1597). Public domain.",
+  "lines": [
+    { "id": "R1", "character": "JULIET", "text": "O Romeo, Romeo! wherefore art thou Romeo? Deny thy father and refuse thy name.", "paraphrase": "Oh Romeo, Romeo, why must you be Romeo? Disown your father and give up your name." },
+    { "id": "R2", "character": "JULIET", "text": "Or, if thou wilt not, be but sworn my love, and I'll no longer be a Capulet." },
+    { "id": "R3", "character": "ROMEO", "text": "Shall I hear more, or shall I speak at this?" },
+    { "id": "R4", "character": "JULIET", "text": "'Tis but thy name that is my enemy; thou art thyself, though not a Montague." },
+    { "id": "R5", "character": "JULIET", "text": "What's Montague? It is nor hand, nor foot, nor arm, nor face, nor any other part belonging to a man." },
+    { "id": "R6", "character": "JULIET", "text": "O, be some other name! What's in a name? That which we call a rose by any other word would smell as sweet.", "paraphrase": "Oh, take another name! What is a name anyway? A rose called something else would smell just as sweet." },
+    { "id": "R7", "character": "ROMEO", "text": "I take thee at thy word. Call me but love, and I'll be new baptized; henceforth I never will be Romeo.", "paraphrase": "I'll take you at your word. Just call me love and I'll be baptized anew; from now on I'll never be Romeo." },
+    { "id": "R8", "character": "JULIET", "text": "What man art thou that thus bescreen'd in night so stumblest on my counsel?" },
+    { "id": "R9", "character": "ROMEO", "text": "By a name I know not how to tell thee who I am. My name, dear saint, is hateful to myself, because it is an enemy to thee." },
+    { "id": "R10", "character": "JULIET", "text": "My ears have not yet drunk a hundred words of that tongue's utterance, yet I know the sound. Art thou not Romeo and a Montague?" },
+    { "id": "R11", "character": "ROMEO", "text": "Neither, fair saint, if either thee dislike." },
+    { "id": "R12", "character": "JULIET", "text": "How camest thou hither, tell me, and wherefore? The orchard walls are high and hard to climb.", "paraphrase": "How did you get here, tell me, and why? The orchard walls are tall and difficult to climb." },
+    { "id": "R13", "character": "ROMEO", "text": "With love's light wings did I o'erperch these walls; for stony limits cannot hold love out." },
+    { "id": "R14", "character": "JULIET", "text": "If they do see thee, they will murder thee." }
+  ]
+}

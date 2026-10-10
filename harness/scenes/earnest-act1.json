@@ -1,0 +1,22 @@
+{
+  "id": "earnest-act1",
+  "title": "The Importance of Being Earnest — Act I opening",
+  "source": "Oscar Wilde, The Importance of Being Earnest (1895). Public domain.",
+  "lines": [
+    { "id": "E1", "character": "ALGERNON", "text": "Did you hear what I was playing, Lane?" },
+    { "id": "E2", "character": "LANE", "text": "I didn't think it polite to listen, sir." },
+    { "id": "E3", "character": "ALGERNON", "text": "I'm sorry for that, for your sake. I don't play accurately.", "paraphrase": "I'm sorry about that, for your benefit. I don't play very precisely." },
+    { "id": "E4", "character": "ALGERNON", "text": "Anyone can play accurately, but I play with wonderful expression.", "paraphrase": "Anyone can play correctly, though my playing has marvellous expression." },
+    { "id": "E5", "character": "LANE", "text": "Yes, sir." },
+    { "id": "E6", "character": "ALGERNON", "text": "As far as the piano is concerned, sentiment is my forte. I keep science for Life.", "paraphrase": "When it comes to the piano, feeling is my strength. Science I save for real life." },
+    { "id": "E7", "character": "LANE", "text": "Yes, sir." },
+    { "id": "E8", "character": "ALGERNON", "text": "And, speaking of the science of Life, have you got the cucumber sandwiches cut for Lady Bracknell?", "paraphrase": "Speaking of science and life, did you get the cucumber sandwiches ready for Lady Bracknell?" },
+    { "id": "E9", "character": "LANE", "text": "Yes, sir." },
+    { "id": "E10", "character": "ALGERNON", "text": "Oh! by the way, Lane, I see from your book that on Thursday night, when Lord Shoreman and Mr. Worthing were dining with me, eight bottles of champagne are entered as having been consumed.", "paraphrase": "By the way, Lane, your book says that on Thursday, when Lord Shoreman and Mr. Worthing dined here, eight bottles of champagne got drunk." },
+    { "id": "E11", "character": "LANE", "text": "Yes, sir; eight bottles and a pint." },
+    { "id": "E12", "character": "ALGERNON", "text": "Why is it that at a bachelor's establishment the servants invariably drink the champagne? I ask merely for information." },
+    { "id": "E13", "character": "LANE", "text": "I attribute it to the superior quality of the wine, sir. I have often observed that in married households the champagne is rarely of a first-rate brand.", "paraphrase": "I put it down to how good the wine is, sir. In married homes, I find, the champagne is seldom first-rate." },
+    { "id": "E14", "character": "ALGERNON", "text": "Good heavens! Is marriage so demoralising as that?" },
+    { "id": "E15", "character": "LANE", "text": "I believe it is a very pleasant state, sir. I have had very little experience of it myself up to the present.", "paraphrase": "I hear it is a pleasant state to be in, sir. I have not had much experience of it myself so far." }
+  ]
+}
