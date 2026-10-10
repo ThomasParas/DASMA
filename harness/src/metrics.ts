@@ -188,18 +188,18 @@ const FAR: Target[] = [
 ];
 
 export const TARGETS: Record<string, Target[]> = {
-  'close-mic': [
+  'solo-close-mic': [
     { metric: 'falseAlertsPer10Min', op: '<=', value: 1, label: 'False alerts per 10 min' },
     { metric: 'falseNotesPer10Min', op: '<=', value: 1, label: 'False notes per 10 min' },
     { metric: 'coreRecall', op: '>=', value: 0.9, label: 'Recall (dropped/wrong word, dropped line)' },
     { metric: 'latencyP50', op: '<', value: 0.5, label: 'Alert latency p50, s (meaningful at --patience 0)' },
   ],
-  'far-field': FAR,
-  'far-field-hard': FAR,
+  'director-far-field': FAR,
+  'director-far-field-hard': FAR,
 };
 
-export function checkTargets(room: string, agg: Aggregate): Array<{ label: string; value: number | null; target: string; pass: boolean }> {
-  return (TARGETS[room] ?? []).map((t) => {
+export function checkTargets(condition: string, agg: Aggregate): Array<{ label: string; value: number | null; target: string; pass: boolean }> {
+  return (TARGETS[condition] ?? []).map((t) => {
     const value = agg[t.metric] as number | null;
     const pass = value !== null && (t.op === '<=' ? value <= t.value : t.op === '>=' ? value >= t.value : value < t.value);
     return { label: t.label, value, target: `${t.op} ${t.value}`, pass };
@@ -210,10 +210,10 @@ const fmt = (v: number | null) => (v === null ? 'n/a' : Number.isInteger(v) ? St
 
 export function formatReport(report: EvalReport): string {
   const out: string[] = [`# DASMA harness report`, '', `Created ${report.createdAt}`, '', '```json', JSON.stringify(report.config, null, 2), '```', ''];
-  for (const [room, agg] of Object.entries(report.conditions)) {
-    out.push(`## ${room}`, '', `${agg.runs} runs, ${agg.audioMinutes.toFixed(1)} min of audio, ${agg.errorLabels} planted errors, mean RTF ${agg.rtfMean.toFixed(3)}`, '');
+  for (const [condition, agg] of Object.entries(report.conditions)) {
+    out.push(`## ${condition}`, '', `${agg.runs} runs, ${agg.audioMinutes.toFixed(1)} min of audio, ${agg.errorLabels} planted errors, mean RTF ${agg.rtfMean.toFixed(3)}`, '');
     out.push('| Target | Value | Required | Result |', '|---|---|---|---|');
-    for (const row of checkTargets(room, agg)) out.push(`| ${row.label} | ${fmt(row.value)} | ${row.target} | ${row.pass ? 'PASS' : 'FAIL'} |`);
+    for (const row of checkTargets(condition, agg)) out.push(`| ${row.label} | ${fmt(row.value)} | ${row.target} | ${row.pass ? 'PASS' : 'FAIL'} |`);
     out.push('', '| Metric | Value |', '|---|---|');
     for (const key of ['recall', 'recallInclChecks', 'sameCategoryRate', 'soundAlikeRecall', 'falseNotesPerRun', 'falseAlertsPerRun', 'falseChecksPerRun', 'benignViolationsPerRun', 'latencyP50', 'latencyP95'] as const) {
       out.push(`| ${key} | ${fmt(agg[key])} |`);

@@ -16,8 +16,8 @@ for (const r of runs) {
   const ids = scenes.get(r.sceneId)!.lines.map((l) => l.id);
   const errs = errorLines(r);
   const kindOf = new Map(r.labels.map((l) => [l.lineId, l.kind]));
-  const room = byRoom.get(r.room) ?? { total: 0, causes: new Map<string, string[]>() };
-  byRoom.set(r.room, room);
+  const room = byRoom.get(r.condition) ?? { total: 0, causes: new Map<string, string[]>() };
+  byRoom.set(r.condition, room);
   for (const n of r.notes) {
     if (n.status !== 'note' || errs.has(n.lineId)) continue;
     room.total++;

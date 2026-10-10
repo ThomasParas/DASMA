@@ -19,10 +19,10 @@ const rows = new Map<
   }
 >();
 for (const r of readRuns(process.argv[2])) {
-  const row = rows.get(r.room) ?? { lines: 0, errorLines: 0, notesOnErrorLines: 0, extraNotes: 0, cat: {} };
-  rows.set(r.room, row);
+  const row = rows.get(r.condition) ?? { lines: 0, errorLines: 0, notesOnErrorLines: 0, extraNotes: 0, cat: {} };
+  rows.set(r.condition, row);
   const errs = errorLines(r);
-  row.lines += scenes.get(r.sceneId)!.lines.length;
+  row.lines += scenes.get(r.sceneId)!.lines.filter((l) => r.character === null || l.character === r.character).length;
   row.errorLines += errs.size;
   for (const id of errs) {
     const n = r.notes.filter((x) => x.lineId === id && x.status === 'note').length;

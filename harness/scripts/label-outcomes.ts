@@ -32,12 +32,12 @@ const rooms = new Map<
   { ww: string[]; status: Record<string, number>; misses: Map<string, string[]> }
 >();
 for (const r of runs) {
-  const room = rooms.get(r.room) ?? {
+  const room = rooms.get(r.condition) ?? {
     ww: [],
     status: { note: 0, checkOnly: 0, none: 0 },
     misses: new Map<string, string[]>(),
   };
-  rooms.set(r.room, room);
+  rooms.set(r.condition, room);
   for (const l of r.labels) {
     if (isBenign(l.kind)) continue;
     const on = r.notes.filter((n) => n.lineId === l.lineId);

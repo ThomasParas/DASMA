@@ -21,6 +21,21 @@ describe('renderPerformance', () => {
     expect(r.segments[1]!.end).toBeCloseTo(2.46);
     expect(r.samples.length).toBe(Math.round(3.46 * 16000));
   });
+
+  it('renders a silent (cue) segment as silence of the same length', () => {
+    const perf: Performance = {
+      segments: [
+        { speaker: 'A', text: 'one two', pauseBefore: 0, lineId: 'L1' },
+        { speaker: 'B', text: 'three four five', pauseBefore: 0, silent: true },
+      ],
+      labels: [],
+    };
+    const r = renderPerformance(perf, { A: 1, B: 2 }, fakeTts);
+    expect(r.segments[1]!.end - r.segments[1]!.start).toBeCloseTo(0.96);
+    const cue = r.samples.subarray(Math.round(r.segments[1]!.start * 16000), Math.round(r.segments[1]!.end * 16000));
+    expect(cue.every((x) => x === 0)).toBe(true);
+    expect(r.samples[100]).toBeCloseTo(0.1);
+  });
 });
 
 describe('assignVoices', () => {

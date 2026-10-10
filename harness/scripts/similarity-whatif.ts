@@ -8,9 +8,9 @@
 import { errorLines, readRuns, score } from './lib';
 
 const runs = readRuns(process.argv[2]);
-const rooms = [...new Set(runs.map((r) => r.room))];
+const rooms = [...new Set(runs.map((r) => r.condition))];
 for (const room of rooms) {
-  const list = runs.filter((r) => r.room === room);
+  const list = runs.filter((r) => r.condition === room);
   let n = 0;
   let similar = 0;
   let flip = 0;

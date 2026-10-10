@@ -59,6 +59,7 @@ export class ScriptedRecognizer implements Recognizer<null> {
 /** Words exactly as performed, spaced evenly through each rendered segment — a perfect recognizer. */
 export function oracleWords(rendered: RenderedPerformance, confidence = 0.95): HeardWord[] {
   return rendered.segments
+    .filter(({ seg }) => !seg.silent)
     .flatMap(({ seg, start, end }) => {
       const toks = seg.text.split(/[\s-]+/).filter(Boolean);
       const d = (end - start) / Math.max(1, toks.length);

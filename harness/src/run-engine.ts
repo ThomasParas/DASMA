@@ -1,4 +1,4 @@
-import { createAligner, type AlignEvent, type AlignOptions, type ExpectedWord } from '@dasma/align';
+import { createAligner, type AlignEvent, type AlignOptions, type ExpectedWord, type HeardWord } from '@dasma/align';
 import type { Recognizer } from '@dasma/asr';
 
 export interface TimedEvent {
@@ -8,6 +8,7 @@ export interface TimedEvent {
 
 export interface EngineRun {
   events: TimedEvent[];
+  heard: HeardWord[];
   rtf: number;
   durationSec: number;
 }
@@ -25,7 +26,11 @@ export function runEngine(
   let audioTime = 0;
   const events: TimedEvent[] = [];
   aligner.onEvent((event) => events.push({ event, audioTime }));
-  const off = recognizer.onWords((words) => aligner.push(words));
+  const heard: HeardWord[] = [];
+  const off = recognizer.onWords((words) => {
+    heard.push(...words);
+    aligner.push(words);
+  });
   const chunk = Math.max(1, Math.round(chunkSec * sampleRate));
   for (let pos = 0; pos < samples.length; pos += chunk) {
     const end = Math.min(pos + chunk, samples.length);
@@ -37,5 +42,5 @@ export function runEngine(
   recognizer.flush();
   aligner.finalize(durationSec + 5);
   off();
-  return { events, rtf: recognizer.realtimeFactor(), durationSec };
+  return { events, heard, rtf: recognizer.realtimeFactor(), durationSec };
 }

@@ -45,7 +45,8 @@ export function renderPerformance(
     const audio = tts.synth(seg.text, voices[seg.speaker] ?? VOICE_POOL[0]!, speed);
     if (!sampleRate) sampleRate = audio.sampleRate;
     const pad = new Float32Array(Math.round(seg.pauseBefore * sampleRate));
-    chunks.push(pad, audio.samples);
+    // A solo cue is played by the app, which ignores the mic meanwhile: the mic hears silence of the cue's length.
+    chunks.push(pad, seg.silent ? new Float32Array(audio.samples.length) : audio.samples);
     total += pad.length;
     const start = total / sampleRate;
     total += audio.samples.length;

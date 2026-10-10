@@ -85,45 +85,45 @@ describe('aggregate', () => {
 
 describe('targets and report', () => {
   const agg = aggregate([{ ...scoreRun(labels, events, segments), durationSec: 600, rtf: 0.2 }]);
-  const report: EvalReport = { createdAt: '2026-10-10T00:00:00Z', config: { seeds: 1 }, conditions: { 'close-mic': agg } };
+  const report: EvalReport = { createdAt: '2026-10-10T00:00:00Z', config: { seeds: 1 }, conditions: { 'solo-close-mic': agg } };
 
   it('checks the spec targets', () => {
-    const rows = checkTargets('close-mic', agg);
+    const rows = checkTargets('solo-close-mic', agg);
     expect(rows.find((r) => r.label.startsWith('False alerts'))!.pass).toBe(true);
     expect(rows.find((r) => r.label.startsWith('Recall'))!.pass).toBe(true);
   });
 
   it('formats a markdown report', () => {
     const md = formatReport(report);
-    expect(md).toContain('## close-mic');
+    expect(md).toContain('## solo-close-mic');
     expect(md).toContain('| Recall (dropped/wrong word, dropped line)');
     expect(md).toMatch(/PASS|FAIL/);
   });
 
   it('gates regressions against a baseline', () => {
     expect(compareToBaseline(report, report).pass).toBe(true);
-    const worse: EvalReport = { ...report, conditions: { 'close-mic': { ...agg, coreRecall: agg.coreRecall! - 0.05 } } };
+    const worse: EvalReport = { ...report, conditions: { 'solo-close-mic': { ...agg, coreRecall: agg.coreRecall! - 0.05 } } };
     expect(compareToBaseline(worse, report).pass).toBe(false);
-    const noisier: EvalReport = { ...report, conditions: { 'close-mic': { ...agg, falseAlertsPerRun: agg.falseAlertsPerRun + 0.5 } } };
+    const noisier: EvalReport = { ...report, conditions: { 'solo-close-mic': { ...agg, falseAlertsPerRun: agg.falseAlertsPerRun + 0.5 } } };
     expect(compareToBaseline(noisier, report).pass).toBe(false);
   });
 
   it('fails the gate when a baseline condition is missing from the report', () => {
-    const baseline: EvalReport = { ...report, conditions: { 'close-mic': agg, 'far-field': agg } };
+    const baseline: EvalReport = { ...report, conditions: { 'solo-close-mic': agg, 'director-far-field': agg } };
     const result = compareToBaseline(report, baseline);
     expect(result.pass).toBe(false);
-    expect(result.lines).toContain('far-field: FAIL condition is in the baseline but missing from the report');
+    expect(result.lines).toContain('director-far-field: FAIL condition is in the baseline but missing from the report');
   });
 
   it('still skips a report condition that has no baseline', () => {
-    const extra: EvalReport = { ...report, conditions: { 'close-mic': agg, 'far-field': agg } };
+    const extra: EvalReport = { ...report, conditions: { 'solo-close-mic': agg, 'director-far-field': agg } };
     const result = compareToBaseline(extra, report);
     expect(result.pass).toBe(true);
-    expect(result.lines).toContain('far-field: no baseline — skipped');
+    expect(result.lines).toContain('director-far-field: no baseline — skipped');
   });
 
   it('fails the gate when the report has no recall evidence but the baseline did', () => {
-    const empty: EvalReport = { ...report, conditions: { 'close-mic': { ...agg, coreRecall: null } } };
+    const empty: EvalReport = { ...report, conditions: { 'solo-close-mic': { ...agg, coreRecall: null } } };
     const result = compareToBaseline(empty, report);
     expect(result.pass).toBe(false);
     expect(result.lines.join('\n')).toContain('coreRecall n/a');
@@ -137,12 +137,12 @@ describe('recall with no labels', () => {
     const agg = aggregate([{ ...clean, durationSec: 600, rtf: 0.2 }]);
     expect(agg).toMatchObject({ errorLabels: 0, recall: null, recallInclChecks: null, coreRecall: null, sameCategoryRate: null });
     expect(JSON.parse(JSON.stringify(agg)).coreRecall).toBeNull();
-    expect(formatReport({ createdAt: 'x', config: {}, conditions: { 'close-mic': agg } })).toContain('| Recall (dropped/wrong word, dropped line) | n/a | >= 0.9 | FAIL |');
+    expect(formatReport({ createdAt: 'x', config: {}, conditions: { 'solo-close-mic': agg } })).toContain('| Recall (dropped/wrong word, dropped line) | n/a | >= 0.9 | FAIL |');
   });
 
   it('treats a recall target with zero labels as FAIL, not a vacuous pass', () => {
     const agg = aggregate([{ ...clean, durationSec: 600, rtf: 0.2 }]);
-    for (const room of ['close-mic', 'far-field', 'far-field-hard']) {
+    for (const room of ['solo-close-mic', 'director-far-field', 'director-far-field-hard']) {
       const row = checkTargets(room, agg).find((r) => r.label.startsWith('Recall'))!;
       expect(row.value).toBeNull();
       expect(row.pass).toBe(false);

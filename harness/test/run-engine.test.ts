@@ -31,4 +31,10 @@ describe('runEngine', () => {
     expect(flag!.audioTime).toBeGreaterThanOrEqual(heard[8]!.end);
     expect(flag!.event).toMatchObject({ alert: true, note: { lineId: 'B', category: 'wrong-words' } });
   });
+
+  it('returns the stabilized words it heard', () => {
+    const heard = words('one two three four five six seven eight nine ten');
+    const run = runEngine(new Float32Array(SR * 6), SR, new ScriptedRecognizer(heard), expected, options);
+    expect(run.heard.map((w) => w.text)).toEqual(heard.map((w) => w.text));
+  });
 });

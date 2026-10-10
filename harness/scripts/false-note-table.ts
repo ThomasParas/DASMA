@@ -12,7 +12,7 @@ for (const r of readRuns(process.argv[2])) {
   const errs = errorLines(r);
   for (const n of r.notes) {
     if (n.status !== 'note' || errs.has(n.lineId)) continue;
-    const key = `${r.room} / ${n.category}`;
+    const key = `${r.condition} / ${n.category}`;
     counts[key] = (counts[key] ?? 0) + 1;
     const list = (examples[key] ??= []);
     if (list.length < 3) list.push(`expected "${n.expected}" heard "${n.heard}"`);

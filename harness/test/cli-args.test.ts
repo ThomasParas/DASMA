@@ -3,6 +3,8 @@ import { parseEvaluateOptions } from '../src/cli-args';
 
 const base = {
   seeds: '10',
+  modes: 'solo,director',
+  'seed-from': '1',
   rooms: 'close-mic,far-field',
   patience: '0.5',
   strictness: 'word-perfect',
@@ -15,6 +17,8 @@ describe('parseEvaluateOptions', () => {
   it('parses the defaults', () => {
     expect(parse()).toEqual({
       seeds: 10,
+      modes: ['solo', 'director'],
+      seedFrom: 1,
       rooms: ['close-mic', 'far-field'],
       patience: 0.5,
       strictness: { mode: 'word-perfect' },
@@ -55,5 +59,16 @@ describe('parseEvaluateOptions', () => {
 
   it('rejects an unknown strictness instead of silently using word-perfect', () => {
     expect(() => parse({ strictness: 'strict' })).toThrow(/--strictness must be word-perfect or lenient/);
+  });
+
+  it('parses --modes and --seed-from', () => {
+    expect(parse({ modes: 'director', 'seed-from': '11' })).toMatchObject({ modes: ['director'], seedFrom: 11 });
+    expect(parse({ modes: 'solo, solo ,director' }).modes).toEqual(['solo', 'director']);
+  });
+
+  it('rejects an unknown mode and a bad --seed-from', () => {
+    expect(() => parse({ modes: 'solo,chorus' })).toThrow(/Unknown mode "chorus"\. Known: solo, director/);
+    expect(() => parse({ modes: '' })).toThrow(/--modes needs at least one mode/);
+    for (const bad of ['0', '-1', '1.5', 'x', '']) expect(() => parse({ 'seed-from': bad })).toThrow(/--seed-from must be a positive integer/);
   });
 });

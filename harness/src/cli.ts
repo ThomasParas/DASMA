@@ -18,7 +18,9 @@ const USAGE = `Usage: npm run harness -- <command> [options]
                                               --record (maintainers only) pins hashes for models not yet listed.
   evaluate [options]                          Generate labelled rehearsals, run the engine, score it
       --scenes all|<id,id>      default all
+      --modes <a,b>             solo | director, default solo,director
       --seeds <n>               positive integer, default 10
+      --seed-from <n>           first seed, default 1 (tuning 1–10, held-out gate 11–30)
       --rooms <a,b>             default close-mic,far-field   (also: far-field-hard)
       --model <id>              default zipformer-en-2023-06-21
       --patience <0..1>         default 0.5
@@ -37,6 +39,8 @@ async function runEvaluate(args: string[]): Promise<void> {
     args,
     options: {
       scenes: { type: 'string', default: 'all' },
+      modes: { type: 'string', default: 'solo,director' },
+      'seed-from': { type: 'string', default: '1' },
       seeds: { type: 'string', default: '10' },
       rooms: { type: 'string', default: 'close-mic,far-field' },
       model: { type: 'string', default: 'zipformer-en-2023-06-21' },
@@ -58,6 +62,8 @@ async function runEvaluate(args: string[]): Promise<void> {
   const { report, runs } = evaluate(
     {
       sceneIds: values.scenes === 'all' ? 'all' : values.scenes.split(','),
+      modes: opts.modes,
+      seedFrom: opts.seedFrom,
       seeds: opts.seeds,
       rooms: opts.rooms,
       patience: opts.patience,
@@ -72,8 +78,8 @@ async function runEvaluate(args: string[]): Promise<void> {
         recognizer.reset();
         return recognizer;
       },
-      onRun: ({ room, sceneId, seed, score }) =>
-        console.log(`${room} ${sceneId} #${seed}: detected ${score.detected}/${score.errorLabels}, false notes ${score.falseNotes}, false alerts ${score.falseAlerts}`),
+      onRun: ({ condition, character, sceneId, seed, score }) =>
+        console.log(`${condition}${character ? ` ${character}` : ''} ${sceneId} #${seed}: detected ${score.detected}/${score.errorLabels}, false notes ${score.falseNotes}, false alerts ${score.falseAlerts}`),
       saveAudio: values['save-audio']
         ? (name, samples, sampleRate) => {
             const file = resolve(out, `${name}.wav`);

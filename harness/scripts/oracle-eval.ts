@@ -26,6 +26,8 @@ mkdirSync(out, { recursive: true });
 const { report, runs } = evaluate(
   {
     sceneIds: 'all',
+    modes: ['solo', 'director'],
+    seedFrom: 1,
     seeds: Number(values.seeds),
     rooms: ['close-mic'],
     patience: Number(values.patience),

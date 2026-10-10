@@ -1,7 +1,10 @@
 import type { Strictness } from '@dasma/align';
+import type { Mode } from './evaluate';
 import { ROOM_PRESETS, type RoomName } from './room';
 
 export interface EvaluateOptions {
+  modes: Mode[];
+  seedFrom: number;
   seeds: number;
   rooms: RoomName[];
   patience: number;
@@ -18,6 +21,8 @@ function unitInterval(name: string, raw: string): number {
 
 /** Validate the raw string values of `evaluate`'s flags, failing early with a message that names the flag. */
 export function parseEvaluateOptions(values: {
+  modes: string;
+  'seed-from': string;
   seeds: string;
   rooms: string;
   patience: string;
@@ -26,6 +31,12 @@ export function parseEvaluateOptions(values: {
   'benign-rate': string;
 }): EvaluateOptions {
   if (!/^\d+$/.test(values.seeds) || Number(values.seeds) < 1) throw new Error(`--seeds must be a positive integer, got "${values.seeds}"`);
+  const modes = [...new Set(values.modes.split(',').map((m) => m.trim()).filter(Boolean))];
+  if (!modes.length) throw new Error('--modes needs at least one mode');
+  for (const m of modes) if (m !== 'solo' && m !== 'director') throw new Error(`Unknown mode "${m}". Known: solo, director`);
+  if (!/^\d+$/.test(values['seed-from']) || Number(values['seed-from']) < 1) {
+    throw new Error(`--seed-from must be a positive integer, got "${values['seed-from']}"`);
+  }
   const rooms = [...new Set(values.rooms.split(',').map((r) => r.trim()).filter(Boolean))];
   if (!rooms.length) throw new Error('--rooms needs at least one room');
   for (const r of rooms) if (!(r in ROOM_PRESETS)) throw new Error(`Unknown room "${r}". Known: ${Object.keys(ROOM_PRESETS).join(', ')}`);
@@ -33,6 +44,8 @@ export function parseEvaluateOptions(values: {
     throw new Error(`--strictness must be word-perfect or lenient, got "${values.strictness}"`);
   }
   return {
+    modes: modes as Mode[],
+    seedFrom: Number(values['seed-from']),
     seeds: Number(values.seeds),
     rooms: rooms as RoomName[],
     patience: unitInterval('patience', values.patience),
