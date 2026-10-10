@@ -185,10 +185,17 @@ describe('aligner: stumbles, calls, chatter, restarts', () => {
   });
 
   it('off-script talk containing "line" is not a call for line', () => {
-    const text = `${perf('L1', 'L2')} Okay everybody hold on line up the chair ||| ${perf('L4', 'L5')}`;
+    const text = `${perf('L1', 'L2')} Okay everybody hold on let me fix this chair now please | line up the chair ||| ${perf('L4', 'L5')}`;
     const r = runScenario(EARNEST, heard(text), P0);
     expect(r.lineNotes).toEqual([]);
     expect(r.flags).toEqual([]);
+    expect(r.types).not.toContain('calledForLine');
+  });
+
+  it('"line" after the last script word is not a call for line', () => {
+    const r = runScenario(EARNEST, heard(`${perf('L1', 'L2', 'L3', 'L4', 'L5')} | line`), P0);
+    // The stray word is an ordinary added word on the last line, never a call for line.
+    expect(r.lineNotes).toEqual([expect.objectContaining({ lineId: 'L5', category: 'added-words', heard: 'line' })]);
     expect(r.types).not.toContain('calledForLine');
   });
 
