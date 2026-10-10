@@ -38,6 +38,30 @@ describe('aligner: clean runs', () => {
     expect(r.flags).toEqual([]);
   });
 
+  it('a scripted filler is not expected: "Um, I really mean it." performed without the Um is clean', () => {
+    const UM: ScriptLineInput[] = [
+      { id: 'U1', characterId: 'X', text: 'Um, I really mean it.' },
+      { id: 'U2', characterId: 'Y', text: 'Then say so plainly.' },
+    ];
+    for (const patience of [0, 0.5]) {
+      const r = runScenario(UM, heard('I really mean it. Then say so plainly.'), { patience });
+      expect(r.lineNotes).toEqual([]);
+      expect(r.flags).toEqual([]);
+    }
+  });
+
+  it('a line that is just a filler ("Hmm.") produces no expected words and no notes', () => {
+    const HMM: ScriptLineInput[] = [
+      { id: 'H1', characterId: 'X', text: 'Tell me what you think.' },
+      { id: 'H2', characterId: 'Y', text: 'Hmm.' },
+      { id: 'H3', characterId: 'X', text: 'Well, say something at least.' },
+    ];
+    const r = runScenario(HMM, heard('Tell me what you think. Well, say something at least.'), P0);
+    expect(r.expected.some((w) => w.lineId === 'H2')).toBe(false);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.flags).toEqual([]);
+  });
+
   it('accepts homophones', () => {
     const KNIGHT: ScriptLineInput[] = [{ id: 'K1', characterId: 'NARRATOR', text: 'The knight rode out into the night.' }];
     const r = runScenario(KNIGHT, heard('the night rode out into the knight'), P0);

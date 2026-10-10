@@ -73,6 +73,33 @@ describe('buildExpected', () => {
   });
 });
 
+describe('buildExpected fillers', () => {
+  it('never expects a scripted filler, in either strictness', () => {
+    const line = [{ id: 'A', characterId: 'X', text: 'Um, I really mean it.' }];
+    for (const strictness of [WP, LENIENT]) {
+      const exp = buildExpected(line, strictness);
+      expect(exp.map((w) => w.norm)).toEqual(['i', 'really', 'mean', 'it']);
+      expect(exp.map((w) => w.idx)).toEqual([0, 1, 2, 3]);
+      expect(exp.map((w) => w.wordInLine)).toEqual([1, 2, 3, 4]);
+    }
+  });
+
+  it('a line that is only a filler has no expected words', () => {
+    const exp = buildExpected(
+      [
+        { id: 'A', characterId: 'X', text: 'Hello.' },
+        { id: 'B', characterId: 'X', text: 'Hmm.' },
+        { id: 'C', characterId: 'X', text: 'Goodbye.' },
+      ],
+      WP,
+    );
+    expect(exp.map((w) => [w.idx, w.lineId, w.norm])).toEqual([
+      [0, 'A', 'hello'],
+      [1, 'C', 'goodbye'],
+    ]);
+  });
+});
+
 describe('toHeardTokens', () => {
   it('normalizes recognizer output and drops fillers', () => {
     const toks = toHeardTokens([hw('UM', 0), hw("I'M", 1), hw('SORRY', 2)], WP);
