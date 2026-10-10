@@ -1,0 +1,5 @@
+node_modules
+dist
+harness/models
+harness/out
+package-lock.json
