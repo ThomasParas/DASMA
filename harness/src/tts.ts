@@ -23,7 +23,8 @@ export interface RenderedPerformance {
 
 /** Speaker ids in the libritts_r Piper voice (904 speakers) chosen to sound distinct. */
 export const VOICE_POOL = [3, 14, 27, 45, 63, 88, 102, 130, 166, 199, 240, 287];
-export const TTS_MODEL_DIR = join(MODELS_DIR, 'vits-piper-en_US-libritts_r-medium');
+export const TTS_MODEL_ID = 'vits-piper-en_US-libritts_r-medium';
+export const TTS_MODEL_DIR = join(MODELS_DIR, TTS_MODEL_ID);
 
 export function assignVoices(speakers: string[], rng: Rng): Record<string, number> {
   const pool = shuffle(VOICE_POOL, rng);

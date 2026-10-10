@@ -7,8 +7,9 @@ import { parseEvaluateOptions } from './cli-args';
 import { evaluate } from './evaluate';
 import { compareToBaseline, formatReport, type EvalReport } from './metrics';
 import { fetchModels } from './models';
-import { BASELINE_FILE, MODELS_DIR, OUT_DIR } from './paths';
-import { createSherpaTts } from './tts';
+import { BASELINE_FILE, MODELS_DIR, OUT_DIR, TTS_CACHE_DIR } from './paths';
+import { createSherpaTts, TTS_MODEL_ID } from './tts';
+import { cachedTts } from './tts-cache';
 
 const USAGE = `Usage: npm run harness -- <command> [options]
 
@@ -66,7 +67,7 @@ async function runEvaluate(args: string[]): Promise<void> {
       model: values.model,
     },
     {
-      tts: createSherpaTts(),
+      tts: cachedTts(createSherpaTts(), TTS_CACHE_DIR, TTS_MODEL_ID),
       makeRecognizer: () => {
         recognizer.reset();
         return recognizer;
