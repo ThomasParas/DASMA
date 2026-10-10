@@ -15,6 +15,8 @@ export interface AlignParams {
   matchThreshold: number;
   subBase: number;
   subSimilarityWeight: number;
+  /** Tie-break only: an exact match beats an equally-placed sound-alike match. */
+  matchSimilarityWeight: number;
   insCost: number;
   delCost: number;
 }
@@ -23,6 +25,7 @@ export const DEFAULT_ALIGN_PARAMS: AlignParams = {
   matchThreshold: MATCH_THRESHOLD,
   subBase: -0.6,
   subSimilarityWeight: 0.4,
+  matchSimilarityWeight: 0.01,
   insCost: -0.7,
   delCost: -0.5,
 };
@@ -54,7 +57,7 @@ export function alignWindow(
     for (let j = 1; j <= m; j++) {
       const s = wordScore(heard[i - 1]!, window[j - 1]!);
       pair[i * W + j] = s;
-      const diag = score[(i - 1) * W + j - 1]! + (s >= p.matchThreshold ? 1 : p.subBase + p.subSimilarityWeight * s);
+      const diag = score[(i - 1) * W + j - 1]! + (s >= p.matchThreshold ? 1 + p.matchSimilarityWeight * s : p.subBase + p.subSimilarityWeight * s);
       const del = score[i * W + j - 1]! + p.delCost;
       const ins = score[(i - 1) * W + j]! + p.insCost;
       let best = diag;
