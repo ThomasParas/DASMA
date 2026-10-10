@@ -22,6 +22,20 @@ describe('Stabilizer (audio time, pass spec §7.1)', () => {
     expect(texts(s.update([w('A', 0, 0.3)], false, 0.55))).toEqual(['A']);
   });
 
+  it('holds a steady newest word whose end is still growing', () => {
+    const s = new Stabilizer({ stableSec: 0.2 });
+    expect(s.update([w('A', 0, 0.3)], false, 0.35)).toEqual([]);
+    expect(s.update([w('A', 0, 0.6)], false, 0.6)).toEqual([]); // steady for 0.25 s, but 0 s past its end
+    expect(s.update([w('A', 0, 0.6)], false, 0.75)).toEqual([]);
+    expect(texts(s.update([w('A', 0, 0.6)], false, 0.8))).toEqual(['A']);
+  });
+
+  it('releases at exactly stableSec despite floating-point error (1.0 - 0.8 < 0.2 in binary)', () => {
+    const s = new Stabilizer({ stableSec: 0.2 });
+    s.update([w('A', 0, 0.3)], false, 0.8);
+    expect(texts(s.update([w('A', 0, 0.3)], false, 1.0))).toEqual(['A']);
+  });
+
   it('a revised word restarts its clock', () => {
     const s = new Stabilizer({ stableSec: 0.2 });
     s.update([w('A', 0), w('X', 0.4)], false, 1.0);
