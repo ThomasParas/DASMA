@@ -17,11 +17,16 @@ export interface Scene {
   lines: SceneLine[];
 }
 
+export function assertSceneId(id: string): void {
+  if (!/^[A-Za-z0-9_-]+$/.test(id)) throw new Error(`Invalid scene id "${id}": use only letters, digits, "_" and "-"`);
+}
+
 export function loadScenes(ids: string[] | 'all'): Scene[] {
   const all = readdirSync(SCENES_DIR)
     .filter((f) => f.endsWith('.json'))
     .sort()
     .map((f) => JSON.parse(readFileSync(join(SCENES_DIR, f), 'utf8')) as Scene);
+  for (const s of all) assertSceneId(s.id);
   if (ids === 'all') return all;
   return ids.map((id) => {
     const scene = all.find((s) => s.id === id);

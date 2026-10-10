@@ -2,15 +2,23 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync 
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { ALL_MODELS, TTS_MODEL, checkLock, extractAndInstall } from '../src/models';
+import { ALL_MODELS, TTS_MODEL, assertSafeMembers, checkLock, extractAndInstall } from '../src/models';
 
 describe('model lock', () => {
-  it('records a new hash, verifies a matching one, and rejects a changed one', () => {
+  it('refuses an unpinned hash unless recording, and records when asked', () => {
     const lock: Record<string, string> = {};
-    expect(checkLock(lock, 'm', 'abc')).toBe('recorded');
+    expect(() => checkLock(lock, 'm', 'abc')).toThrow(/No pinned SHA-256 for m.*fetch-models --record/);
+    expect(lock).toEqual({});
+    expect(checkLock(lock, 'm', 'abc', { record: true })).toBe('recorded');
     expect(lock).toEqual({ m: 'abc' });
+  });
+
+  it('verifies a matching hash and rejects a changed one, with or without record', () => {
+    const lock: Record<string, string> = { m: 'abc' };
     expect(checkLock(lock, 'm', 'abc')).toBe('verified');
     expect(() => checkLock(lock, 'm', 'def')).toThrow(/Checksum mismatch/);
+    expect(() => checkLock(lock, 'm', 'def', { record: true })).toThrow(/Checksum mismatch/);
+    expect(lock).toEqual({ m: 'abc' });
   });
 
   it('only downloads from official sherpa-onnx releases', () => {
@@ -57,5 +65,15 @@ describe('extractAndInstall', () => {
     writeFileSync(join(root, '.extract-m', 'model-dir', 'stale'), 'x');
     extractAndInstall('archive', root, 'm', 'model-dir', (_a, dest) => mkdirSync(join(dest, 'model-dir')));
     expect(readdirSync(join(root, 'model-dir'))).toEqual([]);
+  });
+});
+
+describe('assertSafeMembers', () => {
+  it('accepts members inside the model directory', () => {
+    expect(() => assertSafeMembers(['model-dir/', 'model-dir/a.onnx', './model-dir/sub/b.txt', 'model-dir'], 'model-dir')).not.toThrow();
+  });
+
+  it.each([['/etc/passwd'], ['../x'], ['model-dir/../../x'], ['a/../../x'], ['other-dir/file'], ['model-dir-evil/file']])('rejects %s', (name) => {
+    expect(() => assertSafeMembers(['model-dir/ok', name], 'model-dir')).toThrow(/Unsafe archive member/);
   });
 });

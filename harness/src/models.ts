@@ -19,14 +19,33 @@ export const TTS_MODEL: ModelSpec = {
 
 export const ALL_MODELS: ModelSpec[] = [...MODEL_CATALOG, TTS_MODEL];
 
-export function checkLock(lock: Record<string, string>, id: string, sha256: string): 'recorded' | 'verified' {
+export function checkLock(
+  lock: Record<string, string>,
+  id: string,
+  sha256: string,
+  { record = false }: { record?: boolean } = {},
+): 'recorded' | 'verified' {
   const known = lock[id];
   if (!known) {
+    if (!record) {
+      throw new Error(`No pinned SHA-256 for ${id} in models.lock.json. A maintainer must run: npm run harness -- fetch-models --record`);
+    }
     lock[id] = sha256;
     return 'recorded';
   }
   if (known !== sha256) throw new Error(`Checksum mismatch for ${id}: expected ${known}, got ${sha256}`);
   return 'verified';
+}
+
+/** Reject archive members that are absolute, climb out with "..", or live outside `<dirName>/`. */
+export function assertSafeMembers(names: string[], dirName: string): void {
+  for (const raw of names) {
+    const name = raw.replace(/^(\.\/)+/, '');
+    if (!name || name === '.') continue;
+    if (name.startsWith('/') || /^[A-Za-z]:/.test(name)) throw new Error(`Unsafe archive member (absolute path): ${raw}`);
+    if (name.split(/[\\/]/).includes('..')) throw new Error(`Unsafe archive member (path traversal): ${raw}`);
+    if (name !== dirName && !name.startsWith(`${dirName}/`)) throw new Error(`Unsafe archive member (outside ${dirName}/): ${raw}`);
+  }
 }
 
 async function sha256File(path: string): Promise<string> {
@@ -35,10 +54,12 @@ async function sha256File(path: string): Promise<string> {
   return hash.digest('hex');
 }
 
-export type Extractor = (archive: string, destDir: string) => void;
+export type Extractor = (archive: string, destDir: string, dirName: string) => void;
 
-const tarExtract: Extractor = (archive, destDir) => {
-  execFileSync('tar', ['-xjf', archive, '-C', destDir]);
+const tarExtract: Extractor = (archive, destDir, dirName) => {
+  const listing = execFileSync('tar', ['-tjf', archive], { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
+  assertSafeMembers(listing.split('\n').filter(Boolean), dirName);
+  execFileSync('tar', ['-xjf', archive, '-C', destDir, '--no-same-owner']);
 };
 
 /**
@@ -50,7 +71,7 @@ export function extractAndInstall(archive: string, modelsDir: string, id: string
   rmSync(temp, { recursive: true, force: true });
   mkdirSync(temp, { recursive: true });
   try {
-    extract(archive, temp);
+    extract(archive, temp, dirName);
     if (!existsSync(join(temp, dirName))) throw new Error(`Archive for ${id} did not contain ${dirName}/`);
     renameSync(join(temp, dirName), join(modelsDir, dirName));
   } finally {
@@ -58,7 +79,7 @@ export function extractAndInstall(archive: string, modelsDir: string, id: string
   }
 }
 
-export async function fetchModels(only?: string, log: (msg: string) => void = console.log): Promise<void> {
+export async function fetchModels(only?: string, log: (msg: string) => void = console.log, record = false): Promise<void> {
   mkdirSync(MODELS_DIR, { recursive: true });
   const lock: Record<string, string> = existsSync(LOCK_FILE) ? JSON.parse(readFileSync(LOCK_FILE, 'utf8')) : {};
   for (const spec of ALL_MODELS) {
@@ -74,7 +95,7 @@ export async function fetchModels(only?: string, log: (msg: string) => void = co
       if (!res.ok || !res.body) throw new Error(`Download failed for ${spec.id}: HTTP ${res.status}`);
       await pipeline(Readable.fromWeb(res.body as unknown as WebReadableStream), createWriteStream(archive));
       const sha = await sha256File(archive);
-      log(`  sha256 ${sha} (${checkLock(lock, spec.id, sha)})`);
+      log(`  sha256 ${sha} (${checkLock(lock, spec.id, sha, { record })})`);
       extractAndInstall(archive, MODELS_DIR, spec.id, spec.dirName);
       writeFileSync(LOCK_FILE, `${JSON.stringify(lock, null, 2)}\n`);
     } finally {

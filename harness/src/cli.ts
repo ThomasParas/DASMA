@@ -2,7 +2,7 @@ import type { Strictness } from '@dasma/align';
 import { findModel } from '@dasma/asr';
 import { NodeSherpaRecognizer, loadSherpa, resolveAsrModel } from '@dasma/asr/node';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { dirname, join, resolve, sep } from 'node:path';
 import { parseArgs } from 'node:util';
 import { evaluate } from './evaluate';
 import { compareToBaseline, formatReport, type EvalReport } from './metrics';
@@ -13,7 +13,9 @@ import { createSherpaTts } from './tts';
 
 const USAGE = `Usage: npm run harness -- <command> [options]
 
-  fetch-models [--only <model-id>]            Download ASR + TTS models into harness/models (needs network)
+  fetch-models [--only <model-id>] [--record]  Download ASR + TTS models into harness/models (needs network).
+                                              Archives are checked against the SHA-256 pinned in models.lock.json;
+                                              --record (maintainers only) pins hashes for models not yet listed.
   evaluate [options]                          Generate labelled rehearsals, run the engine, score it
       --scenes all|<id,id>      default all
       --seeds <n>               default 10
@@ -76,7 +78,11 @@ async function runEvaluate(args: string[]): Promise<void> {
       onRun: ({ room, sceneId, seed, score }) =>
         console.log(`${room} ${sceneId} #${seed}: detected ${score.detected}/${score.errorLabels}, false notes ${score.falseNotes}, false alerts ${score.falseAlerts}`),
       saveAudio: values['save-audio']
-        ? (name, samples, sampleRate) => sherpa.writeWave(join(out, `${name}.wav`), { samples, sampleRate })
+        ? (name, samples, sampleRate) => {
+            const file = resolve(out, `${name}.wav`);
+            if (!file.startsWith(`${out}${sep}`)) throw new Error(`Refusing to write outside ${out}: ${file}`);
+            sherpa.writeWave(file, { samples, sampleRate });
+          }
         : undefined,
     },
   );
@@ -116,8 +122,8 @@ async function main(): Promise<void> {
   const [command, ...args] = process.argv.slice(2);
   switch (command) {
     case 'fetch-models': {
-      const { values } = parseArgs({ args, options: { only: { type: 'string' } } });
-      await fetchModels(values.only);
+      const { values } = parseArgs({ args, options: { only: { type: 'string' }, record: { type: 'boolean', default: false } } });
+      await fetchModels(values.only, console.log, values.record);
       return;
     }
     case 'evaluate':

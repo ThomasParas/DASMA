@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { loadScenes, toScriptLines } from '../src/scenes';
+import { assertSceneId, loadScenes, toScriptLines } from '../src/scenes';
 
 describe('scenes', () => {
   it('loads all bundled scenes with unique line ids', () => {
@@ -20,5 +20,10 @@ describe('scenes', () => {
   it('converts to aligner script lines', () => {
     const [scene] = loadScenes(['earnest-act1']);
     expect(toScriptLines(scene!)[0]).toEqual({ id: 'E1', characterId: 'ALGERNON', text: 'Did you hear what I was playing, Lane?' });
+  });
+
+  it('only allows filename-safe scene ids', () => {
+    expect(() => assertSceneId('romeo-balcony_2')).not.toThrow();
+    for (const bad of ['../x', 'a/b', 'a b', '', 'x.json']) expect(() => assertSceneId(bad)).toThrow(/Invalid scene id/);
   });
 });
