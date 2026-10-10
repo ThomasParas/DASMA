@@ -64,6 +64,10 @@ export interface NoteDraft {
 export type AlignEvent =
   | { type: 'matched'; idx: number; at: number }
   | { type: 'suspect'; idxs: number[]; at: number }
+  /**
+   * A note may be flagged twice: first with alert false, then once more with alert true when the script position is
+   * confirmed after it (pass spec §6.1). Consumers count alerts from flags with alert true.
+   */
   | { type: 'flag'; note: NoteDraft; alert: boolean; at: number }
   | { type: 'stumble'; idx: number; heard: string; at: number }
   | { type: 'lost'; guesses: number[]; at: number }

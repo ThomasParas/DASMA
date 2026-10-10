@@ -29,6 +29,9 @@ const ANCHOR_WORDS = 3;
 /** Further heard words that must follow the trigram in the script before a forward re-anchor is trusted. */
 const FORWARD_CONFIRM_WORDS = 2;
 
+const consecutive = (idxs: number[]): boolean =>
+  idxs.length === ANCHOR_WORDS && idxs.every((x, k) => k === 0 || x === idxs[k - 1]! + 1);
+
 export function patienceToGrace(patience: number): { confirmWords: number; timeoutSec: number } {
   const p = Math.min(1, Math.max(0, patience));
   return { confirmWords: 1 + Math.round(3 * p), timeoutSec: 0.4 + 2.6 * p };
@@ -70,6 +73,8 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
   let lastHeardEnd = -Infinity;
   let lastCommittedHeardEnd = -Infinity;
   let recentMatched: ExpectedWord[] = [];
+  /** Alert-eligible notes waiting for the script position to be confirmed after them (pass spec §6.1). */
+  let waiting: Array<{ note: NoteDraft; afterIdx: number }> = [];
 
   const emit = (e: AlignEvent) => {
     for (const l of listeners) l(e);
@@ -129,6 +134,31 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     for (const id of lineOrder) if (lineFirst.get(id)! >= from && lineLast.get(id)! < to) done.add(id);
   }
 
+  /** Mid-line: the 3 matches right before the flagged ops are consecutive and the last is on the note's own line. */
+  function anchoredBefore(ops: Op[], from: number, before: ExpectedWord[], lineId: string): boolean {
+    const prev = [...before, ...ops.slice(0, from).filter(isMatch).map((o) => expected[o.e]!)].slice(-ANCHOR_WORDS);
+    return consecutive(prev.map((w) => w.idx)) && prev.at(-1)!.lineId === lineId;
+  }
+
+  /** The last script index a note's ops touch (for insertion-only notes, the last match before them). */
+  function regionEnd(ops: Op[], from: number, to: number): number {
+    let end = -1;
+    for (let k = 0; k <= to; k++) {
+      const o = ops[k]!;
+      if (hasE(o) && (k >= from || o.kind === 'match')) end = Math.max(end, o.e);
+    }
+    return end >= 0 ? end : cursor - 1;
+  }
+
+  function releaseWaiting(at: number): void {
+    const last = recentMatched.map((w) => w.idx);
+    if (!waiting.length || !consecutive(last)) return;
+    const ready = waiting.filter((w) => last[0]! > w.afterIdx);
+    if (!ready.length) return;
+    waiting = waiting.filter((w) => !ready.includes(w));
+    for (const w of ready) emit({ type: 'flag', note: w.note, alert: true, at });
+  }
+
   function resetFrom(idx: number): void {
     for (const id of lineOrder) {
       if (lineLast.get(id)! < idx) continue;
@@ -139,9 +169,11 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
       done.delete(id);
     }
     recentMatched = [];
+    waiting = waiting.filter((w) => lineLast.get(w.note.lineId)! < idx);
   }
 
   function commit(ops: Op[], at: number): void {
+    const before = recentMatched;
     if (!ops.length) return;
     const abs: Op[] = ops.map((o) => (hasE(o) ? { ...o, e: o.e + cursor } : o));
     const { notes, stumbles, meta } = classifyOps(abs, {
@@ -184,11 +216,16 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
       lines.get(note.lineId)?.notes.push(note);
       // Lenient mode forgives word-level slips once the line is mostly right, which is only known at line end,
       // so a live alert for a word-level note could never be retracted: leave those to the finalized line notes.
-      const deferred = options.strictness.mode === 'lenient' && WORD_LEVEL_CATEGORIES.has(note.category);
-      const quiet = meta.get(note)?.quiet ?? false;
-      emit({ type: 'flag', note, alert: !quiet && !deferred && note.status === 'note' && note.confidence >= options.alertMinConfidence, at });
+      const m = meta.get(note)!;
+      const deferredToLineEnd = options.strictness.mode === 'lenient' && WORD_LEVEL_CATEGORIES.has(note.category);
+      const eligible = !m.quiet && !deferredToLineEnd && note.status === 'note' && note.confidence >= options.alertMinConfidence;
+      const after = abs.slice(m.to + 1).filter(isMatch).slice(0, ANCHOR_WORDS).map((o) => o.e);
+      const anchored = anchoredBefore(abs, m.from, before, note.lineId) || consecutive(after);
+      emit({ type: 'flag', note, alert: eligible && anchored, at });
+      if (eligible && !anchored) waiting.push({ note, afterIdx: regionEnd(abs, m.from, m.to) });
     }
     for (const s of stumbles) emit({ type: 'stumble', idx: s.idx, heard: s.heard, at });
+    releaseWaiting(at);
     if (maxH >= 0) {
       lastCommittedHeardEnd = H[maxH]!.end;
       H = H.slice(maxH + 1);
@@ -221,6 +258,7 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
   function enterLost(at: number): void {
     lost = true;
     pending = null;
+    waiting = [];
     lostSince = H[0]?.start ?? at;
     suspected.clear();
     emit({ type: 'lost', guesses: index.find(H, cursor, MATCH_THRESHOLD).slice(0, 3), at });
@@ -356,6 +394,7 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     finalize(now) {
       if (!expected.length) return;
       if (!lost && H.length) step(now, true);
+      waiting = [];
       lost = false;
       pending = null;
       H = [];
@@ -376,6 +415,7 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
       H = [];
       lost = false;
       pending = null;
+      waiting = [];
       started = false;
       recentMatched = [];
       suspected.clear();

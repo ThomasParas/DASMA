@@ -300,12 +300,15 @@ describe('aligner: controls', () => {
     expect(matched).toContain(16);
   });
 
-  it('instant patience flags a wrong word as soon as the next word confirms it', () => {
-    const r = runScenario(EARNEST, heard(WITH_FEELING), { patience: 0 });
+  it('instant patience flags a mid-line wrong word as soon as the next word confirms it', () => {
+    const text = [perf('L1', 'L2', 'L3'), 'Anyone can play beautifully, but I play with wonderful expression.', perf('L5')].join(' ');
+    const r = runScenario(EARNEST, heard(text), { patience: 0 });
     const flagAt = r.events.findIndex((e) => e.type === 'flag');
-    const sirMatchedAt = r.events.findIndex((e) => e.type === 'matched' && e.idx === 38);
+    const butMatchedAt = r.events.findIndex((e) => e.type === 'matched' && e.idx === 31); // "but" in L4
     expect(flagAt).toBeGreaterThan(-1);
-    expect(flagAt).toBeLessThan(sirMatchedAt);
+    expect(r.events[flagAt]).toMatchObject({ alert: true });
+    expect(flagAt).toBeGreaterThan(butMatchedAt);
+    expect(r.events.findIndex((e) => e.type === 'matched' && e.idx === 32)).toBeGreaterThan(flagAt);
   });
 
   it('relaxed patience shows a suspect before confirming', () => {
@@ -353,5 +356,33 @@ describe('aligner: recognizer word boundaries and abbreviations', () => {
     const l10 = textOf('L10', LONG_SCENE).replace('Mr.', 'mister');
     const text = [perfLong('L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9'), l10, perfLong('L11')].join(' ');
     expect(runScenario(LONG_SCENE, heard(text), P0).lineNotes).toEqual([]);
+  });
+});
+
+describe('aligner: anchored alerts (pass spec §6.1)', () => {
+  it('chatter that shares a word with the next line raises no alert (M1 oracle earnest #6)', () => {
+    const text = `${perf('L1', 'L2')} | Sorry sorry can we take that bit again from just before the entrance please | ${perf('L3', 'L4', 'L5')}`;
+    for (const patience of [0, 0.5]) {
+      const r = runScenario(EARNEST, heard(text), { patience });
+      expect(r.flags.filter((f) => f.alert), `patience ${patience}`).toEqual([]);
+    }
+  });
+
+  it('a wrong word mid-line alerts at once', () => {
+    const text = [perf('L1', 'L2', 'L3'), 'Anyone can play beautifully, but I play with wonderful expression.', perf('L5')].join(' ');
+    const r = runScenario(EARNEST, heard(text), P0);
+    const flags = r.flags.filter((f) => f.note.lineId === 'L4');
+    expect(flags).toHaveLength(1);
+    expect(flags[0]!.alert).toBe(true);
+  });
+
+  it('a wrong first word waits until three correct words follow, then alerts once', () => {
+    const text = [perf('L1', 'L2'), "Truly sorry for that, for your sake. I don't play accurately.", perf('L4', 'L5')].join(' ');
+    const r = runScenario(EARNEST, heard(text), P0);
+    const alertAt = r.events.flatMap((e, k) => (e.type === 'flag' && e.alert ? [k] : []));
+    expect(alertAt).toHaveLength(1);
+    const thirdMatched = r.events.findIndex((e) => e.type === 'matched' && e.idx === 19); // "that" in L3
+    expect(alertAt[0]).toBeGreaterThan(thirdMatched);
+    expect(r.flags.filter((f) => f.note.lineId === 'L3').map((f) => f.alert)).toEqual([false, true]);
   });
 });
