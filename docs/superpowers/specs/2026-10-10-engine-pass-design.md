@@ -105,9 +105,9 @@ M1 skipped every line that carried a planted error when counting false alarms, w
 
 - **Seeds:** 30 per scene (10 tuning + 20 held out).
 - **Two new public-domain scenes:**
-  - `earnest-act1-cigarette`: the Jack/Algernon cigarette-case passage from *The Importance of Being Earnest*, Act 1 (Wilde, 1895), about 40 lines. It is a longer two-hander.
-  - `hamlet-to-be`: Hamlet's "To be, or not to be" (Act 3, Scene 1), one character. It is split into lines at sentence boundaries, because perturbation, notes and recall are all per line. This is the canonical solo use, and it runs only in solo mode.
-- **Planted sound-alike substitutions:** a new `wrong-words` variant that swaps a word for a near-homophone from a fixed list (e.g. accept/except, sir/sore, piece/peace, then/than, there/their). The label carries `soundAlike: true` and the report shows its detection rate separately. Pairs that normalize to identical sound keys are excluded, because no listener could catch them. These still count in core recall, since actors genuinely make these mistakes.
+  - `earnest-act1-cigarette`: the Jack/Algernon cigarette-case passage from *The Importance of Being Earnest*, Act 1 (Wilde, 1895), about 25 speeches, several of them long. It is a longer two-hander.
+  - `hamlet-to-be`: Hamlet's "To be, or not to be" (Act 3, Scene 1), one character. It is split into lines at sentence boundaries, because perturbation, notes and recall are all per line. It uses modern spellings ("wished", "the oppressor's", "heartache"), because archaic elisions are a normalization problem outside this pass. This is the canonical solo use, and it runs only in solo mode.
+- **Planted sound-alike substitutions:** a new `wrong-words` variant that swaps a word for a near-sound-alike from a fixed list (e.g. accept/except, sir/sore, then/than, quite/quiet, slings/stings). The label carries `soundAlike: true` and the report shows its detection rate separately. True homophones (piece/peace, there/their) are left off the list, because no listener could catch them. These still count in core recall, since actors genuinely make these mistakes.
 - **Quoting chatter:** the director `CHATTER` list gains lines that quote an earlier line of the same scene, built at perturb time from a previous line's first 4–6 words, e.g. "Go back to 'what I was playing', please." This measures the §6.3 fix.
 
 ### 4.6 Run records
@@ -139,7 +139,12 @@ c = BASE['dropped-words'] (0.8)
 ```
 
 - **Alerts:** a `dropped-words` note may alert only if its run of deleted words contains ≥ 2 content words (non-function words). A single dropped content word can still be a `note`, but it is never an alert.
-- **Split words:** before classification, a sub op whose heard word is the expected word followed by the start of the next expected word is reconciled as two matches. This is the "norhan" case: heard `norhan` against expected `nor hand`. The rule fires only when the leftover is at least 2 letters and is a prefix of the next word's norm, or shares its sound key.
+- **Split words:** before alignment, a heard token is split into two when it is an expected word in the window followed by the start of the next expected word. This is the "norhan" case: heard `norhan` against expected `nor hand`. The rule fires only when:
+  - the token itself matches no window word;
+  - the leftover is at least 2 letters; and
+  - the leftover is a prefix of the next word's norm, or shares its primary sound key.
+
+  The split happens before alignment because a probe showed the DP lays out `norhan` in more than one equally scored way, e.g. as an insertion plus two deletions. Patching it after alignment would miss some layouts.
 
 ### 5.2 Audio quality wired in
 
@@ -160,9 +165,13 @@ export class AudioQualityMeter {
 
 ### 5.3 Softer penalty on low-confidence wrong words (M1 finding 3)
 
-In `makeNote`, the heard-confidence multiplier becomes:
-- **For notes whose words include at least one content word:** `c *= 0.6 + 0.4 × meanHeardConfidence`.
+In `makeNote`, the heard-confidence multiplier becomes a tunable floor:
+- **For notes whose words include at least one content word:** `c *= f + (1 − f) × meanHeardConfidence`, where `f = AlignOptions.heardConfidenceFloor`.
 - **For notes made up entirely of function words:** `c *= meanHeardConfidence`, unchanged. The existing `× 0.5` for all-function-word notes is also unchanged.
+
+**The default is `f = 0`, which is today's behaviour.** Round 1 measures `f ∈ {0, 0.3, 0.6}` on the tuning seeds and keeps the value that best meets the solo targets. It judges false notes first, then recall.
+
+**Why not ship 0.6 outright, as M1 proposed:** a probe while planning this pass showed the trade-off. Against the engine's own simulated-recognizer noise (`noise.property.test.ts`, 5–15% error, `LONG_SCENE`, 200 seeds), `f = 0.6` raised false notes from 0.1 to 2.8 per run (alerts unchanged at 0.025). It turns every low-confidence, dissimilar mishearing into a note. Whether real recognizer errors look like that is an empirical question, so the harness decides.
 
 ### 5.4 Cheap sound-alike fixes (M1 findings 1–2)
 
@@ -173,7 +182,7 @@ In `makeNote`, the heard-confidence multiplier becomes:
 
 ### 5.5 Normalization (M1 finding 7)
 
-- **Rejoining split words:** before alignment, two adjacent heard tokens whose concatenated norms equal an expected word's norm in the current window are merged into one token (start of the first, end of the second, minimum confidence). Examples: "any one" → "anyone", "to night" → "tonight", "can not" → "cannot".
+- **Rejoining split words:** before alignment, two adjacent heard tokens (gap ≤ 0.3 s) whose concatenated norms equal an expected word's norm in the current window are merged into one token (start of the first, end of the second, minimum confidence). The merge does not happen when the first token alone matches a window word at or before that position, because then the script really has two words. Examples: "any one" → "anyone", "to night" → "tonight", "can not" → "cannot".
 - **Abbreviations** in expected and heard text:
   - Mr → mister, Mrs → missus, Dr → doctor.
   - St → saint when followed by a capitalized word, otherwise street.
@@ -185,14 +194,22 @@ In `makeNote`, the heard-confidence multiplier becomes:
 ### 6.1 Alerts only when anchored (M1 finding 5)
 
 A `flag` gets `alert: true` only if, in addition to today's conditions, its region is **anchored**. Anchored means one of:
-- the 3 matched words immediately before the flagged region are consecutive script positions; or
-- the 3 matched words immediately after it, within the same commit, are consecutive script positions.
+- **Before:** the 3 matched words immediately before the flagged region are consecutive script positions, and the last of them is on the note's own line. This is the mid-line case, which alerts at once.
+- **After:** 3 consecutive script positions are matched after the region.
 
-The tail of the previous line counts toward the "before" set. When the region is not anchored, the flag is still emitted, with `alert: false`.
+**Deferred alerts:** when an alert-eligible note is not anchored at commit time (typically an error at a line's start), its `flag` is emitted with `alert: false` and the note waits. As soon as the 3 most recent matches are consecutive and all lie after the region, the same note is flagged again with `alert: true`. A waiting note is dropped, never alerting, when:
+- its line is reset by a backward jump;
+- the aligner becomes lost;
+- the note is downgraded as off-script (§6.2); or
+- the run ends.
+
+`AlignEvent` documents that a note may be flagged twice, first with `alert: false` and then once with `alert: true`.
+
+**Why not let the previous line's tail anchor a line-start error:** a probe of the M1 chatter case ("Sorry, sorry, can we take…" before "I'm sorry for that…") at Patience 0 showed the chatter's first words are committed at the start of the next line, right after a cleanly matched line. Anchoring them by that line's tail would let those false alerts through.
 
 ### 6.2 Off-script talk becomes "check" (M1 finding 5)
 
-- **Detection:** the aligner keeps a rolling record of committed heard tokens. An **off-script run** is ≥ 4 consecutive heard tokens with ≤ 1 `match` op among them. Gaps of up to 1.0 s between tokens don't break a run.
+- **Detection:** the aligner keeps a rolling record of every heard token that has been resolved: committed, or discarded while lost or re-anchoring. Each entry records whether the token was committed as a `match`. An **off-script run** is ≥ 4 consecutive resolved heard tokens with ≤ 1 match among them. Gaps of up to 1.0 s between tokens don't break a run.
 - **Effect:** any note whose heard tokens fall inside an off-script run gets `status: 'check'` and `alert: false`.
   - Notes already emitted from earlier commits keep their emitted `flag`.
   - Their entries in line state are downgraded, so the finalized `lineDone` notes reflect the downgrade.
@@ -210,8 +227,9 @@ The tail of the previous line counts toward the "before" set. When the region is
 
 ### 6.4 Instant Patience without misreading (M1 finding 6)
 
-- **Lookahead check:** before `commit`, if the committable ops end in a block of ≥ 1 `sub` ops, test whether that block's heard tokens match, in order and at `MATCH_THRESHOLD`, the first words of any of the next 2 lines in the window. If they do, the commit is deferred until the next heard word or timeout, giving the DP more context to align the block as the next line's opening.
-  - **Bound:** a block is deferred at most once. The second time, the engine commits normally.
+- **Lookahead re-alignment:** before `commit`, find the last block of non-match ops (containing ≥ 1 `sub`) before the confirming matches. Test whether that block's heard tokens, at least 2 of them, match in order and at `MATCH_THRESHOLD` the expected words starting at the first word of one of the next 2 lines.
+  - **If they do:** the ops are rebuilt so that the expected words from the block's start up to that line's first word become `del` ops, and the heard words from the block onward are aligned again starting at that line. The rebuilt ops then go through the normal commit rule. The skipped line is then classified as a dropped line or a jumped cue, as usual.
+  - **Why not wait for more words:** a probe on `LONG_SCENE` at Patience 0 (actor skips L8) showed that waiting for one more word does not help. The DP still prefers substitutions to a 17-word deletion, so the block must be re-aligned explicitly.
 - **Line-end floor:** when the last committable op touches one of a line's final 2 expected words, `commitPoint` uses `max(confirmWords, 2)`. Elsewhere `confirmWords` is unchanged (`1 + round(3p)`), so mid-line errors at Patience 0 still commit after one word.
 - **Timeouts:** `commitPointOnTimeout` is unchanged.
 
@@ -258,7 +276,7 @@ After round 2 is measured on the held-out seeds, the pass ends.
   - The "norhan" split word.
   - Patience 0 at line ends.
   - Sound-alike pairs on both sides of the letter-agreement bound.
-- **Property tests:** the existing 5–15% recognizer-noise property tests stay, and their false-alert budget stays.
+- **Property tests:** the existing 5–15% recognizer-noise property tests stay, with their false-alert and false-note budgets, at the default options. If round 1 selects `heardConfidenceFloor > 0`, the property test also runs at that value, and any break in its note budget is reported in the results doc rather than hidden by changing the noise model.
 - **`packages/asr`:** `Stabilizer` tests drive time explicitly, including the same audio fed in 0.1 s and in 8 ms chunks, which must release the same words at the same audio times (within one chunk). There are also `AudioQualityMeter` tests.
 - **Harness:**
   - Tests for the render cache (hit, miss, key changes).
