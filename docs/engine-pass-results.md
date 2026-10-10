@@ -4,8 +4,8 @@ Spec: docs/superpowers/specs/2026-10-10-engine-pass-design.md · Numbers are per
 
 ## Step 0 — baseline (engine unchanged since M1)
 
-Config: scenes all (earnest-act1, earnest-act1-cigarette, hamlet-to-be, romeo-balcony) · held-out seeds 11–30 · error rate 0.35 · benign rate 0.2 · model zipformer-en-2023-06-21.
-Repeatability: two identical runs gave identical conditions (rtf excluded).
+Config: scenes all (solo: earnest-act1, earnest-act1-cigarette, hamlet-to-be, romeo-balcony; director: earnest-act1, earnest-act1-cigarette, romeo-balcony only, hamlet-to-be is solo-only) · held-out seeds 11–30 · error rate 0.35 · benign rate 0.2 · model zipformer-en-2023-06-21.
+Repeatability: two identical runs (earnest-act1 only, seeds 1–2, close-mic, solo+director) gave identical conditions (rtf excluded).
 
 ### solo-close-mic (the M3 gate)
 | Target | Patience | Value | Required | Result |
@@ -39,7 +39,7 @@ Output of `npx tsx harness/scripts/false-note-causes.ts harness/out/s0-tune/runs
 
 ```
 ## solo-close-mic: 54 false notes
-  buckets: {"on stumble/long-pause line":18,"recognizer only (clean neighbourhood)":30,"next to a planted error":6}
+  buckets: {"on aside line":4,"recognizer only (clean neighbourhood)":30,"on stumble/long-pause line":14,"next to a planted error":6}
   17  recognizer only (clean neighbourhood) / dropped-words
       earnest-act1-cigarette#7 C16 note:dropped-words "Yes. But why does"->"" 0.8
       earnest-act1-cigarette#9 C20 note:dropped-words "who"->"" 0.8

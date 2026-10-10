@@ -45,9 +45,11 @@ for (const [room, { total, causes }] of byRoom) {
   for (const [key, list] of causes) {
     const b = key.startsWith('adjacent')
       ? 'next to a planted error'
-      : key.startsWith('on ')
-        ? 'on stumble/long-pause line'
-        : key.split(' / ')[0]!;
+      : key.startsWith('on aside')
+        ? 'on aside line'
+        : key.startsWith('on ')
+          ? 'on stumble/long-pause line'
+          : key.split(' / ')[0]!;
     buckets.set(b, (buckets.get(b) ?? 0) + list.length);
   }
   console.log('  buckets:', JSON.stringify(Object.fromEntries(buckets)));
