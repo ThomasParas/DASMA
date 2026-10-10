@@ -2,6 +2,7 @@ import { WORD_LEVEL_CATEGORIES, classifyOps } from './classify';
 import { commitPoint, commitPointOnTimeout } from './commit';
 import { countCheckedWords, displayExpected, toHeardTokens } from './expected';
 import { finalizeLine, type LineState } from './finalize-line';
+import { insideAny, offScriptSpans, type HeardMark } from './off-script';
 import { MATCH_THRESHOLD, phoneticKey, wordScore } from './phonetic';
 import { TrigramIndex } from './trigram-index';
 import type { AlignEvent, AlignOptions, ExpectedWord, HeardToken, HeardWord, NoteDraft } from './types';
@@ -75,6 +76,27 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
   let recentMatched: ExpectedWord[] = [];
   /** Alert-eligible notes waiting for the script position to be confirmed after them (pass spec §6.1). */
   let waiting: Array<{ note: NoteDraft; afterIdx: number }> = [];
+
+  /** Every heard token the aligner has taken in, in order; H is always a suffix of this list (pass spec §6.2). */
+  const marks: HeardMark[] = [];
+  const markOf = new Map<HeardToken, HeardMark>();
+  /** Heard-time span of each note that has heard words, for downgrading earlier notes once a run turns out off-script. */
+  const noteTimes = new Map<NoteDraft, [number, number]>();
+  const MAX_MARKS = 64;
+
+  function track(tok: HeardToken): void {
+    const mark: HeardMark = { start: tok.start, end: tok.end, matched: false };
+    marks.push(mark);
+    markOf.set(tok, mark);
+    if (marks.length > MAX_MARKS) marks.splice(0, marks.length - MAX_MARKS);
+  }
+
+  /** While lost, heard tokens only accumulate (bounded) until a re-anchor candidate shows up. */
+  function pushLost(tok: HeardToken): void {
+    H.push(tok);
+    track(tok);
+    if (H.length > LOST_BUFFER) H.shift();
+  }
 
   const emit = (e: AlignEvent) => {
     for (const l of listeners) l(e);
@@ -159,6 +181,25 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     for (const w of ready) emit({ type: 'flag', note: w.note, alert: true, at });
   }
 
+  /** Earlier notes whose heard words now turn out to sit inside off-script talk become checks (pass spec §6.2). */
+  function downgradeOffScript(spans: Array<[number, number]>, at: number): void {
+    if (!spans.length) return;
+    for (const id of lineOrder) {
+      const st = lines.get(id)!;
+      let changed = false;
+      st.notes = st.notes.map((n) => {
+        const t = noteTimes.get(n);
+        if (!t || n.status !== 'note' || !insideAny(spans, t[0], t[1])) return n;
+        changed = true;
+        waiting = waiting.filter((w) => w.note !== n);
+        const down: NoteDraft = { ...n, status: 'check' };
+        noteTimes.set(down, t);
+        return down;
+      });
+      if (changed && done.has(id)) emitLineDone(id, at);
+    }
+  }
+
   function resetFrom(idx: number): void {
     for (const id of lineOrder) {
       if (lineLast.get(id)! < idx) continue;
@@ -199,6 +240,8 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
         attach = w.lineId;
         maxE = Math.max(maxE, op.e);
         if (op.kind === 'match') {
+          const mark = markOf.get(H[op.h]!);
+          if (mark) mark.matched = true;
           st.resolution.set(op.e, 'matched');
           recentMatched = [...recentMatched, w].slice(-3);
           started = true;
@@ -212,19 +255,27 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
         if (attach) lines.get(attach)?.heard.push(H[op.h]!);
       }
     }
-    for (const note of notes) {
+    const pendingAfter = maxH >= 0 ? H.length - (maxH + 1) : H.length;
+    const spans = offScriptSpans(marks.slice(0, Math.max(0, marks.length - pendingAfter)));
+    for (const raw of notes) {
+      const m = meta.get(raw)!;
+      const toks = abs.slice(m.from, m.to + 1).filter(hasH).map((o) => H[o.h]!);
+      const time: [number, number] | null = toks.length ? [toks[0]!.start, toks.at(-1)!.end] : null;
+      const offScript = time !== null && insideAny(spans, time[0], time[1]);
+      const note: NoteDraft = offScript && raw.status === 'note' ? { ...raw, status: 'check' } : raw;
+      if (time) noteTimes.set(note, time);
       lines.get(note.lineId)?.notes.push(note);
       // Lenient mode forgives word-level slips once the line is mostly right, which is only known at line end,
       // so a live alert for a word-level note could never be retracted: leave those to the finalized line notes.
-      const m = meta.get(note)!;
       const deferredToLineEnd = options.strictness.mode === 'lenient' && WORD_LEVEL_CATEGORIES.has(note.category);
-      const eligible = !m.quiet && !deferredToLineEnd && note.status === 'note' && note.confidence >= options.alertMinConfidence;
+      const eligible = !offScript && !m.quiet && !deferredToLineEnd && note.status === 'note' && note.confidence >= options.alertMinConfidence;
       const after = abs.slice(m.to + 1).filter(isMatch).slice(0, ANCHOR_WORDS).map((o) => o.e);
       const anchored = anchoredBefore(abs, m.from, before, note.lineId) || consecutive(after);
       emit({ type: 'flag', note, alert: eligible && anchored, at });
       if (eligible && !anchored) waiting.push({ note, afterIdx: regionEnd(abs, m.from, m.to) });
     }
     for (const s of stumbles) emit({ type: 'stumble', idx: s.idx, heard: s.heard, at });
+    downgradeOffScript(spans, at);
     releaseWaiting(at);
     if (maxH >= 0) {
       lastCommittedHeardEnd = H[maxH]!.end;
@@ -357,21 +408,27 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
       return;
     }
     if (lost) {
-      H.push(tok);
-      if (H.length > LOST_BUFFER) H.shift();
+      pushLost(tok);
       tryReanchor(tok.end);
       return;
     }
     for (const piece of split(tok) ?? [tok]) {
       if (lost) {
-        H.push(piece);
+        pushLost(piece);
         tryReanchor(piece.end);
         continue;
       }
       const last = H.at(-1);
       const joined = last ? rejoin(last, piece) : null;
-      if (joined) H[H.length - 1] = joined;
-      else H.push(piece);
+      if (joined) {
+        const mark = markOf.get(last!)!;
+        mark.end = joined.end;
+        markOf.set(joined, mark);
+        H[H.length - 1] = joined;
+      } else {
+        H.push(piece);
+        track(piece);
+      }
       step(piece.end, false);
     }
   }

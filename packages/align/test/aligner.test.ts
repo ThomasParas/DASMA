@@ -386,3 +386,23 @@ describe('aligner: anchored alerts (pass spec §6.1)', () => {
     expect(r.flags.filter((f) => f.note.lineId === 'L3').map((f) => f.alert)).toEqual([false, true]);
   });
 });
+
+describe('aligner: off-script talk (pass spec §6.2)', () => {
+  it('a chatter tail attached to the end of a line is a check, not a note', () => {
+    const text = `${perf('L1', 'L2', 'L3')} okay hold on can we play that again from just before the entrance please | ${perf('L4', 'L5')}`;
+    for (const patience of [0, 0.5]) {
+      const r = runScenario(EARNEST, heard(text), { patience });
+      expect(r.lineNotes.filter((n) => n.status === 'note'), `patience ${patience}`).toEqual([]);
+      expect(r.flags.filter((f) => f.alert), `patience ${patience}`).toEqual([]);
+    }
+  });
+
+  // Guard (passes before and after): an actor's aside followed by a restart of the line produces no notes.
+  it('an aside and restart produce no notes', () => {
+    const text = `${perf('L1', 'L2')} I'm sorry for that, wait, sorry, let me go again. ${perf('L3', 'L4', 'L5')}`;
+    for (const patience of [0, 0.5]) {
+      const r = runScenario(EARNEST, heard(text), { patience });
+      expect(r.lineNotes.filter((n) => n.status === 'note'), `patience ${patience}`).toEqual([]);
+    }
+  });
+});
