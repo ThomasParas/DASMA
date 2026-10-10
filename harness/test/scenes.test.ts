@@ -25,6 +25,7 @@ describe('scenes', () => {
       lines: counts.flatMap(([c, n]) => Array.from({ length: n }, (_, k) => ({ id: `${c}${k}`, character: c, text: 'a b c' }))),
     });
     expect(soloCharacters(mk([['BEA', 3], ['ANN', 4], ['CY', 5]]))).toEqual(['ANN', 'CY']);
+    expect(soloCharacters(mk([['ZOE', 4], ['ANN', 5]]))).toEqual(['ZOE', 'ANN']);
     expect(soloCharacters(loadScenes(['earnest-act1'])[0]!)).toEqual(['ALGERNON', 'LANE']);
     expect(soloCharacters(loadScenes(['earnest-act1-cigarette'])[0]!)).toEqual(['ALGERNON', 'JACK']);
   });
