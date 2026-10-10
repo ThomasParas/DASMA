@@ -33,4 +33,18 @@ describe('TrigramIndex', () => {
   it('returns nothing for an unknown phrase', () => {
     expect(index.find(toks('the question mark'), 0, MATCH_THRESHOLD)).toEqual([]);
   });
+  it('finds a sound-alike (homophone) phrase', () => {
+    const idx = new TrigramIndex(buildExpected([{ id: 'B', characterId: 'X', text: 'the knight rode home' }], WP));
+    expect(idx.find(toks('the night rode'), 0, MATCH_THRESHOLD)).toEqual([0]);
+  });
+  it('finds a phrase that matches only through a secondary phonetic key', () => {
+    // smith = SM0|XMT, schmidt = XMT|SMT: smith's secondary key matches schmidt's primary key only.
+    const idx = new TrigramIndex(buildExpected([{ id: 'C', characterId: 'X', text: 'ask mister schmidt now' }], WP));
+    expect(idx.find(toks('mister smith now'), 0, MATCH_THRESHOLD)).toEqual([1]);
+  });
+  it('rejects a key collision that scores below the threshold', () => {
+    // in / on share phonetic key AN, but short words score only 0.6 (fuzzy ceiling).
+    const idx = new TrigramIndex(buildExpected([{ id: 'D', characterId: 'X', text: 'go in the house' }], WP));
+    expect(idx.find(toks('go on the'), 0, MATCH_THRESHOLD)).toEqual([]);
+  });
 });
