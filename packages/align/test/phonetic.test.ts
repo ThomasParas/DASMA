@@ -24,6 +24,17 @@ describe('wordScore', () => {
     expect(wordScore(w('sur'), w('sir'))).toBe(0.9);
     expect(wordScore(w('there'), w('their'))).toBe(0.9);
   });
+  it('needs the letters to broadly agree too: sorry is not a sound-alike of sir', () => {
+    expect(wordScore(w('sorry'), w('sir'))).toBeLessThan(MATCH_THRESHOLD);
+    expect(wordScore(w('sir'), w('sorry'))).toBeLessThan(MATCH_THRESHOLD);
+    expect(wordScore(w('sore'), w('sir'))).toBeLessThan(MATCH_THRESHOLD);
+  });
+
+  it('still accepts true homophones and near spellings', () => {
+    for (const [a, b] of [['night', 'knight'], ['there', 'their'], ['sur', 'sir'], ['piece', 'peace']]) {
+      expect(wordScore(w(a!), w(b!)), `${a}/${b}`).toBe(0.9);
+    }
+  });
   it('does not treat short sound-alikes as matches (in/on)', () => {
     const s = wordScore(w('in'), w('on'));
     expect(s).toBeLessThan(MATCH_THRESHOLD);

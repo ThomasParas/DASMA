@@ -106,6 +106,11 @@ describe('aligner: clean runs', () => {
 });
 
 describe('aligner: line errors', () => {
+  it('"Yes, sorry" for "Yes, sir" is a wrong word, not a sound-alike match', () => {
+    const r = runScenario(EARNEST, heard(`${perf('L1', 'L2', 'L3', 'L4')} Yes, sorry.`), P0);
+    expect(r.lineNotes).toEqual([expect.objectContaining({ lineId: 'L5', category: 'wrong-words', expected: 'sir', heard: 'sorry', status: 'note' })]);
+  });
+
   it.each([0, 0.5, 1])('wrong word (patience %s)', (patience) => {
     const r = runScenario(EARNEST, heard(WITH_FEELING), { patience });
     expect(r.lineNotes).toEqual([

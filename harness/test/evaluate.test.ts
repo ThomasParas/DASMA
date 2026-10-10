@@ -25,7 +25,7 @@ describe('evaluate (end to end, perfect recognizer)', () => {
     expect(runs).toHaveLength(6);
     expect(runs.every((r) => r.condition === 'director-close-mic' && r.mode === 'director' && r.character === null)).toBe(true);
     expect(agg.errorLabels).toBeGreaterThan(10);
-    // Sound-alike errors (pass spec §4.5) count in core recall; today's engine accepts sir/sore etc. as matches — restored to 0.7 by the letter-agreement guard (Task 8).
+    // Measured 7/11 = 0.636 (same before and after the Task 8 letter guard): 0.7 is not reached; restored by Task 9 (per-pair similarity downgrade). Misses: sir→sore (E5, now a 'check' not a note), 1 sound-alike wrong word with no note (R1), dropped-words 'not, be but' (R2, 'check' only), speak→sneak (R3, 'check' only).
     expect(agg.coreRecall!).toBeGreaterThanOrEqual(0.6);
     expect(agg.recallInclChecks!).toBeGreaterThanOrEqual(0.8);
     // Fair counting (pass spec §4.4): planted paraphrases that don't collapse into one paraphrase note leave extra word-level notes/alerts, which now count as false.

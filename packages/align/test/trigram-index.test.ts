@@ -38,9 +38,9 @@ describe('TrigramIndex', () => {
     expect(idx.find(toks('the night rode'), 0, MATCH_THRESHOLD)).toEqual([0]);
   });
   it('finds a phrase that matches only through a secondary phonetic key', () => {
-    // smith = SM0|XMT, schmidt = XMT|SMT: smith's secondary key matches schmidt's primary key only.
-    const idx = new TrigramIndex(buildExpected([{ id: 'C', characterId: 'X', text: 'ask mister schmidt now' }], WP));
-    expect(idx.find(toks('mister smith now'), 0, MATCH_THRESHOLD)).toEqual([1]);
+    // gill = KL|JL, jill = JL|AL: gill's secondary key matches jill's primary key only, and the spellings are close (1 edit in 4 letters).
+    const idx = new TrigramIndex(buildExpected([{ id: 'C', characterId: 'X', text: 'ask mister jill now' }], WP));
+    expect(idx.find(toks('mister gill now'), 0, MATCH_THRESHOLD)).toEqual([1]);
   });
   it('rejects a key collision that scores below the threshold', () => {
     // in / on share phonetic key AN, but short words score only 0.6 (fuzzy ceiling).
