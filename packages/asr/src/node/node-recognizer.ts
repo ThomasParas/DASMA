@@ -79,6 +79,12 @@ export class NodeSherpaRecognizer implements Recognizer<ResolvedAsrModel> {
     return this.fedSec > 0 ? this.procMs / 1000 / this.fedSec : 0;
   }
 
+  /**
+   * sherpa-onnx-node (1.13.x) exposes no explicit free: each recognizer/stream handle is an N-API
+   * external whose finalizer calls SherpaOnnxDestroyOnlineRecognizer / SherpaOnnxDestroyOnlineStream.
+   * Dropping our references is therefore what releases native memory (on the next GC). The same
+   * applies to the stream replaced by reset() and the recognizer replaced by a second load().
+   */
   dispose(): void {
     this.listeners.clear();
     this.stream = undefined;
