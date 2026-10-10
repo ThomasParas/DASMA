@@ -1,4 +1,4 @@
-import { mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -65,5 +65,23 @@ describe('cachedTts', () => {
     expect(inner.calls).toBe(2);
     expect(out.samples.length).toBe(4);
     expect(readdirSync(dir)).toHaveLength(1);
+  });
+
+  it('re-renders a cache file truncated on a sample boundary', () => {
+    const dir = tmp();
+    const inner = counting();
+    const tts = cachedTts(inner, dir, 'model-a');
+    const full = tts.synth('Line', 3, 1);
+    const files = readdirSync(dir);
+    expect(files).toHaveLength(1);
+    const file = join(dir, files[0]!);
+    const bytes = readFileSync(file);
+    writeFileSync(file, bytes.subarray(0, bytes.length - 4));
+    const out = tts.synth('Line', 3, 1);
+    expect(inner.calls).toBe(2);
+    expect(out.samples.length).toBe(full.samples.length);
+    expect(out.sampleRate).toBe(22050);
+    expect(tts.synth('Line', 3, 1).samples.length).toBe(full.samples.length);
+    expect(inner.calls).toBe(2);
   });
 });

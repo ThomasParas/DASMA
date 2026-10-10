@@ -9,20 +9,27 @@ export function cacheKey(modelId: string, sid: number, speed: number, text: stri
   return createHash('sha256').update(JSON.stringify([modelId, sid, speed, text])).digest('hex');
 }
 
-/** File layout: uint32 LE sample rate, then float32 LE samples. */
+/**
+ * File layout: uint32 LE sample rate, uint32 LE sample count, then native-endian float32 samples
+ * (little-endian on supported hosts).
+ */
+const HEADER_BYTES = 8;
+
 function encode(a: Audio): Buffer {
-  const buf = Buffer.alloc(4 + a.samples.length * 4);
+  const buf = Buffer.alloc(HEADER_BYTES + a.samples.length * 4);
   buf.writeUInt32LE(a.sampleRate, 0);
-  Buffer.from(a.samples.buffer, a.samples.byteOffset, a.samples.byteLength).copy(buf, 4);
+  buf.writeUInt32LE(a.samples.length, 4);
+  Buffer.from(a.samples.buffer, a.samples.byteOffset, a.samples.byteLength).copy(buf, HEADER_BYTES);
   return buf;
 }
 
 function decode(buf: Buffer): Audio | null {
-  if (buf.length < 4 || (buf.length - 4) % 4 !== 0) return null;
+  if (buf.length < HEADER_BYTES) return null;
   const sampleRate = buf.readUInt32LE(0);
-  if (sampleRate === 0) return null;
+  const count = buf.readUInt32LE(4);
+  if (sampleRate === 0 || buf.length !== HEADER_BYTES + count * 4) return null;
   // slice() copies into a fresh, 4-byte-aligned ArrayBuffer.
-  const samples = new Float32Array(buf.buffer.slice(buf.byteOffset + 4, buf.byteOffset + buf.length));
+  const samples = new Float32Array(buf.buffer.slice(buf.byteOffset + HEADER_BYTES, buf.byteOffset + buf.length));
   return { samples, sampleRate };
 }
 
