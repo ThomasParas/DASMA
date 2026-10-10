@@ -12,7 +12,16 @@ describe('tokensToWords', () => {
   });
 
   it('handles a bare space token and the ▁ marker', () => {
-    expect(tokensToWords([' ', 'LESS', '▁WITH'], [1, 1.1, 1.3], 0).map((w) => w.text)).toEqual(['LESS', 'WITH']);
+    const words = tokensToWords([' ', 'LESS', '▁WITH'], [1, 1.1, 1.3], 0);
+    expect(words.map((w) => w.text)).toEqual(['LESS', 'WITH']);
+    expect(words[0]!.start).toBeCloseTo(1.1);
+    expect(words[1]!.start).toBeCloseTo(1.3);
+  });
+
+  it('counts only text-bearing tokens toward a word confidence', () => {
+    const [w] = tokensToWords([' ', 'HI'], [0, 0.5], 0, [Math.log(0.1), Math.log(0.5)]);
+    expect(w!.text).toBe('HI');
+    expect(w!.confidence).toBeCloseTo(0.5);
   });
 
   it('turns log-probabilities into a confidence', () => {
