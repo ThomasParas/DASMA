@@ -51,6 +51,10 @@ describe.skipIf(!present)('NodeSherpaRecognizer (needs `npm run harness -- fetch
     const silence = { samples: new Float32Array(wave.sampleRate * 3), sampleRate: wave.sampleRate };
     const { words } = await transcribe([wave, silence, wave]);
     const last = words.at(-1)!;
+    expect(words.some((w) => w.start < dur)).toBe(true);
+    expect(words.some((w) => w.start > dur + 2)).toBe(true);
+    const second = words.find((w) => w.start > dur + 2)!;
+    expect(second.start).toBeLessThan(dur + 3 + 1.0);
     expect(last.start).toBeGreaterThan(dur + 3);
     expect(last.start).toBeLessThan(2 * dur + 3 + 0.5);
   });

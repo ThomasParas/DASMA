@@ -89,7 +89,9 @@ export class NodeSherpaRecognizer implements Recognizer<ResolvedAsrModel> {
     const { rec, stream } = this.ready();
     const r = rec.getResult(stream);
     const timestamps = typeof r.timestamps === 'string' ? (JSON.parse(r.timestamps) as number[]) : (r.timestamps ?? []);
-    const words = tokensToWords(r.tokens ?? [], timestamps, this.segmentStart, Array.isArray(r.ys_probs) ? r.ys_probs : undefined);
+    // Token timestamps are relative to sherpa's own segment start, which lags the feed (chunk + right context).
+    const offset = typeof r.start_time === 'number' ? r.start_time : this.segmentStart;
+    const words = tokensToWords(r.tokens ?? [], timestamps, offset, Array.isArray(r.ys_probs) ? r.ys_probs : undefined);
     const fresh = this.stabilizer.update(words, endpoint);
     if (endpoint) {
       rec.reset(stream);

@@ -12,6 +12,8 @@ export interface SherpaOnlineResult {
   tokens?: string[];
   timestamps?: number[] | string;
   ys_probs?: number[];
+  /** Sherpa's own segment start (s); token timestamps are relative to it. */
+  start_time?: number;
 }
 export interface SherpaOnlineRecognizer {
   createStream(): SherpaOnlineStream;
