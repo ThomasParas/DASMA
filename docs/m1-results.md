@@ -130,7 +130,7 @@ The regression gate tolerates −0.03 core recall and +0.2 false alerts/run. The
 
 ## Engine calibration findings
 
-Evidence comes from `harness/out/*/runs.json` (not committed; regenerate with the commands above) plus direct traces of single runs. No engine constants were changed in this task.
+Evidence comes from `harness/out/*/runs.json`, which is git-ignored and regenerated with the commands in "Reproducing these results" below, plus traces of single runs (`harness/scripts/trace-run.ts`). No engine constants were changed in this task.
 
 ### 1. Double-metaphone sound-alikes are too coarse ("sir" ≈ "sorry")
 
@@ -142,13 +142,17 @@ Evidence comes from `harness/out/*/runs.json` (not committed; regenerate with th
 ### 2. `SIMILAR_SUB_SCORE` 0.3 sits exactly on the recognizer-mishearing distribution
 
 - Property test ("still detects planted wrong words through 10% noise"): 90/100 detected. **7 of the 10 misses** are pairs scoring 0.30–0.48 that get the 0.6 factor: 0.85 × 0.6 × 0.95 = **0.485**, just under `noteMinConfidence` 0.5. The pairs: invariably→umbrella 0.30, observed→yoghurt 0.30, pint→biscuit 0.30, bottles→pickle 0.30, bottles→kettle 0.30, entered→lantern 0.36, accurately→yoghurt 0.48. (banana→nine also scores 0.40.) The other 3 misses are alignment splits, e.g. "accurately"→"a" plus added "volcano".
-- Real harness: **0 of the 7** close-mic wrong-words misses were caused by this (all planted pairs score ≤ 0.24; see finding 3). But the recognizer's own mishearings cluster in exactly that band. Of 78 single-word false-check substitutions in close-mic, 70 score ≥ 0.3 (25 at 0.30, 26 at 0.40). Removing the 0.6 downgrade would turn 16 of them into false notes (0.8/run, about 6.5/10 min). Raising the cut to 0.45 would add 14. In far-field it would add 29 (1.45/run).
+- Real harness: the planted pairs themselves all score ≤ 0.24, but the downgrade is applied to a whole **group** of adjacent substitutions on a line. If any one pair in the group is "similar", every word in it gets the 0.6 factor. That caused **2 of the 7** close-mic wrong-words misses and contributed to a third. "I don't"→"a dreadful" scored 0.401 because the misheard function word "I"→"a" scores 0.60; without the factor it would be 0.67, a note. "What man"→"dinner may" scored 0.371 because "man"→"may" scores 0.30; without the factor it would be 0.62. "I don't"→"a sister" was 0.25, which would be 0.42 without the factor, still a check. The recognizer's own mishearings also cluster in the 0.30–0.48 band. Of 78 single-word false-check substitutions in close-mic, 70 score ≥ 0.3 (25 at 0.30, 26 at 0.40). Removing the 0.6 downgrade would turn 16 of them into false notes (0.8/run, about 6.5/10 min). Raising the cut to 0.45 would add 14. In far-field it would add 29 (1.45/run).
 - So the threshold is not "loose" in the sense of being cheap to tighten. The metaphone-Levenshtein × 0.6 score is too coarse to separate (in these runs it took only a handful of values, mostly 0, 0.2, 0.24, 0.3, 0.4, 0.45, 0.48, 0.6, with 0.30 and 0.40 the most common) "piano"/"piao" (a mishearing) from "observed"/"yoghurt" (a real error).
-- **Proposed:** replace the key-Levenshtein with a phoneme-level similarity (CMUdict lookup with a g2p fallback). Make the downgrade conditional: similar **and** low heard confidence → check; similar but confident (≥ 0.8) → note. Re-run both the property test and the harness.
+- **Proposed:** apply the similarity factor **per word pair**, not per group, so a misheard function word can't downgrade a neighbouring real substitution. Replace the key-Levenshtein with a phoneme-level similarity (CMUdict lookup with a g2p fallback). Make the downgrade conditional: similar **and** low heard confidence → check; similar but confident (≥ 0.8) → note. Re-run both the property test and the harness.
 
-### 3. Heard-token confidence suppresses genuine wrong words (the main wrong-words recall loss)
+### 3. Heard-token confidence suppresses genuine wrong words (the largest single cause of wrong-words recall loss)
 
-- Close-mic wrong-words recall is 0.50 (7/14 notes), but recall including checks is 1.0. All 7 misses are **dissimilar** substitutions (score 0.00–0.24, so no 0.6 factor). They drop below 0.5 because the heard words' mean token probability is 0.27–0.54: "what"→"money" 0.46, "Shall"→"letter" 0.247, "don't"→"sister" 0.25, "What"→"dinner" 0.371, "wherefore"→"kridge" 0.227, "don't"→"dreadful" 0.401, plus one paraphrase at 0.487.
+- Close-mic wrong-words recall is 0.50 (7/14 notes), but recall including checks is 1.0. The 7 misses break down as follows:
+  - **3 are low heard confidence alone.** No pair in the group is similar, and the implied mean heard-token probability is 0.27–0.54: "what"→"money" 0.46 (heard confidence 0.54), "Shall"→"letter" 0.247 (0.29), "wherefore"→"kridge" 0.227 (0.27).
+  - **2 are the group similarity factor alone** (finding 2).
+  - **1 has both causes:** "I don't"→"a sister" 0.25, heard confidence 0.49, and it would still be a check (0.42) without the factor.
+  - **1 is a whole-line paraphrase check** at 0.487. Each note's score and implied confidence is printed by `harness/scripts/label-outcomes.ts`.
 - The transducer's prediction network gives low posteriors to words that are unlikely in context. A planted (or real) wrong word is exactly that, so the evidence is penalized precisely when it matters. Detected substitutions had implied confidences of 0.63–0.87.
 - **Proposed:** stop multiplying wrong-words confidence by raw token probability. Use e.g. `c *= 0.6 + 0.4·conf`, or compare against the line's median heard confidence, and keep the full penalty only for function words.
 
@@ -177,7 +181,7 @@ Evidence comes from `harness/out/*/runs.json` (not committed; regenerate with th
 ### Recognizer findings
 
 - **Latency:** at p=0, real ASR gives p50 1.09 s against 0.45 s for the oracle. The recognizer path (zipformer chunking plus `Stabilizer(2)`) adds about 0.64 s. **Proposed:** use a stabilizer depth of 1 for the alert path (keeping depth 2 for notes), or a model with smaller chunks.
-- **`start_time` (verified):** sherpa-onnx-node 1.13.8's `start_time` is stream-absolute, and token timestamps are relative to it. In a raw probe (wave, 3 s silence, wave), the second copy's first token came out at 9.92 + 0.36 = 10.28 s, against 10.27 s expected from the first copy. The continuity integration test passes with the current `collect`, so no code change was needed; the comment now records this.
+- **`start_time` (verified):** sherpa-onnx-node 1.13.8's `start_time` is stream-absolute, and token timestamps are relative to it. The raw probe fed wave, 3 s silence, wave, 3 s silence, wave (6.63 s each, so copies start at 0, 9.63 and 19.25 s). The first copy's first token is at 0 + 0.64 s. The second copy arrived as the third endpoint (the second endpoint was an empty silence segment): 9.92 + 0.36 = 10.28 s, against 9.63 + 0.64 = 10.27 s expected. The third copy (final result): 19.52 + 0.36 = 19.88 s, against 19.89 s expected. The continuity integration test passes with the current `collect`, so no code change was needed; the comment now records this.
 - **Fixed in this task (`1aff518`):** `flush()` padded with 16 kHz silence after 22.05 kHz input, and sherpa aborts the process (exit 255) when a stream changes rate. The first smoke run crashed on this. A new integration test covers it.
 
 ### Harness findings
@@ -187,11 +191,40 @@ Evidence comes from `harness/out/*/runs.json` (not committed; regenerate with th
 - Per-scene far-field targets on 1.2-minute scenes are about 8× looser than the close-mic per-10-min targets. **Proposed:** report both, and use longer scenes.
 - Latency is measured from an interpolated label time (word position ÷ segment length), so p50/p95 carry ±0.2–0.3 s of measurement error.
 
+## Reproducing these results
+
+All commands run from the repo root after `npm run harness -- fetch-models` (the hashes are pinned in `harness/models.lock.json`). Outputs go to the git-ignored `harness/out/`. **The TTS is not deterministic, so re-running gives numbers within the run-to-run noise shown above, not identical numbers.** The committed `harness/baselines/baseline.json` is the exact m1-default `report.json` behind the tables. The analysis scripts in `harness/scripts/` are deterministic given a `runs.json`.
+
+| Table / claim                                                                                                   | Command                                                                                                                                                                                       |
+| --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Smoke run                                                                                                       | `npm run harness -- evaluate --scenes earnest-act1 --seeds 1 --rooms close-mic,far-field --save-audio --out harness/out/smoke`                                                                |
+| Close mic p=0.5, far field, far field (hard), detection by category                                             | `npm run harness -- evaluate --seeds 10 --rooms close-mic,far-field,far-field-hard --out harness/out/m1-default`                                                                              |
+| Close mic p=0                                                                                                   | `npm run harness -- evaluate --seeds 10 --rooms close-mic --patience 0 --out harness/out/m1-instant`                                                                                          |
+| Light model                                                                                                     | `npm run harness -- evaluate --seeds 10 --rooms close-mic,far-field --model zipformer-en-20M-2023-02-17 --out harness/out/m1-light`                                                           |
+| Patience 1 (all rooms)                                                                                          | `npm run harness -- evaluate --seeds 10 --rooms close-mic,far-field,far-field-hard --patience 1 --out harness/out/m1-patience1`                                                               |
+| Run-to-run noise                                                                                                | `npm run harness -- evaluate --seeds 10 --rooms close-mic,far-field --out harness/out/m1-default-repeat`, then `npm run harness -- gate --report harness/out/m1-default-repeat/report.json`   |
+| Engine alone (oracle) p=0.5 / p=0                                                                               | `npx tsx harness/scripts/oracle-eval.ts --out harness/out/m1-oracle` and `npx tsx harness/scripts/oracle-eval.ts --patience 0 --out harness/out/m1-oracle-instant`                            |
+| Baseline and gate                                                                                               | `npm run harness -- baseline --report harness/out/m1-default/report.json`, then `npm run harness -- gate --report harness/out/m1-default/report.json`                                         |
+| "Where false notes come from" (Step 5 table)                                                                    | the `node -e` snippet in the Task 19 brief, Step 5, run on `harness/out/m1-default/runs.json`                                                                                                 |
+| Cause attribution table; chatter counts (findings 4–5)                                                          | `npx tsx harness/scripts/false-note-causes.ts harness/out/m1-default/runs.json [-v]` (and on `m1-oracle`, `m1-oracle-instant`, `m1-instant` runs.json for the oracle and patience-0 examples) |
+| Wrong-words misses, scores and implied confidences (findings 2–3)                                               | `npx tsx harness/scripts/label-outcomes.ts harness/out/m1-default/runs.json [--misses]`                                                                                                       |
+| Similarity what-if counts (finding 2)                                                                           | `npx tsx harness/scripts/similarity-whatif.ts harness/out/m1-default/runs.json`                                                                                                               |
+| Word-pair scores, SUBSTITUTES distances, property-test misses (findings 1–2)                                    | `npx tsx harness/scripts/word-scores.ts`                                                                                                                                                      |
+| Single-run traces: oracle earnest #3 (sir/sorry), oracle earnest #6 (4 chatter alerts), ASR romeo #4 ("norhan") | `npx tsx harness/scripts/trace-run.ts earnest-act1 3 close-mic oracle`, `… earnest-act1 6 close-mic oracle`, `… romeo-balcony 4 close-mic asr`                                                |
+| `start_time` probe                                                                                              | `npx tsx harness/scripts/start-time-probe.ts`                                                                                                                                                 |
+| TTS nondeterminism                                                                                              | `npx tsx harness/scripts/tts-determinism.ts`                                                                                                                                                  |
+
+Not reproducible exactly from the repo:
+
+- **ASR single-run traces.** The "norhan" partial in romeo #4 came from one particular TTS rendering, and other renderings of that seed give different word timings. The oracle traces do reproduce, with the same flags at slightly shifted times.
+- **Smoke-WAV level and transcript checks.** These were done once on `harness/out/smoke/*.wav` with a throwaway script and are described in the Task 19 report.
+
 ## Recommendation
 
-**GO WITH ENGINE CHANGES**, applied strictly and with the failures stated plainly:
+**None of the brief's three outcomes matches these results exactly. The nearest fit is GO WITH ENGINE CHANGES, and the close-mic results are currently a FAIL on every target.**
 
-- **Not GO.** Close-mic misses all four targets at the default patience (3.66 false alerts and 9.35 false notes per 10 min, recall 0.80, latency 1.26 s). This is worse than the GO-WITH-ENGINE-CHANGES precondition ("one side met") at the default setting. The light model and patience 0 meet recall but not the false-alarm targets (the "vice versa" case).
+- **Close mic FAILS every target** at the default patience: 3.66 false alerts and 9.35 false notes per 10 min, recall 0.80, latency 1.26 s. GO needs all of them met. GO WITH ENGINE CHANGES assumes one side (false alarms or recall) is already met, and at the default setting neither is. Only the light model and patience 0 meet recall, and both miss the false-alarm targets by a wide margin.
+- **Why GO WITH ENGINE CHANGES is still the nearest fit:** the spec's far-field room passes its per-scene targets, and the oracle runs show that the main causes are on the engine side and named below, rather than a hard limit of single-laptop audio.
 - **SINGLE-LAPTOP NO-GO is not triggered** for the spec's far-field room. It is within the per-scene budget at patience 0.5 (1.00 / 1.85) and at patience 1 (0.80 / 1.50), with recall 0.85–0.93. It **is** triggered by far-field-hard (3.80 alerts and 4.05 notes per scene even at patience 1). Far-field also passes only because the test scenes last 1.2 minutes (8.1 alerts and 15.0 notes per 10 min).
 - Per-actor audio would not fix this on its own. Close-mic, the per-actor proxy, fails, and the oracle runs show that much of the failure is the engine: chatter handling, deletion confidence, patience-0 commits. The recognizer's share is deletions and latency.
 
@@ -201,10 +234,12 @@ Engine changes to make, in order of expected impact, followed by a re-run of thi
 2. Alerts only after a line is anchored, and off-script-run detection for chatter (finding 5).
 3. Confirmation floor and lookahead check at patience 0 (finding 6).
 4. Soften the heard-confidence penalty for content-word substitutions (finding 3).
-5. Letter-agreement guard on sound-alike matches (finding 1), and phoneme-level similarity with a confidence-conditional downgrade (finding 2).
+5. Letter-agreement guard on sound-alike matches (finding 1). Apply the similarity factor per word pair instead of per group, and switch to phoneme-level similarity with a confidence-conditional downgrade (finding 2).
 6. Compound and abbreviation normalization (finding 7).
 7. Harness: deterministic audio, flags and transcripts in `runs.json`, sound-alike substitutions, longer scenes.
 
-M2 (script import) does not depend on these engine defaults and can proceed in parallel if the user agrees. M3 (live solo mode) should not start until close-mic meets its targets on the re-run.
+M2 (script import) does not depend on these engine defaults and can proceed in parallel if the user agrees. **M3 (live solo mode) is gated on close-mic passing all four targets on that re-run.**
+
+The committed baseline (`harness/baselines/baseline.json`, copied from m1-default) pins results that **fail 7 of the 10 spec targets**: all 4 close-mic targets and all 3 far-field-hard targets. It is a regression reference for the gate, not an acceptable state.
 
 Next data needed: real rehearsal recordings (D21) run through `harness` in the same report format.
