@@ -1,14 +1,13 @@
-import type { Strictness } from '@dasma/align';
 import { findModel } from '@dasma/asr';
 import { NodeSherpaRecognizer, loadSherpa, resolveAsrModel } from '@dasma/asr/node';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve, sep } from 'node:path';
 import { parseArgs } from 'node:util';
+import { parseEvaluateOptions } from './cli-args';
 import { evaluate } from './evaluate';
 import { compareToBaseline, formatReport, type EvalReport } from './metrics';
 import { fetchModels } from './models';
 import { BASELINE_FILE, MODELS_DIR, OUT_DIR } from './paths';
-import { ROOM_PRESETS, type RoomName } from './room';
 import { createSherpaTts } from './tts';
 
 const USAGE = `Usage: npm run harness -- <command> [options]
@@ -18,7 +17,7 @@ const USAGE = `Usage: npm run harness -- <command> [options]
                                               --record (maintainers only) pins hashes for models not yet listed.
   evaluate [options]                          Generate labelled rehearsals, run the engine, score it
       --scenes all|<id,id>      default all
-      --seeds <n>               default 10
+      --seeds <n>               positive integer, default 10
       --rooms <a,b>             default close-mic,far-field   (also: far-field-hard)
       --model <id>              default zipformer-en-2023-06-21
       --patience <0..1>         default 0.5
@@ -48,10 +47,7 @@ async function runEvaluate(args: string[]): Promise<void> {
       'save-audio': { type: 'boolean', default: false },
     },
   });
-  const rooms = values.rooms.split(',') as RoomName[];
-  for (const r of rooms) if (!(r in ROOM_PRESETS)) throw new Error(`Unknown room "${r}". Known: ${Object.keys(ROOM_PRESETS).join(', ')}`);
-  const strictness: Strictness =
-    values.strictness === 'lenient' ? { mode: 'lenient', lineMatchThreshold: 0.8 } : { mode: 'word-perfect' };
+  const opts = parseEvaluateOptions(values);
   const out = values.out ? fromCwd(values.out) : join(OUT_DIR, new Date().toISOString().replace(/[:.]/g, '-'));
   mkdirSync(out, { recursive: true });
 
@@ -61,12 +57,12 @@ async function runEvaluate(args: string[]): Promise<void> {
   const { report, runs } = evaluate(
     {
       sceneIds: values.scenes === 'all' ? 'all' : values.scenes.split(','),
-      seeds: Number(values.seeds),
-      rooms,
-      patience: Number(values.patience),
-      strictness,
-      errorRate: Number(values['error-rate']),
-      benignRate: Number(values['benign-rate']),
+      seeds: opts.seeds,
+      rooms: opts.rooms,
+      patience: opts.patience,
+      strictness: opts.strictness,
+      errorRate: opts.errorRate,
+      benignRate: opts.benignRate,
       model: values.model,
     },
     {
