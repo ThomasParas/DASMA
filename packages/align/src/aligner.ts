@@ -1,4 +1,4 @@
-import { classifyOps } from './classify';
+import { WORD_LEVEL_CATEGORIES, classifyOps } from './classify';
 import { commitPoint, commitPointOnTimeout } from './commit';
 import { countCheckedWords, displayExpected, toHeardTokens } from './expected';
 import { finalizeLine, type LineState } from './finalize-line';
@@ -150,7 +150,10 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     }
     for (const note of notes) {
       lines.get(note.lineId)?.notes.push(note);
-      emit({ type: 'flag', note, alert: note.status === 'note' && note.confidence >= options.alertMinConfidence, at });
+      // Lenient mode forgives word-level slips once the line is mostly right, which is only known at line end,
+      // so a live alert for a word-level note could never be retracted: leave those to the finalized line notes.
+      const deferred = options.strictness.mode === 'lenient' && WORD_LEVEL_CATEGORIES.has(note.category);
+      emit({ type: 'flag', note, alert: !deferred && note.status === 'note' && note.confidence >= options.alertMinConfidence, at });
     }
     for (const s of stumbles) emit({ type: 'stumble', idx: s.idx, heard: s.heard, at });
     if (maxH >= 0) {

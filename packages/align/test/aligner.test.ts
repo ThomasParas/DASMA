@@ -184,6 +184,15 @@ describe('aligner: stumbles, calls, chatter, restarts', () => {
     expect(r.types).toContain('stumble');
   });
 
+  it.each([0, 0.5])('lenient mode: a single wrong word in a long line fires no live alert and no note (patience %s)', (patience) => {
+    const text = [perf('L1', 'L2', 'L3'), 'Anyone can play accurately, but I play with garden expression.', perf('L5')].join(' ');
+    const strict = runScenario(EARNEST, heard(text), { patience });
+    expect(strict.flags.some((f) => f.alert && f.note.category === 'wrong-words')).toBe(true);
+    const r = runScenario(EARNEST, heard(text), { patience, strictness: { mode: 'lenient', lineMatchThreshold: 0.8 } });
+    expect(r.flags.some((f) => f.alert)).toBe(false);
+    expect(r.lineNotes).toEqual([]);
+  });
+
   it('called for line', () => {
     const text = [perf('L1', 'L2'), "I'm sorry for that, for your sake. || Line! | I don't play accurately.", perf('L4', 'L5')].join(' ');
     const r = runScenario(EARNEST, heard(text), P0);
