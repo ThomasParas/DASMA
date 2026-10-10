@@ -406,3 +406,36 @@ describe('aligner: off-script talk (pass spec §6.2)', () => {
     }
   });
 });
+
+describe('aligner: backward jumps (pass spec §6.3)', () => {
+  const quoting = (quote: string) => `${perfLong('L1', 'L2', 'L3', 'L4', 'L5')} | Go back to ${quote} please | ${perfLong('L6', 'L7')}`;
+
+  it.each([0, 0.5])('a director quoting a finished line does not wipe it (M1 final-review probe, patience %s)', (patience) => {
+    const r = runScenario(LONG_SCENE, heard(quoting('what I was playing')), { patience });
+    expect(r.lineNotes.filter((n) => n.status === 'note')).toEqual([]);
+    expect(r.flags.filter((f) => f.alert)).toEqual([]);
+  });
+
+  // A 5-word quote does confirm a jump back (trigram + 2 words). Once the run moves on, the skipped lines get their
+  // earlier results back. Known residual, measured by the harness's quoting chatter: at Patience 0 the 0.4 s timeout can
+  // commit the trailing "please" as an added word on the quoted line before the run moves on.
+  it('a longer quote that confirms a jump back still restores the lines it skipped (patience 0.5)', () => {
+    const r = runScenario(LONG_SCENE, heard(quoting('what I was playing Lane')), { patience: 0.5 });
+    expect(r.lineNotes.filter((n) => n.status === 'note')).toEqual([]);
+    expect(r.flags.filter((f) => f.alert)).toEqual([]);
+  });
+
+  it('a real restart two lines back still re-runs those lines', () => {
+    const r = runScenario(LONG_SCENE, heard(perfLong('L1', 'L2', 'L3', 'L4', 'L2', 'L3', 'L4', 'L5', 'L6')), P0);
+    expect(r.lineNotes).toEqual([]);
+    expect(r.types).toContain('reanchored');
+  });
+
+  // Review Focus 3 (guard): the run ends right after a confirmed jump back; later lines keep their earlier results.
+  it('a confirmed jump back followed by the end of the run leaves no dropped lines', () => {
+    const r = runScenario(LONG_SCENE, heard(`${perfLong('L1', 'L2', 'L3', 'L4', 'L5')} | Did you hear what I was playing`), P0);
+    const final = new Map<string, unknown[]>();
+    for (const e of r.events) if (e.type === 'lineDone') final.set(e.lineId, e.notes);
+    for (const id of ['L2', 'L3', 'L4', 'L5']) expect(final.get(id), id).toEqual([]);
+  });
+});

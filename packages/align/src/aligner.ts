@@ -77,6 +77,17 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
   /** Alert-eligible notes waiting for the script position to be confirmed after them (pass spec §6.1). */
   let waiting: Array<{ note: NoteDraft; afterIdx: number }> = [];
 
+  interface LineSnapshot {
+    resolution: Map<number, 'matched' | 'sub' | 'del'>;
+    notes: NoteDraft[];
+    heard: HeardToken[];
+    /** The notes of the line's last lineDone, if it had finished before the jump. */
+    final: NoteDraft[] | null;
+  }
+  /** Lines reset by a backward jump that the redo has not reached yet (pass spec §6.3). */
+  const snapshots = new Map<string, LineSnapshot>();
+  const lastDone = new Map<string, NoteDraft[]>();
+
   /** Every heard token the aligner has taken in, in order; H is always a suffix of this list (pass spec §6.2). */
   const marks: HeardMark[] = [];
   const markOf = new Map<HeardToken, HeardMark>();
@@ -134,12 +145,27 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
 
   function emitLineDone(id: string, at: number): void {
     done.add(id);
+    const snap = snapshots.get(id);
+    if (snap) {
+      // A backward jump reset this line, but the redo never reached it: it keeps its earlier result.
+      snapshots.delete(id);
+      const st = lines.get(id)!;
+      st.resolution = new Map(snap.resolution);
+      st.notes = [...snap.notes];
+      st.heard = [...snap.heard];
+      if (snap.final) {
+        lastDone.set(id, snap.final);
+        emit({ type: 'lineDone', lineId: id, notes: snap.final, at });
+        return;
+      }
+    }
     const notes = finalizeLine(lines.get(id)!, {
       strictness: options.strictness,
       audioQuality,
       noteMin: options.noteMinConfidence,
       at,
     });
+    lastDone.set(id, notes);
     emit({ type: 'lineDone', lineId: id, notes, at });
   }
 
@@ -147,13 +173,18 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     for (const id of lineOrder) {
       if (done.has(id)) continue;
       const st = lines.get(id)!;
-      const reached = final ? st.resolution.size > 0 || st.notes.length > 0 : cursor >= lineLast.get(id)! + 2;
+      const reached = final ? st.resolution.size > 0 || st.notes.length > 0 || snapshots.has(id) : cursor >= lineLast.get(id)! + 2;
       if (reached) emitLineDone(id, at);
     }
   }
 
-  function markSkipped(from: number, to: number): void {
-    for (const id of lineOrder) if (lineFirst.get(id)! >= from && lineLast.get(id)! < to) done.add(id);
+  function markSkipped(from: number, to: number, at: number): void {
+    for (const id of lineOrder) {
+      if (lineFirst.get(id)! >= from && lineLast.get(id)! < to) {
+        if (snapshots.has(id)) emitLineDone(id, at);
+        else done.add(id);
+      }
+    }
   }
 
   /** Mid-line: the 3 matches right before the flagged ops are consecutive and the last is on the note's own line. */
@@ -204,6 +235,15 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     for (const id of lineOrder) {
       if (lineLast.get(id)! < idx) continue;
       const st = lines.get(id)!;
+      const touched = st.resolution.size > 0 || st.notes.length > 0;
+      if (touched && !snapshots.has(id)) {
+        snapshots.set(id, {
+          resolution: new Map(st.resolution),
+          notes: [...st.notes],
+          heard: [...st.heard],
+          final: done.has(id) ? (lastDone.get(id) ?? []) : null,
+        });
+      }
       st.resolution.clear();
       st.notes = [];
       st.heard = [];
@@ -240,6 +280,7 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
         attach = w.lineId;
         maxE = Math.max(maxE, op.e);
         if (op.kind === 'match') {
+          snapshots.delete(w.lineId);
           const mark = markOf.get(H[op.h]!);
           if (mark) mark.matched = true;
           st.resolution.set(op.e, 'matched');
@@ -259,6 +300,12 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     const spans = offScriptSpans(marks.slice(0, Math.max(0, marks.length - pendingAfter)));
     for (const raw of notes) {
       const m = meta.get(raw)!;
+      if (snapshots.has(raw.lineId)) continue;
+      // Pass spec §6.3: lines the redo never reached keep their earlier result, so a skip over them is not a jumped cue either.
+      if (raw.category === 'jumped-cue') {
+        const skipped = abs.slice(m.from, m.to + 1).filter(hasE).map((o) => expected[o.e]!.lineId);
+        if (skipped.length && skipped.every((id) => snapshots.has(id))) continue;
+      }
       const toks = abs.slice(m.from, m.to + 1).filter(hasH).map((o) => H[o.h]!);
       const time: [number, number] | null = toks.length ? [toks[0]!.start, toks.at(-1)!.end] : null;
       const offScript = time !== null && insideAny(spans, time[0], time[1]);
@@ -332,9 +379,9 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     }
     const c = index.find(H, cursor, MATCH_THRESHOLD)[0];
     if (c === undefined) return;
-    if (c > cursor) {
-      // A forward snap is only trusted once the words after the trigram match too; stray off-script
-      // talk that happens to echo three script words must not skip lines.
+    if (c !== cursor) {
+      // A jump either way is only trusted once the words after the trigram match too: a director quoting an earlier
+      // line, or stray talk echoing three script words, must not move the cursor (pass spec §6.3).
       const need = Math.min(FORWARD_CONFIRM_WORDS, expected.length - (c + ANCHOR_WORDS));
       if (need > 0) {
         pending = { c, confirmed: 0, need };
@@ -360,7 +407,7 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     }
     if (c > cursor) {
       emit({ type: 'notRun', fromIdx: cursor, toIdx: c, at });
-      markSkipped(cursor, c);
+      markSkipped(cursor, c, at);
     } else if (c < cursor) {
       resetFrom(c);
     }
@@ -464,7 +511,7 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
       const at = Number.isFinite(lastHeardEnd) ? lastHeardEnd : 0;
       if (target > cursor) {
         emit({ type: 'notRun', fromIdx: cursor, toIdx: target, at });
-        markSkipped(cursor, target);
+        markSkipped(cursor, target, at);
       } else if (target < cursor) {
         resetFrom(target);
       }
