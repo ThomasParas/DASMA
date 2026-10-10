@@ -10,15 +10,21 @@ const FLUSH_PAD_SEC = 0.8;
 
 export class NodeSherpaRecognizer implements Recognizer<ResolvedAsrModel> {
   readonly supportsHotwords = false;
+  private readonly stableSec: number | undefined;
   private rec: SherpaOnlineRecognizer | undefined;
   private stream: SherpaOnlineStream | undefined;
   private readonly listeners = new Set<(words: HeardWord[]) => void>();
-  private stabilizer = new Stabilizer(2);
+  private stabilizer: Stabilizer;
   private fedSec = 0;
   /** Rate of the last accepted chunk: sherpa aborts the process if one stream is fed two different rates. */
   private feedRate = SAMPLE_RATE;
   private segmentStart = 0;
   private procMs = 0;
+
+  constructor(opts: { stableSec?: number } = {}) {
+    this.stableSec = opts.stableSec;
+    this.stabilizer = new Stabilizer({ stableSec: this.stableSec });
+  }
 
   async load(model: ResolvedAsrModel): Promise<void> {
     this.rec = new (loadSherpa().OnlineRecognizer)({
@@ -42,7 +48,7 @@ export class NodeSherpaRecognizer implements Recognizer<ResolvedAsrModel> {
   reset(): void {
     if (!this.rec) throw new Error('NodeSherpaRecognizer: call load() first');
     this.stream = this.rec.createStream();
-    this.stabilizer = new Stabilizer(2);
+    this.stabilizer = new Stabilizer({ stableSec: this.stableSec });
     this.fedSec = 0;
     this.feedRate = SAMPLE_RATE;
     this.segmentStart = 0;
@@ -103,7 +109,7 @@ export class NodeSherpaRecognizer implements Recognizer<ResolvedAsrModel> {
     // token timestamps are relative to it. It lags the fed-sample clock slightly (chunk + right context).
     const offset = typeof r.start_time === 'number' ? r.start_time : this.segmentStart;
     const words = tokensToWords(r.tokens ?? [], timestamps, offset, Array.isArray(r.ys_probs) ? r.ys_probs : undefined);
-    const fresh = this.stabilizer.update(words, endpoint);
+    const fresh = this.stabilizer.update(words, endpoint, this.fedSec);
     if (endpoint) {
       rec.reset(stream);
       this.segmentStart = this.fedSec;

@@ -11,6 +11,7 @@ const base = {
   'error-rate': '0.35',
   'benign-rate': '0.2',
   'heard-floor': '0',
+  'stable-sec': '0.2',
 };
 const parse = (over: Partial<Record<keyof typeof base, string>> = {}) => parseEvaluateOptions({ ...base, ...over });
 
@@ -26,6 +27,7 @@ describe('parseEvaluateOptions', () => {
       errorRate: 0.35,
       benignRate: 0.2,
       heardConfidenceFloor: 0,
+      stableSec: 0.2,
     });
   });
 
@@ -45,6 +47,11 @@ describe('parseEvaluateOptions', () => {
     for (const bad of ['-0.1', '1.1', 'NaN', 'Infinity', 'abc', '', ' ']) {
       expect(() => parse({ [key]: bad }), `${key}=${JSON.stringify(bad)}`).toThrow(new RegExp(`--${key} must be a number from 0 to 1`));
     }
+  });
+
+  it('rejects a non-positive or too-large --stable-sec', () => {
+    for (const bad of ['0', '-0.1', '2.5', 'x', '']) expect(() => parse({ 'stable-sec': bad })).toThrow(/--stable-sec must be a number above 0 and at most 2/);
+    expect(parse({ 'stable-sec': '0.3' }).stableSec).toBe(0.3);
   });
 
   it('rejects an unknown room and names the known ones', () => {

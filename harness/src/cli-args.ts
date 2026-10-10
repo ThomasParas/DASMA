@@ -12,6 +12,7 @@ export interface EvaluateOptions {
   errorRate: number;
   benignRate: number;
   heardConfidenceFloor: number;
+  stableSec: number;
 }
 
 function unitInterval(name: string, raw: string): number {
@@ -31,6 +32,7 @@ export function parseEvaluateOptions(values: {
   'error-rate': string;
   'benign-rate': string;
   'heard-floor': string;
+  'stable-sec': string;
 }): EvaluateOptions {
   if (!/^\d+$/.test(values.seeds) || Number(values.seeds) < 1) throw new Error(`--seeds must be a positive integer, got "${values.seeds}"`);
   const modes = [...new Set(values.modes.split(',').map((m) => m.trim()).filter(Boolean))];
@@ -45,6 +47,10 @@ export function parseEvaluateOptions(values: {
   if (values.strictness !== 'word-perfect' && values.strictness !== 'lenient') {
     throw new Error(`--strictness must be word-perfect or lenient, got "${values.strictness}"`);
   }
+  const stableSec = values['stable-sec'].trim() === '' ? Number.NaN : Number(values['stable-sec']);
+  if (!Number.isFinite(stableSec) || stableSec <= 0 || stableSec > 2) {
+    throw new Error(`--stable-sec must be a number above 0 and at most 2, got "${values['stable-sec']}"`);
+  }
   return {
     modes: modes as Mode[],
     seedFrom: Number(values['seed-from']),
@@ -55,5 +61,6 @@ export function parseEvaluateOptions(values: {
     errorRate: unitInterval('error-rate', values['error-rate']),
     benignRate: unitInterval('benign-rate', values['benign-rate']),
     heardConfidenceFloor: unitInterval('heard-floor', values['heard-floor']),
+    stableSec,
   };
 }
