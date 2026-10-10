@@ -127,6 +127,17 @@ describe('aligner: line errors', () => {
     expect(r.lineNotes[0]!.expected).toContain('your sake');
   });
 
+  it('a single dropped content word is noted but does not buzz', () => {
+    const r = runScenario(EARNEST, heard([perf('L1', 'L2'), "I'm sorry for that. I don't play accurately.", perf('L4', 'L5')].join(' ')), P0);
+    expect(r.lineNotes).toEqual([expect.objectContaining({ category: 'dropped-words', status: 'note' })]);
+    expect(r.flags.filter((f) => f.alert)).toEqual([]);
+  });
+
+  it('two dropped content words buzz', () => {
+    const r = runScenario(EARNEST, heard([perf('L1', 'L2', 'L3'), 'Anyone can play accurately, but I play with.', perf('L5')].join(' ')), P0);
+    expect(r.flags.filter((f) => f.alert)).toEqual([expect.objectContaining({ note: expect.objectContaining({ category: 'dropped-words' }) })]);
+  });
+
   it('dropped line', () => {
     const r = runScenario(EARNEST, heard(perf('L1', 'L2', 'L4', 'L5')), P0);
     expect(r.lineNotes).toEqual([expect.objectContaining({ lineId: 'L3', characterId: 'ALGERNON', category: 'dropped-line' })]);

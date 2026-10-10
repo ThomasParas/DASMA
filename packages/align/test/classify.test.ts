@@ -196,3 +196,32 @@ describe('classifyOps: note metadata and confidence', () => {
     expect(classify(text, { confidenceAt: { [at]: 0.6 } }).notes).toEqual([expect.objectContaining({ heard: 'sore', status: 'check' })]);
   });
 });
+
+describe('classifyOps: dropped words', () => {
+  const DROP_SAKE = [perf('L1', 'L2'), "I'm sorry for that. I don't play accurately.", perf('L4', 'L5')].join(' ');
+
+  it('follows the confidence of the heard words around the gap', () => {
+    expect(classify(DROP_SAKE).notes).toEqual([expect.objectContaining({ category: 'dropped-words', status: 'note', confidence: 0.8 })]);
+    expect(classify(DROP_SAKE, { heardOpts: { confidence: 0.5 } }).notes).toEqual([
+      expect.objectContaining({ category: 'dropped-words', status: 'check', confidence: 0.4 }),
+    ]);
+  });
+
+  it('is less believable next to another mismatch', () => {
+    const text = [perf('L1', 'L2', 'L3'), 'Anyone can play accurately, but I play with marvellous.', perf('L5')].join(' ');
+    const del = classify(text).notes.find((n) => n.category === 'dropped-words')!;
+    expect(del).toMatchObject({ status: 'check', confidence: 0.48 });
+  });
+
+  it('a dropped run with fewer than 2 content words is quiet (never alerts)', () => {
+    const r = classify(DROP_SAKE); // "for your sake": one content word
+    expect(r.meta.get(r.notes[0]!)!.quiet).toBe(true);
+  });
+
+  it('a dropped run with 2+ content words may alert', () => {
+    const r = classify([perf('L1', 'L2', 'L3'), 'Anyone can play accurately, but I play with.', perf('L5')].join(' '));
+    const del = r.notes.find((n) => n.category === 'dropped-words')!;
+    expect(del.expected).toBe('wonderful expression');
+    expect(r.meta.get(del)!.quiet).toBe(false);
+  });
+});

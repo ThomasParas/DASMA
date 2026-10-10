@@ -56,6 +56,8 @@ export const WORD_LEVEL_CATEGORIES: ReadonlySet<Category> = new Set<Category>([
 ]);
 
 export const CONTRACTION_CAP = 0.45;
+/** A deletion next to another mismatch is less believable: the surrounding alignment may be off. */
+export const BUSY_FACTOR = 0.6;
 const JUMP_GAP_SEC = 1.5;
 const STUMBLE_PAUSE_SEC = 0.25;
 const SIMILAR_SUB_SCORE = 0.3;
@@ -242,6 +244,28 @@ export function classifyOps(ops: Op[], ctx: ClassifyContext): Classified {
   }
 
   // 4. Remaining blocks of substitutions and skips.
+  /** Pass spec §5.1: a deletion is only as believable as the recognizer was sure of the words around it. */
+  const deletionEvidence = (from: number, to: number): number => {
+    const near: number[] = [];
+    for (let k = from - 1, n = 0; k >= 0 && n < 2; k--) {
+      const o = ops[k]!;
+      if (o.kind === 'match') {
+        near.push(H(o.h).confidence);
+        n++;
+      }
+    }
+    for (let k = to + 1, n = 0; k < ops.length && n < 2; k++) {
+      const o = ops[k]!;
+      if (o.kind === 'match') {
+        near.push(H(o.h).confidence);
+        n++;
+      }
+    }
+    const neighbour = near.length ? near.reduce((s, x) => s + x, 0) / near.length : 1;
+    const busy = [from - 2, from - 1, to + 1, to + 2].some((k) => k >= 0 && k < ops.length && ops[k]!.kind !== 'match');
+    return neighbour * (busy ? BUSY_FACTOR : 1);
+  };
+
   const classifyBlock = (i: number, j: number): void => {
     const idx = Array.from({ length: j - i }, (_, k) => i + k);
     const subs = idx.filter((k) => ops[k]!.kind === 'sub' && E((ops[k] as SubOp).e).zone === 'checked');
@@ -258,7 +282,10 @@ export function classifyOps(ops: Op[], ctx: ClassifyContext): Classified {
       const words = group.map((k) => E((ops[k] as DelOp).e));
       const span: [number, number] = [group[0]!, group.at(-1)!];
       if (words.length === ctx.lineWordCount.get(words[0]!.lineId)) whole.push({ words, span });
-      else add('dropped-words', words, [], words[0]!, span);
+      else {
+        const content = words.filter((w) => !FUNCTION_WORDS.has(w.norm)).length;
+        add('dropped-words', words, [], words[0]!, span, { factor: deletionEvidence(span[0], span[1]), quiet: content < 2 });
+      }
     }
     if (!whole.length) return;
     const nextMatch = ops.slice(j).find(isMatch);

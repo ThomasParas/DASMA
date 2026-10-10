@@ -144,7 +144,7 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
   function commit(ops: Op[], at: number): void {
     if (!ops.length) return;
     const abs: Op[] = ops.map((o) => (hasE(o) ? { ...o, e: o.e + cursor } : o));
-    const { notes, stumbles } = classifyOps(abs, {
+    const { notes, stumbles, meta } = classifyOps(abs, {
       expected,
       heard: H,
       recentMatched,
@@ -185,7 +185,8 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
       // Lenient mode forgives word-level slips once the line is mostly right, which is only known at line end,
       // so a live alert for a word-level note could never be retracted: leave those to the finalized line notes.
       const deferred = options.strictness.mode === 'lenient' && WORD_LEVEL_CATEGORIES.has(note.category);
-      emit({ type: 'flag', note, alert: !deferred && note.status === 'note' && note.confidence >= options.alertMinConfidence, at });
+      const quiet = meta.get(note)?.quiet ?? false;
+      emit({ type: 'flag', note, alert: !quiet && !deferred && note.status === 'note' && note.confidence >= options.alertMinConfidence, at });
     }
     for (const s of stumbles) emit({ type: 'stumble', idx: s.idx, heard: s.heard, at });
     if (maxH >= 0) {
