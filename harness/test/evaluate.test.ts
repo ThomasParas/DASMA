@@ -4,7 +4,7 @@ import { fakeTts } from './helpers/fake-tts';
 import { ScriptedRecognizer, oracleWords } from './helpers/scripted-recognizer';
 
 const config: EvalConfig = {
-  sceneIds: 'all',
+  sceneIds: ['earnest-act1', 'romeo-balcony'],
   seeds: 3,
   rooms: ['close-mic'],
   patience: 0.5,

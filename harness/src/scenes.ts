@@ -14,6 +14,8 @@ export interface Scene {
   id: string;
   title: string;
   source: string;
+  /** Which evaluation modes use this scene; absent = both. A monologue is solo-only. */
+  modes?: Array<'solo' | 'director'>;
   lines: SceneLine[];
 }
 
@@ -33,6 +35,13 @@ export function loadScenes(ids: string[] | 'all'): Scene[] {
     if (!scene) throw new Error(`Unknown scene "${id}". Known: ${all.map((s) => s.id).join(', ')}`);
     return scene;
   });
+}
+
+/** Characters with at least `minLines` lines, in order of first appearance: each gets its own solo run. */
+export function soloCharacters(scene: Scene, minLines = 4): string[] {
+  const counts = new Map<string, number>();
+  for (const l of scene.lines) counts.set(l.character, (counts.get(l.character) ?? 0) + 1);
+  return [...counts].filter(([, n]) => n >= minLines).map(([c]) => c);
 }
 
 export function toScriptLines(scene: Scene): ScriptLineInput[] {

@@ -1,15 +1,32 @@
 import { describe, expect, it } from 'vitest';
-import { assertSceneId, loadScenes, toScriptLines } from '../src/scenes';
+import { assertSceneId, loadScenes, soloCharacters, toScriptLines, type Scene } from '../src/scenes';
 
 describe('scenes', () => {
   it('loads all bundled scenes with unique line ids', () => {
     const scenes = loadScenes('all');
-    expect(scenes.map((s) => s.id).sort()).toEqual(['earnest-act1', 'romeo-balcony']);
+    expect(scenes.map((s) => s.id).sort()).toEqual(['earnest-act1', 'earnest-act1-cigarette', 'hamlet-to-be', 'romeo-balcony']);
     for (const s of scenes) {
       const ids = s.lines.map((l) => l.id);
       expect(new Set(ids).size).toBe(ids.length);
       expect(s.source).toMatch(/Public domain/);
+      for (const l of s.lines) expect(l.text).not.toMatch(/[[\]]/); // no stage directions in spoken text
     }
+  });
+
+  it('hamlet-to-be is a solo-only monologue', () => {
+    const [h] = loadScenes(['hamlet-to-be']);
+    expect(h!.modes).toEqual(['solo']);
+    expect(soloCharacters(h!)).toEqual(['HAMLET']);
+  });
+
+  it('soloCharacters keeps characters with at least 4 lines, in first-appearance order (Review Focus 5)', () => {
+    const mk = (counts: Array<[string, number]>): Scene => ({
+      id: 'x', title: 'x', source: 'x',
+      lines: counts.flatMap(([c, n]) => Array.from({ length: n }, (_, k) => ({ id: `${c}${k}`, character: c, text: 'a b c' }))),
+    });
+    expect(soloCharacters(mk([['BEA', 3], ['ANN', 4], ['CY', 5]]))).toEqual(['ANN', 'CY']);
+    expect(soloCharacters(loadScenes(['earnest-act1'])[0]!)).toEqual(['ALGERNON', 'LANE']);
+    expect(soloCharacters(loadScenes(['earnest-act1-cigarette'])[0]!)).toEqual(['ALGERNON', 'JACK']);
   });
 
   it('loads by id and rejects unknown ids', () => {
