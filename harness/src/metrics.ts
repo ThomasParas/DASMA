@@ -75,10 +75,11 @@ export interface Aggregate {
   runs: number;
   audioMinutes: number;
   errorLabels: number;
-  recall: number;
-  recallInclChecks: number;
-  coreRecall: number;
-  sameCategoryRate: number;
+  /** null when no errors were planted: there is nothing to have recalled, so no rate (never a vacuous 1.0). */
+  recall: number | null;
+  recallInclChecks: number | null;
+  coreRecall: number | null;
+  sameCategoryRate: number | null;
   perCategory: Record<string, { labels: number; detected: number }>;
   falseNotesPerRun: number;
   falseAlertsPerRun: number;
@@ -96,7 +97,7 @@ export function aggregate(runs: Array<ScoredRun & { durationSec: number; rtf: nu
   const n = Math.max(1, runs.length);
   const minutes = sum((r) => r.durationSec) / 60;
   const per10 = (x: number) => (minutes > 0 ? (x / minutes) * 10 : 0);
-  const ratio = (a: number, b: number) => (b > 0 ? a / b : 1);
+  const ratio = (a: number, b: number) => (b > 0 ? a / b : null);
   const lat = runs.flatMap((r) => r.alertLatencies).sort((a, b) => a - b);
   const pct = (p: number) => (lat.length ? lat[Math.min(lat.length - 1, Math.max(0, Math.ceil(p * lat.length) - 1))]! : null);
   const perCategory: Record<string, { labels: number; detected: number }> = {};
@@ -184,14 +185,22 @@ export function formatReport(report: EvalReport): string {
 export function compareToBaseline(report: EvalReport, baseline: EvalReport): { pass: boolean; lines: string[] } {
   const lines: string[] = [];
   let pass = true;
+  for (const room of Object.keys(baseline.conditions)) {
+    if (!(room in report.conditions)) {
+      lines.push(`${room}: FAIL condition is in the baseline but missing from the report`);
+      pass = false;
+    }
+  }
   for (const [room, agg] of Object.entries(report.conditions)) {
     const base = baseline.conditions[room];
     if (!base) {
       lines.push(`${room}: no baseline — skipped`);
       continue;
     }
+    // No recall evidence in the report is a failure whenever the baseline had some; with none in both there is nothing to compare.
+    const recallOk = base.coreRecall === null || (agg.coreRecall !== null && agg.coreRecall >= base.coreRecall - 0.03);
     const checks: Array<[string, boolean]> = [
-      [`coreRecall ${fmt(agg.coreRecall)} vs ${fmt(base.coreRecall)}`, agg.coreRecall >= base.coreRecall - 0.03],
+      [`coreRecall ${fmt(agg.coreRecall)} vs ${fmt(base.coreRecall)}`, recallOk],
       [`falseAlertsPerRun ${fmt(agg.falseAlertsPerRun)} vs ${fmt(base.falseAlertsPerRun)}`, agg.falseAlertsPerRun <= base.falseAlertsPerRun + 0.2],
       [`falseNotesPerRun ${fmt(agg.falseNotesPerRun)} vs ${fmt(base.falseNotesPerRun)}`, agg.falseNotesPerRun <= base.falseNotesPerRun + 0.3],
     ];

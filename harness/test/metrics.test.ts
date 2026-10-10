@@ -75,9 +75,50 @@ describe('targets and report', () => {
 
   it('gates regressions against a baseline', () => {
     expect(compareToBaseline(report, report).pass).toBe(true);
-    const worse: EvalReport = { ...report, conditions: { 'close-mic': { ...agg, coreRecall: agg.coreRecall - 0.05 } } };
+    const worse: EvalReport = { ...report, conditions: { 'close-mic': { ...agg, coreRecall: agg.coreRecall! - 0.05 } } };
     expect(compareToBaseline(worse, report).pass).toBe(false);
     const noisier: EvalReport = { ...report, conditions: { 'close-mic': { ...agg, falseAlertsPerRun: agg.falseAlertsPerRun + 0.5 } } };
     expect(compareToBaseline(noisier, report).pass).toBe(false);
+  });
+
+  it('fails the gate when a baseline condition is missing from the report', () => {
+    const baseline: EvalReport = { ...report, conditions: { 'close-mic': agg, 'far-field': agg } };
+    const result = compareToBaseline(report, baseline);
+    expect(result.pass).toBe(false);
+    expect(result.lines).toContain('far-field: FAIL condition is in the baseline but missing from the report');
+  });
+
+  it('still skips a report condition that has no baseline', () => {
+    const extra: EvalReport = { ...report, conditions: { 'close-mic': agg, 'far-field': agg } };
+    const result = compareToBaseline(extra, report);
+    expect(result.pass).toBe(true);
+    expect(result.lines).toContain('far-field: no baseline — skipped');
+  });
+
+  it('fails the gate when the report has no recall evidence but the baseline did', () => {
+    const empty: EvalReport = { ...report, conditions: { 'close-mic': { ...agg, coreRecall: null } } };
+    const result = compareToBaseline(empty, report);
+    expect(result.pass).toBe(false);
+    expect(result.lines.join('\n')).toContain('coreRecall n/a');
+  });
+});
+
+describe('recall with no labels', () => {
+  const clean = scoreRun([], [], segments);
+
+  it('reports n/a (null) instead of a vacuous 1.0', () => {
+    const agg = aggregate([{ ...clean, durationSec: 600, rtf: 0.2 }]);
+    expect(agg).toMatchObject({ errorLabels: 0, recall: null, recallInclChecks: null, coreRecall: null, sameCategoryRate: null });
+    expect(JSON.parse(JSON.stringify(agg)).coreRecall).toBeNull();
+    expect(formatReport({ createdAt: 'x', config: {}, conditions: { 'close-mic': agg } })).toContain('| Recall (dropped/wrong word, dropped line) | n/a | >= 0.9 | FAIL |');
+  });
+
+  it('treats a recall target with zero labels as FAIL, not a vacuous pass', () => {
+    const agg = aggregate([{ ...clean, durationSec: 600, rtf: 0.2 }]);
+    for (const room of ['close-mic', 'far-field', 'far-field-hard']) {
+      const row = checkTargets(room, agg).find((r) => r.label.startsWith('Recall'))!;
+      expect(row.value).toBeNull();
+      expect(row.pass).toBe(false);
+    }
   });
 });

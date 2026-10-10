@@ -22,8 +22,8 @@ describe('evaluate (end to end, perfect recognizer)', () => {
     expect(agg.runs).toBe(6);
     expect(runs).toHaveLength(6);
     expect(agg.errorLabels).toBeGreaterThan(10);
-    expect(agg.coreRecall).toBeGreaterThanOrEqual(0.7);
-    expect(agg.recallInclChecks).toBeGreaterThanOrEqual(0.8);
+    expect(agg.coreRecall!).toBeGreaterThanOrEqual(0.7);
+    expect(agg.recallInclChecks!).toBeGreaterThanOrEqual(0.8);
     expect(agg.falseAlertsPerRun).toBeLessThanOrEqual(0.5);
     expect(agg.falseNotesPerRun).toBeLessThanOrEqual(0.5);
   });
