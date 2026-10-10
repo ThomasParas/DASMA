@@ -439,3 +439,22 @@ describe('aligner: backward jumps (pass spec §6.3)', () => {
     for (const id of ['L2', 'L3', 'L4', 'L5']) expect(final.get(id), id).toEqual([]);
   });
 });
+
+describe('aligner: instant patience at line boundaries (pass spec §6.4)', () => {
+  it('a skipped line is a jumped cue at patience 0, exactly as at 0.5', () => {
+    const text = perfLong('L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L9', 'L10');
+    for (const patience of [0, 0.5]) {
+      const r = runScenario(LONG_SCENE, heard(text), { patience });
+      expect(r.lineNotes.filter((n) => n.status === 'note'), `patience ${patience}`).toEqual([
+        expect.objectContaining({ lineId: 'L9', category: 'jumped-cue' }),
+      ]);
+      expect(r.flags.filter((f) => f.alert && f.note.lineId === 'L8'), `patience ${patience}`).toEqual([]);
+    }
+  });
+
+  it('a wrong word in a line’s last two words is confirmed by two words at patience 0', () => {
+    const r = runScenario(EARNEST, heard(WITH_FEELING), P0);
+    const flagAt = r.events.findIndex((e) => e.type === 'flag');
+    expect(flagAt).toBeGreaterThan(r.events.findIndex((e) => e.type === 'matched' && e.idx === 38));
+  });
+});

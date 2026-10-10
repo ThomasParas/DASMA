@@ -333,9 +333,54 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     checkLinesDone(at, false);
   }
 
+  /** Shift an op aligned against H.slice(hOff) and expected.slice(cursor + eOff) back into window coordinates. */
+  const shiftOp = (o: Op, hOff: number, eOff: number): Op =>
+    o.kind === 'ins' ? { ...o, h: o.h + hOff } : o.kind === 'del' ? { ...o, e: o.e + eOff } : { ...o, h: o.h + hOff, e: o.e + eOff };
+
+  /**
+   * Pass spec §6.4: if the last block of mismatches before the confirming matches is really the opening of one of the
+   * next two lines, rebuild the ops so the words up to that line are skipped and the heard words align from it.
+   */
+  function realignToNextLine(ops: Op[]): Op[] {
+    let k = ops.length - 1;
+    while (k >= 0 && ops[k]!.kind === 'match') k--;
+    let b = k;
+    while (b >= 0 && ops[b]!.kind !== 'match') b--;
+    const block = ops.slice(b + 1, k + 1);
+    if (!block.some((o) => o.kind === 'sub')) return ops;
+    const firstH = block.find(hasH)?.h;
+    const firstE = block.find(hasE)?.e;
+    if (firstH === undefined || firstE === undefined) return ops;
+    const blockToks = block.filter(hasH).map((o) => H[o.h]!);
+    if (blockToks.length < 2) return ops;
+    const lineIdx = lineOrder.indexOf(expected[cursor + firstE]!.lineId);
+    for (const id of lineOrder.slice(lineIdx + 1, lineIdx + 3)) {
+      const s = lineFirst.get(id)!;
+      if (s - cursor >= options.windowSize) break;
+      if (!blockToks.every((t, n) => expected[s + n] !== undefined && wordScore(t, expected[s + n]!) >= MATCH_THRESHOLD)) continue;
+      const dels: Op[] = [];
+      for (let e = cursor + firstE; e < s; e++) dels.push({ kind: 'del', e: e - cursor });
+      const rest = alignWindow(H.slice(firstH), expected.slice(s, s + options.windowSize)).map((o) => shiftOp(o, firstH, s - cursor));
+      return [...ops.slice(0, b + 1), ...dels, ...rest];
+    }
+    return ops;
+  }
+
+  /** Pass spec §6.4: a mismatch touching one of a line's last 2 words needs at least 2 confirming words. */
+  function touchesLineEnd(ops: Op[], end: number): boolean {
+    for (let k = 0; k <= end; k++) {
+      const o = ops[k]!;
+      if (o.kind === 'match' || !hasE(o)) continue;
+      const w = expected[cursor + o.e];
+      if (w && lineLast.get(w.lineId)! - w.idx < 2) return true;
+    }
+    return false;
+  }
+
   function step(at: number, timeout: boolean): void {
-    const ops = alignWindow(H, windowAt());
-    const end = timeout ? commitPointOnTimeout(ops) : commitPoint(ops, confirmWords);
+    const ops = realignToNextLine(alignWindow(H, windowAt()));
+    let end = timeout ? commitPointOnTimeout(ops) : commitPoint(ops, confirmWords);
+    if (!timeout && confirmWords < 2 && end >= 0 && touchesLineEnd(ops, end)) end = commitPoint(ops, 2);
     // Before anything has matched, unmatched talk is pre-roll chatter: a timeout must not commit it as errors.
     if (end >= 0 && (started || ops.slice(0, end + 1).some(isMatch))) commit(ops.slice(0, end + 1), at);
     if (!H.length || lost) return;
