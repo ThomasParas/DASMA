@@ -1,8 +1,13 @@
 {
-  "createdAt": "2026-10-10T18:24:22.967Z",
+  "createdAt": "2026-10-10T22:50:54.260Z",
   "config": {
     "sceneIds": "all",
-    "seeds": 10,
+    "modes": [
+      "solo",
+      "director"
+    ],
+    "seedFrom": 11,
+    "seeds": 20,
     "rooms": [
       "close-mic",
       "far-field",
@@ -17,161 +22,317 @@
     "model": "zipformer-en-2023-06-21"
   },
   "conditions": {
-    "close-mic": {
-      "runs": 20,
-      "audioMinutes": 24.607312925170064,
-      "errorLabels": 91,
-      "recall": 0.8571428571428571,
-      "recallInclChecks": 0.967032967032967,
-      "coreRecall": 0.8,
-      "sameCategoryRate": 0.7912087912087912,
+    "solo-close-mic": {
+      "runs": 140,
+      "audioMinutes": 236.9769448223734,
+      "errorLabels": 454,
+      "recall": 0.7577092511013216,
+      "recallInclChecks": 0.9273127753303965,
+      "coreRecall": 0.7276422764227642,
+      "sameCategoryRate": 0.6233480176211453,
+      "soundAlikeLabels": 33,
+      "soundAlikeRecall": 0.09090909090909091,
       "perCategory": {
-        "added-words": {
-          "labels": 9,
-          "detected": 8
-        },
         "dropped-words": {
-          "labels": 12,
-          "detected": 11
-        },
-        "called-for-line": {
-          "labels": 12,
-          "detected": 10
-        },
-        "dropped-line": {
-          "labels": 14,
-          "detected": 14
-        },
-        "jumped-cue": {
-          "labels": 13,
-          "detected": 13
+          "labels": 82,
+          "detected": 68
         },
         "transposed": {
-          "labels": 11,
-          "detected": 9
+          "labels": 56,
+          "detected": 45
         },
-        "paraphrase": {
-          "labels": 6,
-          "detected": 6
+        "added-words": {
+          "labels": 63,
+          "detected": 44
         },
         "wrong-words": {
-          "labels": 14,
-          "detected": 7
+          "labels": 87,
+          "detected": 43
+        },
+        "dropped-line": {
+          "labels": 77,
+          "detected": 68
+        },
+        "called-for-line": {
+          "labels": 61,
+          "detected": 50
+        },
+        "paraphrase": {
+          "labels": 28,
+          "detected": 26
         }
       },
-      "falseNotesPerRun": 1.15,
-      "falseAlertsPerRun": 0.45,
-      "falseChecksPerRun": 5.65,
-      "benignViolationsPerRun": 0.35,
-      "falseNotesPer10Min": 9.34681493665812,
-      "falseAlertsPer10Min": 3.6574493230401344,
-      "latencyP50": 1.2562896825396805,
-      "latencyP95": 9.601587301587301,
-      "rtfMean": 0.026787123557227583
+      "falseNotesPerRun": 1.6214285714285714,
+      "falseAlertsPerRun": 0.8071428571428572,
+      "falseChecksPerRun": 4.271428571428571,
+      "benignViolationsPerRun": 0.20714285714285716,
+      "falseNotesPer10Min": 9.578990908594434,
+      "falseAlertsPer10Min": 4.7683963553796085,
+      "latencyP50": 1.703556181093127,
+      "latencyP95": 9.161133786848083,
+      "rtfMean": 0.026097996653171803
     },
-    "far-field": {
-      "runs": 20,
-      "audioMinutes": 24.607312925170064,
-      "errorLabels": 91,
-      "recall": 0.7912087912087912,
-      "recallInclChecks": 1,
-      "coreRecall": 0.85,
-      "sameCategoryRate": 0.6483516483516484,
+    "solo-far-field": {
+      "runs": 140,
+      "audioMinutes": 236.9769448223734,
+      "errorLabels": 454,
+      "recall": 0.7092511013215859,
+      "recallInclChecks": 0.947136563876652,
+      "coreRecall": 0.7154471544715447,
+      "sameCategoryRate": 0.5286343612334802,
+      "soundAlikeLabels": 33,
+      "soundAlikeRecall": 0.18181818181818182,
       "perCategory": {
-        "added-words": {
-          "labels": 9,
-          "detected": 6
-        },
         "dropped-words": {
-          "labels": 12,
-          "detected": 11
-        },
-        "called-for-line": {
-          "labels": 12,
-          "detected": 6
-        },
-        "dropped-line": {
-          "labels": 14,
-          "detected": 14
-        },
-        "jumped-cue": {
-          "labels": 13,
-          "detected": 13
+          "labels": 82,
+          "detected": 69
         },
         "transposed": {
-          "labels": 11,
-          "detected": 8
+          "labels": 56,
+          "detected": 43
         },
-        "paraphrase": {
-          "labels": 6,
-          "detected": 5
+        "added-words": {
+          "labels": 63,
+          "detected": 38
         },
         "wrong-words": {
-          "labels": 14,
-          "detected": 9
+          "labels": 87,
+          "detected": 39
+        },
+        "dropped-line": {
+          "labels": 77,
+          "detected": 68
+        },
+        "called-for-line": {
+          "labels": 61,
+          "detected": 39
+        },
+        "paraphrase": {
+          "labels": 28,
+          "detected": 26
         }
       },
-      "falseNotesPerRun": 1.85,
-      "falseAlertsPerRun": 1,
-      "falseChecksPerRun": 11,
+      "falseNotesPerRun": 2.1142857142857143,
+      "falseAlertsPerRun": 1.2142857142857142,
+      "falseChecksPerRun": 8.75,
+      "benignViolationsPerRun": 0.3357142857142857,
+      "falseNotesPer10Min": 12.490666559224461,
+      "falseAlertsPer10Min": 7.173693631987021,
+      "latencyP50": 1.8457949105568048,
+      "latencyP95": 7.23486016628874,
+      "rtfMean": 0.025990943137533706
+    },
+    "solo-far-field-hard": {
+      "runs": 140,
+      "audioMinutes": 236.9769448223734,
+      "errorLabels": 454,
+      "recall": 0.5484581497797357,
+      "recallInclChecks": 0.8083700440528634,
+      "coreRecall": 0.5853658536585366,
+      "sameCategoryRate": 0.2555066079295154,
+      "soundAlikeLabels": 33,
+      "soundAlikeRecall": 0.3939393939393939,
+      "perCategory": {
+        "dropped-words": {
+          "labels": 82,
+          "detected": 56
+        },
+        "transposed": {
+          "labels": 56,
+          "detected": 35
+        },
+        "added-words": {
+          "labels": 63,
+          "detected": 29
+        },
+        "wrong-words": {
+          "labels": 87,
+          "detected": 38
+        },
+        "dropped-line": {
+          "labels": 77,
+          "detected": 50
+        },
+        "called-for-line": {
+          "labels": 61,
+          "detected": 28
+        },
+        "paraphrase": {
+          "labels": 28,
+          "detected": 13
+        }
+      },
+      "falseNotesPerRun": 5.014285714285714,
+      "falseAlertsPerRun": 4.735714285714286,
+      "falseChecksPerRun": 17.814285714285713,
+      "benignViolationsPerRun": 1.0142857142857142,
+      "falseNotesPer10Min": 29.62313488032288,
+      "falseAlertsPer10Min": 27.977405164749385,
+      "latencyP50": 2.503990929705216,
+      "latencyP95": 13.212834467120182,
+      "rtfMean": 0.026107080068073257
+    },
+    "director-close-mic": {
+      "runs": 60,
+      "audioMinutes": 108.53861375661371,
+      "errorLabels": 362,
+      "recall": 0.7762430939226519,
+      "recallInclChecks": 0.9226519337016574,
+      "coreRecall": 0.7222222222222222,
+      "sameCategoryRate": 0.649171270718232,
+      "soundAlikeLabels": 29,
+      "soundAlikeRecall": 0.10344827586206896,
+      "perCategory": {
+        "paraphrase": {
+          "labels": 15,
+          "detected": 14
+        },
+        "dropped-words": {
+          "labels": 34,
+          "detected": 31
+        },
+        "wrong-words": {
+          "labels": 61,
+          "detected": 25
+        },
+        "added-words": {
+          "labels": 58,
+          "detected": 42
+        },
+        "jumped-cue": {
+          "labels": 55,
+          "detected": 50
+        },
+        "dropped-line": {
+          "labels": 49,
+          "detected": 48
+        },
+        "transposed": {
+          "labels": 45,
+          "detected": 36
+        },
+        "called-for-line": {
+          "labels": 45,
+          "detected": 35
+        }
+      },
+      "falseNotesPerRun": 3.0166666666666666,
+      "falseAlertsPerRun": 1.3666666666666667,
+      "falseChecksPerRun": 7.75,
+      "benignViolationsPerRun": 0.45,
+      "falseNotesPer10Min": 16.67609284248583,
+      "falseAlertsPer10Min": 7.55491498941347,
+      "latencyP50": 1.7908742756361846,
+      "latencyP95": 20.127165532879815,
+      "rtfMean": 0.026494432699307447
+    },
+    "director-far-field": {
+      "runs": 60,
+      "audioMinutes": 108.53861375661371,
+      "errorLabels": 362,
+      "recall": 0.7099447513812155,
+      "recallInclChecks": 0.930939226519337,
+      "coreRecall": 0.7013888888888888,
+      "sameCategoryRate": 0.5220994475138122,
+      "soundAlikeLabels": 29,
+      "soundAlikeRecall": 0.27586206896551724,
+      "perCategory": {
+        "paraphrase": {
+          "labels": 15,
+          "detected": 14
+        },
+        "dropped-words": {
+          "labels": 34,
+          "detected": 32
+        },
+        "wrong-words": {
+          "labels": 61,
+          "detected": 22
+        },
+        "added-words": {
+          "labels": 58,
+          "detected": 34
+        },
+        "jumped-cue": {
+          "labels": 55,
+          "detected": 46
+        },
+        "dropped-line": {
+          "labels": 49,
+          "detected": 47
+        },
+        "transposed": {
+          "labels": 45,
+          "detected": 31
+        },
+        "called-for-line": {
+          "labels": 45,
+          "detected": 31
+        }
+      },
+      "falseNotesPerRun": 4.233333333333333,
+      "falseAlertsPerRun": 2.283333333333333,
+      "falseChecksPerRun": 17.033333333333335,
       "benignViolationsPerRun": 0.7,
-      "falseNotesPer10Min": 15.036180550276107,
-      "falseAlertsPer10Min": 8.127665162311411,
-      "latencyP50": 1.7075485008818347,
-      "latencyP95": 5.4495611577964524,
-      "rtfMean": 0.027081633432491453
+      "falseNotesPer10Min": 23.40180984525636,
+      "falseAlertsPer10Min": 12.622236018898114,
+      "latencyP50": 1.780714022042929,
+      "latencyP95": 8.324775387632542,
+      "rtfMean": 0.02647260556585284
     },
-    "far-field-hard": {
-      "runs": 20,
-      "audioMinutes": 24.607312925170064,
-      "errorLabels": 91,
-      "recall": 0.5604395604395604,
-      "recallInclChecks": 0.7802197802197802,
-      "coreRecall": 0.6,
-      "sameCategoryRate": 0.27472527472527475,
+    "director-far-field-hard": {
+      "runs": 60,
+      "audioMinutes": 108.53861375661371,
+      "errorLabels": 362,
+      "recall": 0.5828729281767956,
+      "recallInclChecks": 0.7651933701657458,
+      "coreRecall": 0.5416666666666666,
+      "sameCategoryRate": 0.22375690607734808,
+      "soundAlikeLabels": 29,
+      "soundAlikeRecall": 0.3103448275862069,
       "perCategory": {
-        "added-words": {
-          "labels": 9,
-          "detected": 4
+        "paraphrase": {
+          "labels": 15,
+          "detected": 8
         },
         "dropped-words": {
-          "labels": 12,
-          "detected": 9
-        },
-        "called-for-line": {
-          "labels": 12,
-          "detected": 5
-        },
-        "dropped-line": {
-          "labels": 14,
-          "detected": 10
-        },
-        "jumped-cue": {
-          "labels": 13,
-          "detected": 8
-        },
-        "transposed": {
-          "labels": 11,
-          "detected": 8
-        },
-        "paraphrase": {
-          "labels": 6,
-          "detected": 2
+          "labels": 34,
+          "detected": 28
         },
         "wrong-words": {
-          "labels": 14,
-          "detected": 5
+          "labels": 61,
+          "detected": 21
+        },
+        "added-words": {
+          "labels": 58,
+          "detected": 31
+        },
+        "jumped-cue": {
+          "labels": 55,
+          "detected": 36
+        },
+        "dropped-line": {
+          "labels": 49,
+          "detected": 29
+        },
+        "transposed": {
+          "labels": 45,
+          "detected": 38
+        },
+        "called-for-line": {
+          "labels": 45,
+          "detected": 20
         }
       },
-      "falseNotesPerRun": 4.8,
-      "falseAlertsPerRun": 5.15,
-      "falseChecksPerRun": 17.25,
-      "benignViolationsPerRun": 1.35,
-      "falseNotesPer10Min": 39.01279277909477,
-      "falseAlertsPer10Min": 41.85747558590376,
-      "latencyP50": 2.5948390022675767,
-      "latencyP95": 8.11578231292517,
-      "rtfMean": 0.026539001792407375
+      "falseNotesPerRun": 11.65,
+      "falseAlertsPerRun": 11.766666666666667,
+      "falseChecksPerRun": 31.883333333333333,
+      "benignViolationsPerRun": 1.9833333333333334,
+      "falseNotesPer10Min": 64.40104362926849,
+      "falseAlertsPer10Min": 65.04597539665744,
+      "latencyP50": 3.054512471655328,
+      "latencyP95": 11.663174603174603,
+      "rtfMean": 0.02637807732070087
     }
   }
 }
