@@ -23,6 +23,8 @@ export interface EvalConfig {
   strictness: Strictness;
   errorRate: number;
   benignRate: number;
+  /** AlignOptions.heardConfidenceFloor (pass spec §5.3). */
+  heardConfidenceFloor: number;
   model: string;
 }
 
@@ -55,7 +57,12 @@ export interface RunRecord {
 
 export function evaluate(config: EvalConfig, deps: EvalDeps): { report: EvalReport; runs: RunRecord[] } {
   const scenes = deps.scenes ?? loadScenes(config.sceneIds);
-  const options: AlignOptions = { ...DEFAULT_ALIGN_OPTIONS, patience: config.patience, strictness: config.strictness };
+  const options: AlignOptions = {
+    ...DEFAULT_ALIGN_OPTIONS,
+    patience: config.patience,
+    strictness: config.strictness,
+    heardConfidenceFloor: config.heardConfidenceFloor,
+  };
   const scored = new Map<string, Array<ScoredRun & { durationSec: number; rtf: number }>>();
   for (const mode of config.modes) for (const room of config.rooms) scored.set(conditionName(mode, room), []);
   const runs: RunRecord[] = [];

@@ -1,5 +1,5 @@
 import { createAligner, type AlignEvent, type AlignOptions, type ExpectedWord, type HeardWord } from '@dasma/align';
-import type { Recognizer } from '@dasma/asr';
+import { AudioQualityMeter, type Recognizer } from '@dasma/asr';
 
 export interface TimedEvent {
   event: AlignEvent;
@@ -27,8 +27,11 @@ export function runEngine(
   const events: TimedEvent[] = [];
   aligner.onEvent((event) => events.push({ event, audioTime }));
   const heard: HeardWord[] = [];
+  const meter = new AudioQualityMeter();
   const off = recognizer.onWords((words) => {
     heard.push(...words);
+    meter.push(words);
+    aligner.setAudioQuality(meter.value());
     aligner.push(words);
   });
   const chunk = Math.max(1, Math.round(chunkSec * sampleRate));

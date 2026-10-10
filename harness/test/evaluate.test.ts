@@ -10,6 +10,7 @@ const config: EvalConfig = {
   seeds: 3,
   rooms: ['close-mic'],
   patience: 0.5,
+  heardConfidenceFloor: 0,
   strictness: { mode: 'word-perfect' },
   errorRate: 0.35,
   benignRate: 0.2,

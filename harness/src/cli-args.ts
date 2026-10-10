@@ -11,6 +11,7 @@ export interface EvaluateOptions {
   strictness: Strictness;
   errorRate: number;
   benignRate: number;
+  heardConfidenceFloor: number;
 }
 
 function unitInterval(name: string, raw: string): number {
@@ -29,6 +30,7 @@ export function parseEvaluateOptions(values: {
   strictness: string;
   'error-rate': string;
   'benign-rate': string;
+  'heard-floor': string;
 }): EvaluateOptions {
   if (!/^\d+$/.test(values.seeds) || Number(values.seeds) < 1) throw new Error(`--seeds must be a positive integer, got "${values.seeds}"`);
   const modes = [...new Set(values.modes.split(',').map((m) => m.trim()).filter(Boolean))];
@@ -52,5 +54,6 @@ export function parseEvaluateOptions(values: {
     strictness: values.strictness === 'lenient' ? { mode: 'lenient', lineMatchThreshold: 0.8 } : { mode: 'word-perfect' },
     errorRate: unitInterval('error-rate', values['error-rate']),
     benignRate: unitInterval('benign-rate', values['benign-rate']),
+    heardConfidenceFloor: unitInterval('heard-floor', values['heard-floor']),
   };
 }

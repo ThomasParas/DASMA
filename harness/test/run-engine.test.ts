@@ -37,4 +37,16 @@ describe('runEngine', () => {
     const run = runEngine(new Float32Array(SR * 6), SR, new ScriptedRecognizer(heard), expected, options);
     expect(run.heard.map((w) => w.text)).toEqual(heard.map((w) => w.text));
   });
+
+  it('feeds audio quality from the recognizer’s word confidence into the aligner', () => {
+    const at = (c: number) => words('one two three four five six seven eight elephant ten').map((w) => ({ ...w, confidence: c }));
+    const confidenceOf = (c: number) => {
+      const run = runEngine(new Float32Array(SR * 6), SR, new ScriptedRecognizer(at(c)), expected, options);
+      const flag = run.events.find(({ event }) => event.type === 'flag')!.event;
+      return flag.type === 'flag' ? flag.note.confidence : NaN;
+    };
+    // Without the meter, confidence scales only with heard confidence: 0.85 × 0.55 = 0.4675. The meter adds × 0.6.
+    expect(confidenceOf(0.55)).toBe(Math.round(0.85 * 0.55 * 0.6 * 1000) / 1000);
+    expect(confidenceOf(0.95)).toBe(Math.round(0.85 * 0.95 * 1000) / 1000);
+  });
 });

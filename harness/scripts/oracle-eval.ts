@@ -34,6 +34,7 @@ const { report, runs } = evaluate(
     strictness: { mode: 'word-perfect' },
     errorRate: 0.35,
     benignRate: 0.2,
+    heardConfidenceFloor: 0,
     model: 'oracle (perfect recognizer, confidence 0.95)',
   },
   { tts: createSherpaTts(), makeRecognizer: (rendered) => new ScriptedRecognizer(oracleWords(rendered)) },

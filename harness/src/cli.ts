@@ -27,6 +27,7 @@ const USAGE = `Usage: npm run harness -- <command> [options]
       --strictness <mode>       word-perfect | lenient   default word-perfect
       --error-rate <0..1>       default 0.35
       --benign-rate <0..1>      default 0.2
+      --heard-floor <0..1>      heard-confidence floor for content words, default 0
       --out <dir>               default harness/out/<timestamp>
       --save-audio              also write each rehearsal as WAV
   gate --report <path> [--baseline <path>]    Exit 1 if results regressed vs the baseline
@@ -48,6 +49,7 @@ async function runEvaluate(args: string[]): Promise<void> {
       strictness: { type: 'string', default: 'word-perfect' },
       'error-rate': { type: 'string', default: '0.35' },
       'benign-rate': { type: 'string', default: '0.2' },
+      'heard-floor': { type: 'string', default: '0' },
       out: { type: 'string' },
       'save-audio': { type: 'boolean', default: false },
     },
@@ -70,6 +72,7 @@ async function runEvaluate(args: string[]): Promise<void> {
       strictness: opts.strictness,
       errorRate: opts.errorRate,
       benignRate: opts.benignRate,
+      heardConfidenceFloor: opts.heardConfidenceFloor,
       model: values.model,
     },
     {
