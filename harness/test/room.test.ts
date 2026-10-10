@@ -24,13 +24,13 @@ describe('convolve', () => {
     expect(Array.from(out).map((v) => Math.round(v * 1e6) / 1e6)).toEqual([1, 2, 3]);
   });
 
-  it('matches direct convolution', () => {
+  it('matches direct convolution at every index, across overlap-add block boundaries', () => {
     const rng = mulberry32(2);
-    const x = Float32Array.from({ length: 5000 }, () => rng() - 0.5);
+    const x = Float32Array.from({ length: 12000 }, () => rng() - 0.5);
     const h = Float32Array.from({ length: 300 }, () => rng() - 0.5);
     const out = convolve(x, h);
     expect(out.length).toBe(x.length + h.length - 1);
-    for (const n of [0, 1, 299, 1000, 4999, 5298]) {
+    for (let n = 0; n < out.length; n++) {
       let direct = 0;
       for (let k = 0; k < h.length; k++) if (n - k >= 0 && n - k < x.length) direct += x[n - k]! * h[k]!;
       expect(out[n]).toBeCloseTo(direct, 3);
@@ -47,6 +47,12 @@ describe('makeImpulseResponse', () => {
     const early = ir.subarray(1, tenth).reduce((s, v) => s + v * v, 0);
     const late = ir.subarray(ir.length - tenth).reduce((s, v) => s + v * v, 0);
     expect(late).toBeLessThan(early * 0.01);
+  });
+
+  it('sets the direct-to-reverb energy ratio in dB', () => {
+    const ir = makeImpulseResponse(SR, 0.6, -6, mulberry32(8));
+    const tail = ir.subarray(1).reduce((s, v) => s + v * v, 0);
+    expect(10 * Math.log10(ir[0]! ** 2 / tail)).toBeCloseTo(-6, 2);
   });
 
   it('is just the direct path with no reverb', () => {
