@@ -37,7 +37,7 @@ describe('alignWindow', () => {
 
   it('global mode consumes the whole window', () => {
     const ops = alignWindow(toks('zebra'), exp('alpha beta gamma'), { global: true });
-    expect(ops.filter(hasE).map((o) => o.e).sort()).toEqual([0, 1, 2]);
+    expect(ops.filter(hasE).map((o) => o.e).sort((a, b) => a - b)).toEqual([0, 1, 2]);
     expect(ops.filter((o) => o.kind !== 'del')).toHaveLength(1);
   });
 

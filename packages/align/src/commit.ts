@@ -40,8 +40,16 @@ function blocksConfirmed(ops: Op[], from: number, p: number, confirmWords: numbe
   return true;
 }
 
-/** After the grace timeout: commit everything except skips that are not followed by two matches. */
+/**
+ * After the grace timeout: commit everything except skips that are not followed by two matches.
+ * Never less than `commitPoint(ops, 1)`: a timeout must not commit less than instant confirmation would.
+ */
 export function commitPointOnTimeout(ops: Op[]): number {
+  return Math.max(commitPoint(ops, 1), timeoutTail(ops));
+}
+
+/** Timeout-only tail rule: commit trailing deviations, stopping at a skip not followed by two matches. */
+function timeoutTail(ops: Op[]): number {
   let end = -1;
   let i = 0;
   while (i < ops.length) {

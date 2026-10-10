@@ -35,6 +35,12 @@ describe('commitPointOnTimeout', () => {
   it('still requires two matches after a skip', () => {
     expect(commitPointOnTimeout([m(0, 0), d(1), m(1, 2)])).toBe(0);
   });
+  it('never commits less than instant confirmation on interleaved blocks', () => {
+    expect(commitPointOnTimeout([m(0, 0), d(1), m(1, 2), i(2), m(3, 3)])).toBe(4);
+  });
+  it('commits a trailing substitution after a confirmed one', () => {
+    expect(commitPointOnTimeout([m(0, 0), s(1, 1), m(2, 2), s(3, 3)])).toBe(3);
+  });
   it('handles empty input', () => {
     expect(commitPointOnTimeout([])).toBe(-1);
   });
