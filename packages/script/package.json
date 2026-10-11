@@ -1,0 +1,22 @@
+{
+  "name": "@dasma/script",
+  "version": "0.0.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
+  "dependencies": {
+    "@dasma/align": "*",
+    "fflate": "0.8.3",
+    "pdfjs-dist": "6.3.289"
+  },
+  "devDependencies": {
+    "docx": "9.7.1",
+    "pdf-lib": "1.17.1"
+  }
+}
