@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createAligner, patienceToGrace } from '../src/aligner';
 import { buildExpected } from '../src/expected';
-import { DEFAULT_ALIGN_OPTIONS, type AlignEvent, type ScriptLineInput, type Strictness } from '../src/types';
+import { DEFAULT_ALIGN_OPTIONS, type AlignEvent, type NoteDraft, type ScriptLineInput, type Strictness } from '../src/types';
 import { heard, runScenario } from './helpers/dsl';
 import { EARNEST, LONG_SCENE, textOf } from './helpers/fixtures';
 
@@ -11,6 +11,12 @@ const perf = (...ids: string[]) => ids.map((id) => textOf(id)).join(' ');
 const perfLong = (...ids: string[]) => ids.map((id) => textOf(id, LONG_SCENE)).join(' ');
 const NOR: ScriptLineInput[] = [{ id: 'N1', characterId: 'JULIET', text: 'It is nor hand, nor foot, nor arm, nor face.' }];
 const WITH_FEELING = [perf('L1', 'L2', 'L3'), 'Anyone can play accurately, but I play with wonderful feeling.', perf('L5')].join(' ');
+/** The notes of each line's last lineDone (the last lineDone per line wins). */
+const finalNotes = (events: AlignEvent[]) => {
+  const out = new Map<string, NoteDraft[]>();
+  for (const e of events) if (e.type === 'lineDone') out.set(e.lineId, e.notes);
+  return out;
+};
 // Word indices in EARNEST: L1 0–7, L2 8–15, L3 16–26, L4 27–36, L5 37–38.
 
 describe('patienceToGrace', () => {
@@ -397,6 +403,45 @@ describe('aligner: anchored alerts (pass spec §6.1)', () => {
     expect(alertAt[0]).toBeGreaterThan(thirdMatched);
     expect(r.flags.filter((f) => f.note.lineId === 'L3').map((f) => f.alert)).toEqual([false, true]);
   });
+
+  // "Truly" for "I'm" waits for three correct words after it; each case below takes that wait away before they come.
+  const TRULY = `${perf('L1', 'L2')} Truly sorry`;
+  const trulyAlerts = (events: AlignEvent[]) =>
+    events.flatMap((e) => (e.type === 'flag' && e.note.lineId === 'L3' && e.note.heard === 'truly' ? [e.alert] : []));
+
+  it('a waiting note is dropped when the aligner gets lost', () => {
+    const text = `${TRULY} for | okay hold on everybody my phone is ringing ||| that, for your sake. I don't play accurately. ${perf('L4', 'L5')}`;
+    const r = runScenario(EARNEST, heard(text), P0);
+    expect(r.types).toContain('lost');
+    expect(trulyAlerts(r.events)).toEqual([false]);
+    expect(finalNotes(r.events).get('L3')).toEqual([expect.objectContaining({ heard: 'truly', status: 'note' })]);
+  });
+
+  it('a waiting note is dropped when a backward jump resets its line', () => {
+    const expected = buildExpected(EARNEST, WP);
+    const aligner = createAligner(expected, { ...DEFAULT_ALIGN_OPTIONS, patience: 0 });
+    const events: AlignEvent[] = [];
+    aligner.onEvent((e) => events.push(e));
+    aligner.push(heard(TRULY));
+    expect(trulyAlerts(events)).toEqual([false]);
+    aligner.jumpTo(expected.findIndex((w) => w.lineId === 'L3'));
+    aligner.push(heard(perf('L3', 'L4', 'L5'), { start: 20 }));
+    aligner.finalize(60);
+    expect(trulyAlerts(events)).toEqual([false]);
+    expect(finalNotes(events).get('L3')).toEqual([]);
+  });
+
+  it('a note still waiting when the run ends is dropped: words after finalize never alert it', () => {
+    const expected = buildExpected(EARNEST, WP);
+    const aligner = createAligner(expected, { ...DEFAULT_ALIGN_OPTIONS, patience: 0 });
+    const events: AlignEvent[] = [];
+    aligner.onEvent((e) => events.push(e));
+    aligner.push(heard(TRULY));
+    aligner.finalize(20);
+    aligner.push(heard("for that, for your sake. I don't play accurately.", { start: 30 }));
+    aligner.finalize(60);
+    expect(trulyAlerts(events)).toEqual([false]);
+  });
 });
 
 describe('aligner: off-script talk (pass spec §6.2)', () => {
@@ -407,6 +452,26 @@ describe('aligner: off-script talk (pass spec §6.2)', () => {
       expect(r.lineNotes.filter((n) => n.status === 'note'), `patience ${patience}`).toEqual([]);
       expect(r.flags.filter((f) => f.alert), `patience ${patience}`).toEqual([]);
     }
+  });
+
+  // "Oh sorry" for "Yes, sir" waits for an anchor; L5 is finished once "as" (L6) matches; one more stray word then makes
+  // "oh sorry as maybe" an off-script run, so the finished line's note becomes a check after the fact.
+  it('a note on a finished line that turns out to be off-script talk is re-emitted as a check and never alerts', () => {
+    const text = `${perfLong('L1', 'L2', 'L3', 'L4')} Oh sorry as ~ maybe ~ far as the piano is concerned, sentiment is my forte. I keep science for Life. ${perfLong('L7', 'L8')}`;
+    const r = runScenario(LONG_SCENE, heard(text), P0);
+    const l5 = r.events.flatMap((e) => (e.type === 'lineDone' && e.lineId === 'L5' ? [e.notes] : []));
+    expect(l5).toEqual([
+      [expect.objectContaining({ category: 'wrong-words', heard: 'oh sorry', status: 'note' })],
+      [expect.objectContaining({ category: 'wrong-words', heard: 'oh sorry', status: 'check' })],
+    ]);
+    expect(r.flags.filter((f) => f.note.lineId === 'L5').map((f) => f.alert)).toEqual([false]);
+  });
+
+  it.each([0, 0.5])('an aside without a restart produces no notes (patience %s)', (patience) => {
+    const text = `${perf('L1', 'L2', 'L3')} | hang on, what comes next, I always forget this bit | ${perf('L4', 'L5')}`;
+    const r = runScenario(EARNEST, heard(text), { patience });
+    expect(r.lineNotes.filter((n) => n.status === 'note')).toEqual([]);
+    expect(r.flags.filter((f) => f.alert)).toEqual([]);
   });
 
   // Guard (passes before and after): an actor's aside followed by a restart of the line produces no notes.
@@ -437,10 +502,54 @@ describe('aligner: backward jumps (pass spec §6.3)', () => {
     expect(r.flags.filter((f) => f.alert)).toEqual([]);
   });
 
+  it.each([0, 0.5])('a note held for a reset line is discarded when a second restart abandons that redo (patience %s)', (patience) => {
+    const text = `${perf('L1', 'L2', 'L3', 'L4', 'L3')} Someone || ${perf('L3', 'L4', 'L5')}`;
+    const r = runScenario(EARNEST, heard(text), { patience });
+    expect(r.events.filter((e) => e.type === 'reanchored' && e.toIdx < e.fromIdx)).toHaveLength(2);
+    expect(finalNotes(r.events).get('L4')).toEqual([]);
+    expect(r.flags.filter((f) => f.note.lineId === 'L4')).toEqual([]);
+  });
+
+  it.each([0, 0.5])('a line restored after a confirmed jump back keeps its genuine note (patience %s)', (patience) => {
+    const l3 = "I'm sorry for that, for your garden. I don't play accurately.";
+    const text = `${perfLong('L1', 'L2')} ${l3} ${perfLong('L4', 'L5')} | Go back to what I was playing Lane please | ${perfLong('L6', 'L7')}`;
+    const r = runScenario(LONG_SCENE, heard(text), { patience });
+    expect(r.events.filter((e) => e.type === 'reanchored' && e.toIdx < e.fromIdx)).not.toEqual([]);
+    expect(finalNotes(r.events).get('L3')).toEqual([expect.objectContaining({ category: 'wrong-words', expected: 'sake', heard: 'garden', status: 'note' })]);
+  });
+
+  it('jumpTo backward then forward gives the skipped lines their earlier results back', () => {
+    const expected = buildExpected(EARNEST, WP);
+    const aligner = createAligner(expected, { ...DEFAULT_ALIGN_OPTIONS, patience: 0 });
+    const events: AlignEvent[] = [];
+    aligner.onEvent((e) => events.push(e));
+    const l3 = "I'm sorry for that, for your garden. I don't play accurately.";
+    aligner.push(heard(`${perf('L1', 'L2')} ${l3} ${perf('L4')}`));
+    aligner.jumpTo(expected.findIndex((w) => w.lineId === 'L2'));
+    aligner.jumpTo(expected.findIndex((w) => w.lineId === 'L5'));
+    aligner.push(heard(perf('L5'), { start: 30 }));
+    aligner.finalize(60);
+    const final = finalNotes(events);
+    expect(final.get('L3')).toEqual([expect.objectContaining({ category: 'wrong-words', expected: 'sake', heard: 'garden', status: 'note' })]);
+    for (const id of ['L1', 'L2', 'L4', 'L5']) expect(final.get(id), id).toEqual([]);
+  });
+
   it('a real restart two lines back still re-runs those lines', () => {
     const r = runScenario(LONG_SCENE, heard(perfLong('L1', 'L2', 'L3', 'L4', 'L2', 'L3', 'L4', 'L5', 'L6')), P0);
     expect(r.lineNotes).toEqual([]);
     expect(r.types).toContain('reanchored');
+  });
+
+  // A wrong first word followed by a pause is committed alone (by the timeout) before the redo matches any word of the
+  // line; once the redo reaches the line, that note stands (pass spec §6.3).
+  it.each([0, 0.5])('a real error on a line the redo reaches is kept (patience %s)', (patience) => {
+    const text = `${perf('L1', 'L2', 'L3', 'L4', 'L3')} Someone || can play accurately, but I play with wonderful expression. ${perf('L5')}`;
+    const r = runScenario(EARNEST, heard(text), { patience });
+    expect(r.types).toContain('reanchored');
+    expect(finalNotes(r.events).get('L4')).toEqual([
+      expect.objectContaining({ category: 'wrong-words', expected: 'Anyone', heard: 'someone', confidence: 0.85, status: 'note' }),
+    ]);
+    expect(r.flags.filter((f) => f.note.lineId === 'L4').map((f) => f.alert)).toEqual([false, true]);
   });
 
   // Review Focus 3 (guard): the run ends right after a confirmed jump back; later lines keep their earlier results.

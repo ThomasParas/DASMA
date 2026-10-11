@@ -88,6 +88,20 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
   const snapshots = new Map<string, LineSnapshot>();
   const lastDone = new Map<string, NoteDraft[]>();
 
+  /** A classified note with what its flag decision needs, computed at the commit that produced it. */
+  interface NoteCandidate {
+    raw: NoteDraft;
+    quiet: boolean;
+    time: [number, number] | null;
+    anchored: boolean;
+    afterIdx: number;
+  }
+  /**
+   * Notes the redo committed on a line it has not reached yet (pass spec §6.3): held unflagged until the redo matches
+   * one of the line's words, then flagged as if emitted at that commit; discarded if the line gets its snapshot back.
+   */
+  const held = new Map<string, NoteCandidate[]>();
+
   /** Every heard token the aligner has taken in, in order; H is always a suffix of this list (pass spec §6.2). */
   const marks: HeardMark[] = [];
   const markOf = new Map<HeardToken, HeardMark>();
@@ -149,6 +163,7 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     if (snap) {
       // A backward jump reset this line, but the redo never reached it: it keeps its earlier result.
       snapshots.delete(id);
+      held.delete(id);
       const st = lines.get(id)!;
       st.resolution = new Map(snap.resolution);
       st.notes = [...snap.notes];
@@ -247,10 +262,25 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
       st.resolution.clear();
       st.notes = [];
       st.heard = [];
+      held.delete(id);
       done.delete(id);
     }
     recentMatched = [];
     waiting = waiting.filter((w) => lineLast.get(w.note.lineId)! < idx);
+  }
+
+  /** Record a note on its line and flag it, alerting at once when anchored or waiting for the anchor (pass spec §6.1, §6.2). */
+  function flagNote(c: NoteCandidate, spans: Array<[number, number]>, at: number): void {
+    const offScript = c.time !== null && insideAny(spans, c.time[0], c.time[1]);
+    const note: NoteDraft = offScript && c.raw.status === 'note' ? { ...c.raw, status: 'check' } : c.raw;
+    if (c.time) noteTimes.set(note, c.time);
+    lines.get(note.lineId)?.notes.push(note);
+    // Lenient mode forgives word-level slips once the line is mostly right, which is only known at line end,
+    // so a live alert for a word-level note could never be retracted: leave those to the finalized line notes.
+    const deferredToLineEnd = options.strictness.mode === 'lenient' && WORD_LEVEL_CATEGORIES.has(note.category);
+    const eligible = !offScript && !c.quiet && !deferredToLineEnd && note.status === 'note' && note.confidence >= options.alertMinConfidence;
+    emit({ type: 'flag', note, alert: eligible && c.anchored, at });
+    if (eligible && !c.anchored) waiting.push({ note, afterIdx: c.afterIdx });
   }
 
   function commit(ops: Op[], at: number): void {
@@ -298,28 +328,30 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     }
     const pendingAfter = maxH >= 0 ? H.length - (maxH + 1) : H.length;
     const spans = offScriptSpans(marks.slice(0, Math.max(0, marks.length - pendingAfter)));
+    // Pass spec §6.3: once the redo reaches a reset line, the notes it held for that line stand.
+    for (const [id, cands] of [...held]) {
+      if (snapshots.has(id)) continue;
+      held.delete(id);
+      for (const c of cands) flagNote(c, spans, at);
+    }
     for (const raw of notes) {
       const m = meta.get(raw)!;
-      if (snapshots.has(raw.lineId)) continue;
       // Pass spec §6.3: lines the redo never reached keep their earlier result, so a skip over them is not a jumped cue either.
       if (raw.category === 'jumped-cue') {
         const skipped = abs.slice(m.from, m.to + 1).filter(hasE).map((o) => expected[o.e]!.lineId);
         if (skipped.length && skipped.every((id) => snapshots.has(id))) continue;
       }
       const toks = abs.slice(m.from, m.to + 1).filter(hasH).map((o) => H[o.h]!);
-      const time: [number, number] | null = toks.length ? [toks[0]!.start, toks.at(-1)!.end] : null;
-      const offScript = time !== null && insideAny(spans, time[0], time[1]);
-      const note: NoteDraft = offScript && raw.status === 'note' ? { ...raw, status: 'check' } : raw;
-      if (time) noteTimes.set(note, time);
-      lines.get(note.lineId)?.notes.push(note);
-      // Lenient mode forgives word-level slips once the line is mostly right, which is only known at line end,
-      // so a live alert for a word-level note could never be retracted: leave those to the finalized line notes.
-      const deferredToLineEnd = options.strictness.mode === 'lenient' && WORD_LEVEL_CATEGORIES.has(note.category);
-      const eligible = !offScript && !m.quiet && !deferredToLineEnd && note.status === 'note' && note.confidence >= options.alertMinConfidence;
       const after = abs.slice(m.to + 1).filter(isMatch).slice(0, ANCHOR_WORDS).map((o) => o.e);
-      const anchored = anchoredBefore(abs, m.from, before, note.lineId) || consecutive(after);
-      emit({ type: 'flag', note, alert: eligible && anchored, at });
-      if (eligible && !anchored) waiting.push({ note, afterIdx: regionEnd(abs, m.from, m.to) });
+      const c: NoteCandidate = {
+        raw,
+        quiet: m.quiet,
+        time: toks.length ? [toks[0]!.start, toks.at(-1)!.end] : null,
+        anchored: anchoredBefore(abs, m.from, before, raw.lineId) || consecutive(after),
+        afterIdx: regionEnd(abs, m.from, m.to),
+      };
+      if (snapshots.has(raw.lineId)) held.set(raw.lineId, [...(held.get(raw.lineId) ?? []), c]);
+      else flagNote(c, spans, at);
     }
     for (const s of stumbles) emit({ type: 'stumble', idx: s.idx, heard: s.heard, at });
     downgradeOffScript(spans, at);

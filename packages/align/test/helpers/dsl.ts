@@ -15,7 +15,10 @@ export interface HeardOptions {
   confidence?: number;
 }
 
-/** Build recognizer-style words. Pause markers: "|" = 1 s, "||" = 3 s, "|||" = 12 s. */
+/**
+ * Build recognizer-style words. Pause markers: "|" = 1 s, "||" = 3 s, "|||" = 12 s, and "~" = 0.6 s (long enough for
+ * the instant-Patience timeout, short enough to keep words in one off-script run).
+ */
 export function heard(text: string, opts: HeardOptions = {}): HeardWord[] {
   const wordDur = opts.wordDur ?? 0.3;
   const gap = opts.gap ?? 0.05;
@@ -23,6 +26,10 @@ export function heard(text: string, opts: HeardOptions = {}): HeardWord[] {
   let t = opts.start ?? 0;
   const out: HeardWord[] = [];
   for (const piece of text.split(/\s+/).filter(Boolean)) {
+    if (piece === '~') {
+      t += 0.6;
+      continue;
+    }
     if (/^\|+$/.test(piece)) {
       t += piece.length === 1 ? 1 : piece.length === 2 ? 3 : 12;
       continue;
