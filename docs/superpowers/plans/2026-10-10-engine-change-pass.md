@@ -3657,3 +3657,154 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
 
 - [ ] **Step 7: Hand off.** The controller updates the project memory note (`dasma-m1-status`) with the outcome. It then uses `superpowers:finishing-a-development-branch`; whether to merge into `main` is the user's decision.
+
+---
+
+## Addendum — Round 2 re-scoped (user decision after round 1; pass spec §8a)
+
+Order: **Task 18R** (fragment rule + confidence counted once) → **Task 19** with the extra Step 3b below (re-sweep `stableSec`, then thresholds) → **Task 21** → **Task 22**. Task 18 (selection) is replaced by §8a; Task 20 is not selected.
+
+### Task 18R: Fragment rule and recognizer confidence counted once
+
+**Files:**
+- Modify: `packages/align/src/classify.ts` (`makeNote`, `classifyBlock` wrong-words branch, new `FRAGMENT_CAP`, `isFragment`), `packages/align/src/finalize-line.ts` (paraphrase confidence)
+- Test: `packages/align/test/classify.test.ts`, `packages/align/test/aligner.test.ts`, `packages/align/test/finalize-line.test.ts` (if it asserts audio-quality scaling), `harness/test/run-engine.test.ts`
+
+**Interfaces:**
+- Produces: `FRAGMENT_CAP = 0.45` (exported), `isFragment(heardNorm: string, expectedNorm: string): boolean` (exported for tests).
+- `makeNote` signature unchanged; it applies `ctx.audioQuality` only when `heard.length === 0 && category !== 'dropped-words'`.
+
+- [ ] **Step 1: Write the failing tests.** In `packages/align/test/classify.test.ts`:
+
+```ts
+describe('classifyOps: recognizer fragments and confidence counted once (pass spec §8a)', () => {
+  const CIG: ScriptLineInput[] = [
+    { id: 'C1', characterId: 'JACK', text: 'I simply want my cigarette case back.' },
+    { id: 'C2', characterId: 'ALGY', text: 'Here it is.' },
+  ];
+
+  it('isFragment: a strict leading prefix of 2+ letters', () => {
+    expect(isFragment('cigar', 'cigarette')).toBe(true);
+    expect(isFragment('de', 'dear')).toBe(true);
+    expect(isFragment('d', 'dear')).toBe(false);
+    expect(isFragment('dear', 'dear')).toBe(false);
+    expect(isFragment('impression', 'expression')).toBe(false);
+  });
+
+  it('a heard leading fragment of the scripted word is a quiet check, not a note', () => {
+    const r = classify('I simply want my cigar case back. Here it is.', { lines: CIG });
+    expect(r.notes).toEqual([expect.objectContaining({ category: 'wrong-words', expected: 'cigarette', heard: 'cigar', status: 'check' })]);
+    expect(r.meta.get(r.notes[0]!)!.quiet).toBe(true);
+  });
+
+  it('a different word is still a note', () => {
+    const r = classify('I simply want my silver case back. Here it is.', { lines: CIG });
+    expect(r.notes).toEqual([expect.objectContaining({ heard: 'silver', status: 'note' })]);
+  });
+
+  it('audio quality no longer scales notes that have heard words', () => {
+    const { notes } = classify([perf('L1', 'L2', 'L3'), L4_FEELING, perf('L5')].join(' '), { ctx: { audioQuality: 0.5 } });
+    expect(notes).toEqual([expect.objectContaining({ category: 'wrong-words', status: 'note', confidence: 0.85 })]);
+  });
+
+  it('audio quality still scales a dropped line', () => {
+    const { notes } = classify(perf('L1', 'L2', 'L4', 'L5'), { ctx: { audioQuality: 0.5 } });
+    expect(notes).toEqual([expect.objectContaining({ category: 'dropped-line', confidence: 0.475, status: 'check' })]);
+  });
+
+  it('dropped-words use neighbour evidence only, not audio quality', () => {
+    const DROP_SAKE = [perf('L1', 'L2'), "I'm sorry for that. I don't play accurately.", perf('L4', 'L5')].join(' ');
+    expect(classify(DROP_SAKE, { ctx: { audioQuality: 0.5 } }).notes).toEqual([
+      expect.objectContaining({ category: 'dropped-words', confidence: 0.8 }),
+    ]);
+  });
+});
+```
+
+Import `isFragment` from `../src/classify`. The existing test `poor audio quality turns a note into a check` asserts the old double counting; replace it with the dropped-line test above and name it in the commit message.
+
+In `packages/align/test/aligner.test.ts`, inside `describe('aligner: line errors')`:
+
+```ts
+  it('a recognizer fragment never buzzes and is only a check', () => {
+    const CIG: ScriptLineInput[] = [
+      { id: 'C1', characterId: 'JACK', text: 'I simply want my cigarette case back.' },
+      { id: 'C2', characterId: 'ALGY', text: 'Here it is.' },
+    ];
+    for (const patience of [0, 0.5]) {
+      const r = runScenario(CIG, heard('I simply want my cigar case back. Here it is.'), { patience });
+      expect(r.lineNotes.filter((n) => n.status === 'note'), `patience ${patience}`).toEqual([]);
+      expect(r.flags.filter((f) => f.alert), `patience ${patience}`).toEqual([]);
+    }
+  });
+```
+
+In `harness/test/run-engine.test.ts`, the meter test asserted the meter scales a wrong-words note (0.85 × 0.55 × 0.6). Under §8a it must not. Change it to assert `confidenceOf(0.55)` equals `Math.round(0.85 * 0.55 * 1000) / 1000` (the heard confidence only), keep the 0.95 case, and rename it "the audio-quality meter does not double-count heard confidence on wrong words (pass spec §8a)". Name it in the commit message.
+
+- [ ] **Step 2: Run and confirm failure**
+
+Run: `npx vitest run packages/align harness/test/run-engine.test.ts`
+Expected: FAIL (`isFragment` missing; fragment is a note; audio quality still scales wrong words).
+
+- [ ] **Step 3: Implement.** In `packages/align/src/classify.ts`:
+
+```ts
+/** Pass spec §8a: a heard word that is a leading fragment of the scripted word is a likely recognizer truncation. */
+export const FRAGMENT_CAP = 0.45;
+
+export function isFragment(heardNorm: string, expectedNorm: string): boolean {
+  const h = heardNorm.replace(/[^a-z]/g, '');
+  const e = expectedNorm.replace(/[^a-z]/g, '');
+  return h.length >= 2 && h.length < e.length && e.startsWith(h);
+}
+```
+
+In `makeNote`, replace the final confidence line with:
+
+```ts
+  // Pass spec §8a: recognizer confidence enters a note once. Notes with heard words already carry it, and
+  // dropped-words carry it through neighbour evidence; only notes with no other evidence take the audio-quality factor.
+  const quality = heard.length === 0 && category !== 'dropped-words' ? ctx.audioQuality : 1;
+  const confidence = round3(Math.min(opts.cap ?? 1, Math.max(0, c * quality)));
+```
+
+In `classifyBlock`'s wrong-words loop, split fragments out of each group before computing the group note:
+
+```ts
+    for (const group of groupBy(subs, (k) => E((ops[k] as SubOp).e).lineId)) {
+      const fragments = group.filter((k) => isFragment(H((ops[k] as SubOp).h).norm, E((ops[k] as SubOp).e).norm));
+      for (const k of fragments) {
+        const o = ops[k] as SubOp;
+        add('wrong-words', [E(o.e)], [H(o.h)], E(o.e), [k, k], { cap: FRAGMENT_CAP, quiet: true });
+      }
+      const rest = group.filter((k) => !fragments.includes(k));
+      if (!rest.length) continue;
+      const pairs = rest.map((k) => ops[k] as SubOp);
+      const factor =
+        pairs.reduce((s, o) => s + (o.score >= SIMILAR_SUB_SCORE && H(o.h).confidence < SIMILAR_CONFIDENT ? 0.6 : 1), 0) / pairs.length;
+      add('wrong-words', pairs.map((o) => E(o.e)), pairs.map((o) => H(o.h)), E(pairs[0]!.e), [rest[0]!, rest.at(-1)!], { factor });
+    }
+```
+
+In `packages/align/src/finalize-line.ts`, the paraphrase confidence becomes `round3(BASE_CONFIDENCE.paraphrase * meanConf)` (drop `* ctx.audioQuality`, same §8a comment). Leave the `audioQuality` field in `FinalizeContext`, since `called-for-line` and other callers still pass it.
+
+- [ ] **Step 4: Run and confirm everything passes**
+
+Run: `npx vitest run packages/align harness/test`
+Expected: PASS. If another existing test's expected confidence changes only because audio quality no longer scales a heard-word note, update it and name it in the commit message. If the oracle e2e (`harness/test/evaluate.test.ts`) moves past a bound, stop and report.
+
+- [ ] **Step 5: Full checks, then commit**
+
+```bash
+npm test && npm run lint && npm run typecheck
+git add packages/align harness/test
+git commit -m "feat(align): recognizer fragments are quiet checks; recognizer confidence counted once (pass spec §8a)
+
+<list of tests whose expectations changed>
+
+Co-Authored-By: <model you are>"
+```
+
+### Task 19, extra Step 3b (round 2 re-scoped): re-sweep `stableSec` before the thresholds
+
+Before Task 19's threshold sweep (its Step 4), repeat Task 17 Step 1 on the tuning seeds with the round-2 engine. Use `--stable-sec` ∈ {0.1, 0.2, 0.3}, at Patience 0.5 and at Patience 0, with the same rule: the smallest `s` whose `falseNotesPer10Min` at Patience 0.5 is ≤ the value at 0.3. If the choice differs from the current default (0.3), change the defaults (Stabilizer, CLI, cli-args test) and commit with the sweep table in the message. Then run the threshold sweep with the chosen `s`.

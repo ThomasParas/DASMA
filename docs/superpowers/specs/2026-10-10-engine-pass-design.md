@@ -311,3 +311,21 @@ After round 2 is measured on the held-out seeds, the pass ends.
 | Releasing the newest word early produces words that later grow | The split-word reconciliation (§5.1) and stabilizer tuning (§7.1) measure and absorb this. |
 | Off-script detection hides a real long paraphrase | Paraphrase is a whole-line classification in `finalizeLine` and is unaffected. Downgraded notes remain visible as checks. |
 | The cache masks TTS variance, making one machine's numbers look more certain than they are | 30 seeds per scene. The results doc states that the numbers are per machine. |
+
+## 8a. Round 2, re-scoped (user decision, 2026-10-10, after round 1)
+
+Round 1 (docs/engine-pass-results.md, "Round 1") passed false alerts but missed false notes (10.76 per 10 min), core recall (0.49) and latency (1.09 s). The round-1 attribution on the tuning seeds found two causes that the §8 list does not address:
+
+- **Fragment false notes.** 88% of solo false notes are single-word wrong-words where the heard word is a leading fragment of the scripted word ("cigar" for "cigarette"). The stabilizer released a word the recognizer was still extending; once released, the completed word is never re-emitted.
+- **Recognizer confidence counted twice.** Notes with heard words already scale by heard-word confidence; the §5.2 audio-quality factor is derived from the same confidence and multiplies in again, pushing real errors below the 0.5 note threshold. Dropped-words notes stack the neighbour-confidence factor (§5.1) on top as well.
+
+The homophone check found no homophone-spelling false notes, so the pronunciation dictionary (§8, Task 20) is not selected. The two-speed stabilizer is not selected (it needs its own spec).
+
+**Round 2 therefore contains, in this order:**
+
+1. **Fragment rule.** In `classifyOps`, a substitution pair whose heard word is a strict leading prefix of the expected word (both compared on letters only, heard ≥ 2 letters) is a likely recognizer truncation. It is classified as its own `wrong-words` note capped at `FRAGMENT_CAP = 0.45` (always a check) and marked quiet (never alerts). Other pairs in the same group are classified as before.
+2. **Recognizer confidence counted once.** The audio-quality factor multiplies only notes that have no heard words and no other confidence evidence: `dropped-line`, `jumped-cue`, `called-for-line`. Notes with heard words use heard confidence only; `dropped-words` uses the §5.1 neighbour evidence only; the paraphrase note in `finalizeLine` uses mean heard confidence only. The meter stays wired in the harness.
+3. **Re-sweep `stableSec`** ∈ {0.1, 0.2, 0.3} on the tuning seeds with the §7.1 rule, since the fragment rule changes the trade-off (lower `stableSec` lowers latency).
+4. **Threshold re-tune** (§8 Task 19) on the tuning seeds.
+
+Then the round-2 held-out measurement (Task 21) and the stop rule (§3) apply unchanged. Targets are unchanged.
