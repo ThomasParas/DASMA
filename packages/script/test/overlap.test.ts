@@ -26,4 +26,18 @@ describe('applyOverlapMarks', () => {
     expect(out[0].overlapRanges).toBeUndefined();
     expect(out[1].overlapRanges).toEqual([[0, 1]]);
   });
+
+  it('removes every overlap slash from a unit; the first one starts the overlap', () => {
+    const out = applyOverlapMarks([unit('u1', 'dialogue', 'Well, I never said / that you were wrong, no / really.'), unit('u2', 'dialogue', 'Mm.')]);
+    expect(out[0].text).toBe('Well, I never said that you were wrong, no really.');
+    expect(out[0].overlapRanges?.[0][0]).toBe(4);
+  });
+
+  it('keeps chained overlap ranges sorted and non-overlapping', () => {
+    const out = applyOverlapMarks([unit('u1', 'dialogue', 'one two three four / five six'), unit('u2', 'dialogue', 'alpha / beta gamma'), unit('u3', 'dialogue', 'zed')]);
+    expect(out.map((u) => u.text)).toEqual(['one two three four five six', 'alpha beta gamma', 'zed']);
+    expect(out[0].overlapRanges).toEqual([[4, 6]]);
+    expect(out[1].overlapRanges).toEqual([[0, 3]]);
+    expect(out[2].overlapRanges).toEqual([[0, 1]]);
+  });
 });

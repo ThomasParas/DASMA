@@ -58,7 +58,7 @@ function splitSpeech(lines: SpeechLine[], speaker: Speaker): Draft[] {
   lines.forEach((l, i) => {
     if (i > 0) {
       italic.push(false);
-      lineAt.push(i);
+      lineAt.push(-1); // the joining newline belongs to neither line
     }
     for (let k = 0; k < l.text.length; k++) {
       italic.push(l.italic[k] ?? false);
@@ -88,7 +88,7 @@ function splitSpeech(lines: SpeechLine[], speaker: Speaker): Draft[] {
   const piece = (kind: UnitKind, s: number, e: number): void => {
     const body = tidy(text.slice(s, e));
     if (!hasWords(body)) return;
-    const touched = [...new Set(lineAt.slice(s, Math.max(s + 1, e)))];
+    const touched = [...new Set(lineAt.slice(s, Math.max(s + 1, e)).filter((i) => i >= 0))];
     const confidence = Math.min(...touched.map((i) => lines[i].confidence));
     const source = touched.flatMap((i) => lines[i].source);
     if (kind === 'dialogue') {

@@ -112,4 +112,11 @@ describe('buildUnits', () => {
     const kinds = unitsOf(textDoc(['HAMLET', 'Go.', 'HORATIO', 'Yes.', '* * *', 'HAMLET', 'Again.', 'HORATIO', 'No.'].join('\n'))).units.map((u) => u.kind);
     expect(kinds).toContain('sceneBreak');
   });
+
+  it('does not pull the next line into the source of a piece that ends at a line break', () => {
+    const { units } = unitsOf(textDoc(['HAMLET', 'Go on.', '[He sits.] Then more.', ...SCENE].join('\n')));
+    const goOn = units.find((u) => u.text === 'Go on.');
+    expect(goOn?.kind).toBe('dialogue');
+    expect(goOn?.source.map((s) => s.line)).toEqual([1]);
+  });
 });
