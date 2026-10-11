@@ -96,6 +96,33 @@ function textColumn(lines: CleanLine[]): { left: number; right: number } {
 const LEADING_NUMBER = /^(\d{1,4})(?:\t|\s{2,})(?=\S)/;
 const TRAILING_NUMBER = /(?<=\S)(?:\t|\s{2,})(\d{1,4})$/;
 
+/** Removes the first `n` characters from the spans' text, dropping spans that become empty. */
+function dropPrefix(spans: RawSpan[], n: number): RawSpan[] {
+  const out: RawSpan[] = [];
+  let left = n;
+  for (const s of spans) {
+    const cut = Math.min(left, s.text.length);
+    left -= cut;
+    const text = s.text.slice(cut);
+    if (text.length > 0) out.push({ ...s, text });
+  }
+  return out;
+}
+
+/** Removes the last `n` characters from the spans' text, dropping spans that become empty. */
+function dropSuffix(spans: RawSpan[], n: number): RawSpan[] {
+  const out: RawSpan[] = [];
+  let left = n;
+  for (let i = spans.length - 1; i >= 0; i--) {
+    const s = spans[i];
+    const cut = Math.min(left, s.text.length);
+    left -= cut;
+    const text = s.text.slice(0, s.text.length - cut);
+    if (text.length > 0) out.unshift({ ...s, text });
+  }
+  return out;
+}
+
 function removeLineNumbers(lines: CleanLine[], source: SourceKind): CleanLine[] {
   const col = source === 'pdf' ? textColumn(lines) : null;
   let last = 0;
@@ -126,13 +153,15 @@ function removeLineNumbers(lines: CleanLine[], source: SourceKind): CleanLine[] 
     if (lead && accept(Number(lead[1]))) {
       const text = l.text.slice(lead[0].length);
       const shift = source === 'text' ? lead[0].length * TEXT_COLUMN : 0;
-      out.push({ ...l, text, left: l.left + shift, spans: [{ ...l.spans[0], text, left: l.left + shift }, ...l.spans.slice(1)] });
+      const spans = dropPrefix(l.spans, lead[0].length);
+      if (spans.length && shift) spans[0] = { ...spans[0], left: spans[0].left + shift };
+      out.push({ ...l, text, left: l.left + shift, spans });
       continue;
     }
     const trail = TRAILING_NUMBER.exec(l.text);
     if (trail && accept(Number(trail[1]))) {
       const text = l.text.slice(0, trail.index);
-      const spans = l.spans.length === 1 ? [{ ...l.spans[0], text }] : l.spans.filter((s) => !isNumberSpan(s));
+      const spans = dropSuffix(l.spans, l.text.length - trail.index);
       out.push({ ...l, text, spans });
       continue;
     }

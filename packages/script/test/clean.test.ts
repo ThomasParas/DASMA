@@ -83,6 +83,27 @@ describe('line numbers', () => {
   });
 });
 
+describe('line numbers on multi-span lines', () => {
+  const sp = (text: string, italic = false) => ({ text, left: 72, right: 72 + text.length * 6, italic, bold: false });
+  const docx = (text: string, spans: ReturnType<typeof sp>[]) =>
+    cleanDoc(rawDoc([line(text, { spans })], { source: 'docx', realPages: false })).lines[0];
+
+  it('strips a leading number from the first span only and keeps the italic span intact', () => {
+    const a = docx('5\tHello world', [sp('5\t'), sp('Hello '), sp('world', true)]);
+    expect(a.text).toBe('Hello world');
+    expect(a.spans.map((s) => [s.text, s.italic])).toEqual([['Hello', false], ['world', true]]);
+    const b = docx('5\tHello world', [sp('5\tHello '), sp('world', true)]);
+    expect(b.text).toBe('Hello world');
+    expect(b.spans.map((s) => [s.text, s.italic])).toEqual([['Hello', false], ['world', true]]);
+  });
+
+  it('removes only the trailing number span, not other number spans', () => {
+    const l = docx('Act 3 is long   10', [sp('Act '), sp('3'), sp(' is long   '), sp('10')]);
+    expect(l.text).toBe('Act 3 is long');
+    expect(l.spans.map((s) => s.text)).toEqual(['Act', '3', 'is long']);
+  });
+});
+
 describe('hyphenation', () => {
   it('rejoins a word split across lines and records both sources', () => {
     const doc = textDoc("I don't play accu-\nrately at all.");
