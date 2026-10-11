@@ -55,6 +55,7 @@ packages/script/
     extract/pdf.ts    extractPdf(bytes)   — pdfjs-dist
     extract/docx.ts   extractDocx(bytes)  — fflate + a minimal XML reader for word/document.xml
     extract/text.ts   extractText(text)
+    extract/pages.ts  assignEstimatedPages(lines) — pure
     clean.ts          cleanDoc(raw) → CleanDoc
     profile.ts        profileDoc(clean) → DocProfile
     weights.ts        every hand-set scoring constant, FLAG_BELOW
@@ -73,17 +74,20 @@ packages/script/
 
 - Every file except `extract/pdf.ts` and `extract/docx.ts` is pure TypeScript, with no `node:*` and no DOM.
 - The two extractors may import only `pdfjs-dist` and `fflate`.
-- `align-adapter.ts` imports *types only* from `@dasma/align`.
+- `@dasma/align` is the only workspace import. `align-adapter.ts` imports its types, and `overlap.ts` and `diff.ts` use its pure `tokenize` and `normalizeToken` so word indices and normalisation match the engine.
 - The same code runs in the browser app and in the Node harness.
 
 **Dependencies (pinned)**
 
 | Package | Version | Used by |
 |---|---|---|
-| `pdfjs-dist` | `6.4.299` | `packages/script` (in Node: the legacy build with no worker) |
+| `pdfjs-dist` | `6.3.289` | `packages/script` (the legacy build; in Node it runs without a worker) |
 | `fflate` | `0.8.3` | `packages/script` |
 | `pdf-lib` | `1.17.1` | devDependency of the harness and of `packages/script` tests |
-| `docx` | `9.10.0` | devDependency of the harness and of `packages/script` tests |
+| `docx` | `9.7.1` | devDependency of the harness and of `packages/script` tests |
+| `diff` | `9.0.0` | devDependency of the harness (word alignment for scoring) |
+
+Every pin is a release at least two weeks old. The newest `pdfjs-dist` (6.4.299) and `docx` (9.10.0) were too recent.
 
 The MVP spec named mammoth for docx files. It is replaced because it discards paragraph alignment and indentation, and those are the strongest speaker-name signals in a Word script.
 
@@ -102,7 +106,7 @@ type ImportInput =
   | { kind: 'text'; text: string };
 
 function importScript(input: ImportInput, opts?: { title?: string }): Promise<ImportResult>;
-interface ImportResult { script: Script; profile: DocProfile; warnings: ImportWarning[] }
+interface ImportResult { script: Script; profile: DocProfile; warnings: ImportWarning[]; pages: number }
 ```
 
 ## 4. Extraction and clean-up
@@ -110,9 +114,11 @@ interface ImportResult { script: Script; profile: DocProfile; warnings: ImportWa
 ### 4.1 `RawDoc`
 
 ```ts
+interface RawSpan { text: string; left: number; right: number; italic: boolean; bold: boolean }
 interface RawLine {
-  page: number;          // 1-based; docx and text: estimated, 50 lines per page
-  text: string;
+  page: number;          // 1-based
+  text: string;          // the spans' text in reading order
+  spans: RawSpan[];      // pdf: text items; docx: runs; text: one span
   left: number;          // left edge, in points (pdf), twips/20 (docx) or leading-space columns ×6 (text)
   right: number;
   centered: boolean;
@@ -120,20 +126,22 @@ interface RawLine {
   bold: boolean;
   size: number;          // font size in points; 0 if unknown
 }
-interface RawDoc { source: 'pdf' | 'docx' | 'text'; pageWidth: number; pages: number; lines: RawLine[] }
+interface RawDoc { source: 'pdf' | 'docx' | 'text'; pageWidth: number; pages: number; realPages: boolean; lines: RawLine[] }
 ```
 
-- **PDF:** text items are grouped into a line when their baselines are within 2 pt of each other, then sorted by x. Italic and bold come from the font name (`Italic`, `Oblique`, `Bold`, `Black`, `Semibold`). A line counts as centred when its midpoint is within 3% of the page width of the text column's midpoint, and it is at least 5% of the page width narrower than the column.
+**Estimated pages.** A docx file without page breaks, and pasted text without form feeds, gets estimated pages (`realPages: false`). Each line takes `max(1, ceil(characters / 80))` page lines, and a new page starts every 50 page lines. One pure helper, `assignEstimatedPages`, does this, and the corpus renderers use the same helper for their truth pages.
+
+- **PDF:** text items are grouped into a line when their baselines are within 2 pt of each other, then sorted by x. A space goes between two items when the gap is at least 0.2 × the font size and neither side already has whitespace. Italic and bold come from pdf.js's font flags, or else from the font name (`Italic`, `Oblique`, `Bold`, `Black`, `Semibold`). A line counts as centred when its midpoint is within 3% of the page width of the text column's midpoint, and it is at least 5% of the page width narrower than the column.
 - **docx:**
   - Each `w:p` paragraph becomes one line.
   - `w:jc="center"` sets `centered`.
   - `w:ind` sets `left`.
   - Run properties `w:i` and `w:b`, and the paragraph style's own, set `italic` and `bold`.
-  - `w:br w:type="page"` and `w:lastRenderedPageBreak` start a new page. When a document has neither, a new page starts every 50 lines.
+  - `w:br w:type="page"`, `w:pageBreakBefore` and `w:lastRenderedPageBreak` start a new page. A document with none of them gets estimated pages.
   - A `w:tab` at the start of a paragraph adds 36 pt of indent.
 - **Text:**
   - Each line becomes one line. Leading tabs count as 4 spaces.
-  - A form feed (`\f`) starts a new page. Otherwise a new page starts every 50 lines.
+  - A form feed (`\f`) starts a new page. Text without form feeds gets estimated pages.
   - Pasted text has no italic, bold or centring.
 - **Errors.** Each condition raises `ScriptImportError` with a code:
   - `noTextLayer`: the PDF has no text items on any page.
@@ -205,7 +213,7 @@ interface DocProfile {
 
 - A token counts toward `cueTokens` only if it occurs in speaker position at least 2 times. Comparison ignores case and trailing punctuation.
 - `primary` is the convention with the most matches among recurring tokens.
-- A cast list is a block starting with a line that matches `^(dramatis personae|characters|cast( of characters)?)\b` (case-insensitive). The block ends at the first heading or the first blank page.
+- A cast list is a block starting with a line that matches `^(dramatis person(ae|æ)|characters|cast( of characters)?|(the )?persons (in|of) the play|persons represented)\b` (case-insensitive). The block ends at the first heading, the first line longer than 12 words, or after 40 lines. Each name is the text before the first `,`, `:` or ` — `, uppercased, without a trailing `.`.
 - `frontMatterEnd` is the first line that is either a heading (§5.2) or the first of three consecutive speeches that use the primary convention.
 
 ### 5.2 Line states and scoring (`tag.ts`, `weights.ts`)
@@ -218,8 +226,10 @@ Each cleaned line takes one of six states:
 | `cueInline` | A speaker name followed by dialogue on the same line. |
 | `dialogue` | Spoken text. |
 | `direction` | A stage direction. |
-| `heading` | Matches `^(act|scene)\b`, `^(prologue|epilogue)\b`, or `^act\s+[ivxlc\d]+.*scene\s+[ivxlc\d]+` (all case-insensitive). The line is at most 8 words long. |
+| `heading` | Matches `^act\s+([ivxlc]+|\d+|one|two|three|four|five)\b`, `^(first|second|third|fourth|fifth|last)\s+act\b`, `^scene\b` or `^(the\s+)?(prologue|epilogue)\b` (all case-insensitive), and is at most 12 words long. `ACT DROP` and similar are not headings. |
 | `front` | Front matter: the title page, cast list, notices. |
+
+Directions use two internal states, `dirIn` (inside a speech, so dialogue may follow and continue the same speaker) and `dirOut` (outside a speech). Both become `direction` units, and a line's confidence sums their posteriors.
 
 **Emission scores**
 
@@ -251,7 +261,7 @@ Each cleaned line takes one of six states:
 - **Speeches.** A speech starts at a `cue` or `cueInline` line and runs until the next `cue`, `cueInline` or `heading`. Direction lines inside it become `direction` units, and dialogue lines after a direction continue the same speaker (`(He sits.)` followed by more of the speech).
 - **Speech text.** The speech's dialogue lines are joined with `\n`. For `cueInline`, the name prefix and its `.` or `:` are removed from the text.
 - **Directions inside a speech.**
-  - A parenthetical `(...)` or bracketed `[...]` span inside dialogue is split out. So is an italic span from docx or PDF that has at least one non-italic word on each side, or ends the line.
+  - A parenthetical `(...)` or bracketed `[...]` span inside dialogue is split out. So is an italic run from docx or PDF of at least 3 words with non-italic text on at least one side. Shorter italic runs are emphasis ("I believe it *is*") and stay spoken.
   - The speech becomes `dialogue`, `direction`, `dialogue`, with the same `characterId` on both dialogue parts.
   - A direction inside a speech is never sent to the engine.
 - **Unit kinds.** A `cue` line becomes a `characterName` unit. A `heading` line becomes a `heading` unit, and a `front` line a `frontMatter` unit. Consecutive `direction` lines become one `direction` unit. A line of only `*`, `#` or `~` characters becomes a `sceneBreak`.
@@ -324,14 +334,15 @@ The plays all come from Project Gutenberg, with the Gutenberg header and licence
 | `earnest` | Wilde, *The Importance of Being Earnest* (1895) | tuning |
 | `dolls-house` | Ibsen, *A Doll's House*, tr. R. Farquharson Sharp (1910) | tuning |
 | `hamlet` | Shakespeare, *Hamlet* | tuning |
-| `seagull` | Chekhov, *The Seagull*, tr. Julius West (1915) | held out |
+| `seagull` | Chekhov, *The Sea-Gull*, the English translation in Gutenberg eBook #1754 (published before 1931; public domain in the US) | held out |
 | `romeo` | Shakespeare, *Romeo and Juliet* | held out |
 
 **Building the tagged files**
 
-- A converter script written for each play, `harness/src/corpus/convert-gutenberg.ts`, builds its tagged file once. The output is committed.
-- The converter fails if any speech starts with a name that isn't in the cast.
-- Inline directions stay attached to their speech in the source file as `[...]` spans. The renderers lay them out in each style's own form.
+- One paragraph-based converter, `harness/src/corpus/convert-gutenberg.ts`, with a small config per play, builds each tagged file once from a downloaded `pg<id>.txt`. The output is committed.
+- The converter keeps the title and the cast list as front matter, and drops Gutenberg's contents lists, scene lists and premiere casts.
+- The converter fails if a speaker doesn't appear in the play's own cast list, apart from a short exception list in the play's config (for example `ALL`, `BOTH`, and Gutenberg's typo `ABKADINA` for `ARKADINA`).
+- Inline directions stay attached to their speech in the source file as `[...]` spans, and Gutenberg's `_word_` emphasis stays as `_..._`. The renderers lay both out in each style's own form; truth text never contains the marks.
 
 ### 6.2 Layout families
 
@@ -341,8 +352,8 @@ Renderers in `harness/src/corpus/` turn a source play into a document of about 1
 |---|---|---|---|
 | `licensed` | 1 | PDF | Names centred in capitals. Italic directions in parentheses. Title header and page-number footer. |
 | | 2 | PDF | Names indented 1.5 in. Italic directions indented, with no parentheses. "- 12 -" page numbers. |
-| | 3 | PDF | Acting edition: `NAME.` in capitals at the start of the line, directions in brackets. Contains ligatures and hyphenated line wraps. |
-| | p | text | Variant 1 as plain text (no italic), including its headers and page numbers. |
+| | 3 | PDF | Acting edition: `NAME.` in capitals at the start of the line, directions in brackets. Contains hyphenated line wraps. |
+| | p | text | Variant 1 as plain text (no italic), including its headers and page numbers, with `fi` and `fl` as ligature characters as a PDF copy-paste gives them. The standard PDF fonts can't encode ligature glyphs, so ligatures are exercised here. |
 | `word` | 1 | docx | `NAME:` in bold at the start of the line. Plain directions in parentheses. |
 | | 2 | docx | Names centred and bold on their own line. Italic directions. |
 | | 3 | docx | Mixed: mostly `NAME:`, some names on their own line, leading tabs. Names in mixed case such as `Nora:`. Some dialogue lines shouted in capitals. |
@@ -354,7 +365,7 @@ Renderers in `harness/src/corpus/` turn a source play into a document of about 1
 
 - **Which plays each family uses.** `licensed` and `word` use `earnest`, `dolls-house` and `seagull`. `classical` uses `hamlet` and `romeo`.
 - **Seeded variation.** Each document's seed varies the font family (one of three standard PDF fonts, or three docx fonts), the size (10–12 pt), the margins (0.75–1.25 in), the line width, and the excerpt's starting scene.
-- **Correct tags travel with the document.** Every rendered document comes with its truth file. That file maps each correct unit to the rendered lines it occupies, by page and line index after the renderer's own layout. Scoring matches units through those lines.
+- **Correct tags travel with the document.** Every rendered document comes with its truth file: the cast (with every abbreviation the renderer used as an alias), the page count, and the correct units, each with its kind, speaker, text and the page it starts on. Scoring matches units by their words (§6.4), so it doesn't depend on how the extractor splits lines.
 
 ### 6.3 Tuning and held-out sets
 
@@ -369,20 +380,21 @@ Renderers in `harness/src/corpus/` turn a source play into a document of about 1
 - **Page:**
   - PDF: a page of the PDF.
   - docx and text: a page as `RawDoc` estimates it (§4.1).
-- **Matching units.** Predicted units are paired with correct units by how many source lines they share.
+- **Matching units.** Every unit's words (the engine's `tokenize` and `normalizeToken`) are laid end to end, for the truth and for the prediction, and the two word streams are aligned with an order-preserving diff. A correct unit *lands* in the predicted units its words align to, and a predicted unit *comes from* the correct units its words align to.
 - **What counts as a fix.** Each of the following counts as one fix:
-  - A correct spoken unit whose matched predicted unit is not spoken.
-  - A predicted spoken unit whose matched correct unit is not spoken.
-  - A spoken unit that is spoken in both but has the wrong `characterId`, after resolving the predicted cast to the correct cast by name and alias.
-  - A heading that was missed, or a heading that was invented.
-  - Each split needed: one predicted unit covering two correct units, where the boundary matters for spoken or heading units.
-  - Each merge needed: the reverse of a split.
+  - **Missed speech:** a correct spoken unit with less than half its words landing in predicted spoken units.
+  - **Invented speech:** a predicted spoken unit with less than half its words coming from correct spoken units.
+  - **Wrong speaker:** a correct spoken unit, not missed, whose main predicted spoken unit has the wrong `characterId`. Predicted characters are resolved to correct ones by name and alias.
+  - **Missed or invented heading:** the same half-the-words rule, for headings.
+  - **Split:** a predicted spoken unit that comes from k ≥ 2 correct spoken units needs k − 1 fixes.
+  - **Merge:** a correct spoken unit that lands in k ≥ 2 predicted spoken units needs k − 1 fixes.
 
-  Confusion between two non-spoken kinds (`direction`, `characterName`, `frontMatter`, `sceneBreak`) is not a fix.
-- **Flagged error.** A fix whose predicted unit is flagged. Errors that need a split or merge count as flagged when either predicted unit is flagged.
+  A unit counts toward a split or merge only with at least 2 aligned words, or 1 when the unit has at most 2 words. Confusion between two non-spoken kinds (`direction`, `characterName`, `frontMatter`, `sceneBreak`) is not a fix.
+- **Owner and page.** Each fix has an owner: the predicted unit the user would click to fix it (the main predicted unit for a missed speech or heading, the unit itself otherwise, and the extra units for a merge). A fix is counted on its owner's first page, or on the correct unit's page when there is no owner.
+- **Flagged error.** A fix whose owner is flagged.
 - **False flag.** A flagged predicted unit that needs no fix.
 - **Speaker accuracy.** The share of correct spoken units whose matched predicted unit is spoken and has the right speaker.
-- **Text accuracy.** The share of correct spoken words reproduced exactly, by word-level edit distance after the engine's `normalizeToken`. Spoken text is compared per play: everything the predictions treat as spoken (in the engine's `toAlignLines` order) against everything the truth treats as spoken.
+- **Text accuracy.** `1 − errors / correct spoken words`, comparing everything the prediction treats as spoken (in `toAlignLines` order) with everything the truth treats as spoken, word by word after `normalizeToken`. Each run of differences counts `max(words removed, words added)` errors, so a wrong word is one error.
 
 ### 6.5 Tuning rounds
 
