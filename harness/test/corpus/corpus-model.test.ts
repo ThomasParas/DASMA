@@ -59,6 +59,31 @@ describe('buildParas', () => {
     expect(cast.find((c) => c.id === 'first-clown')!.aliases).toEqual([]);
   });
 
+  it('never renders an underscore: emphasis spans verse lines, and stray marks are dropped', () => {
+    const play = {
+      ...MINI_PLAY,
+      units: [
+        { kind: 'frontMatter' as const, text: '_[The action takes place in a room.]_' },
+        { kind: 'heading' as const, text: 'ACT I' },
+        { kind: 'direction' as const, text: '[Enter Horatio, very gay.] He does!' },
+        { kind: 'dialogue' as const, characterId: 'hamlet', text: 'Now _Anon he finds him,\nStriking_ too late, [_Aside_ .] and so_ on.' },
+      ],
+    };
+    const { paras, truth } = buildParas(play, play.units, STYLES.licensed['1'], mulberry32(1));
+    expect(paras.some((p) => p.runs.some((r) => r.text.includes('_')))).toBe(false);
+    expect(truth.some((t) => t.text.includes('_'))).toBe(false);
+    const speech = paras.filter((p) => p.kind === 'speech');
+    expect(speech[0].runs.find((r) => r.text.includes('Anon'))?.italic).toBe(true);
+    expect(speech[1].runs.find((r) => r.text.includes('Striking'))?.italic).toBe(true);
+    expect(runs(speech[1])).toContain('Striking too late,');
+    // Standalone units carry no source brackets; only the style's own wrapper.
+    expect(runs(paras[0])).toBe('The action takes place in a room.');
+    expect(truth[0]).toEqual({ kind: 'frontMatter', text: 'The action takes place in a room.' });
+    expect(truth.find((t) => t.kind === 'direction')).toEqual({ kind: 'direction', text: '(Enter Horatio, very gay. He does!)' });
+    // Inline directions are cleaned before wrapping.
+    expect(truth).toContainEqual({ kind: 'direction', text: '(Aside .)' });
+  });
+
   it('puts a direction that opens a speech between the cue and the dialogue', () => {
     const { truth } = buildParas(MINI_PLAY, MINI_PLAY.units, STYLES.licensed['1'], mulberry32(1));
     const clown = truth.findIndex((t) => t.kind === 'characterName' && t.text === 'FIRST CLOWN');

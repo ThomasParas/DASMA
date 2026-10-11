@@ -34,13 +34,18 @@ export function abbreviation(name: string, cast: readonly Character[]): string |
 
 const wrapText = (t: string, wrap: 'parens' | 'brackets' | 'none'): string => (wrap === 'parens' ? `(${t})` : wrap === 'brackets' ? `[${t}]` : t);
 const plain = (t: string): string => t.replace(/_/g, '').replace(/\s+/g, ' ').trim();
+/** Standalone directions and front matter: no source bracket or emphasis marks survive, only the style's own wrapper. */
+const stripMarks = (t: string): string => plain(t.replace(/[[\]]/g, ''));
 const hasWords = (t: string): boolean => /[\p{L}\p{N}]/u.test(t);
 
-function emphasisRuns(text: string): Run[] {
-  return text
-    .split(/(_[^_]+_)/)
-    .filter(Boolean)
-    .map((part) => (/^_[^_]+_$/.test(part) ? { text: part.slice(1, -1), italic: true } : { text: part }));
+/** Every `_` toggles italic and is never rendered; the state carries across the lines of a piece, an unmatched `_` is dropped. */
+function emphasisRuns(text: string, italic: boolean): { runs: Run[]; italic: boolean } {
+  const runs: Run[] = [];
+  text.split('_').forEach((part, i) => {
+    if (i > 0) italic = !italic;
+    if (part) runs.push(italic ? { text: part, italic: true } : { text: part });
+  });
+  return { runs, italic };
 }
 
 export function buildParas(play: SourcePlay, units: readonly SourceUnit[], style: StyleSpec, rng: Rng): BuiltParas {
@@ -98,7 +103,7 @@ export function buildParas(play: SourcePlay, units: readonly SourceUnit[], style
     };
     for (const m of u.text.matchAll(/\[([^\]]*)\]/g)) {
       textPiece(u.text.slice(last, m.index));
-      const d = wrapText(m[1].trim(), style.inline.wrap);
+      const d = wrapText(plain(m[1]), style.inline.wrap);
       pieces.push({ kind: 'direction', raw: d, truth: addTruth({ kind: 'direction', text: d }) });
       last = m.index! + m[0].length;
     }
@@ -123,9 +128,12 @@ export function buildParas(play: SourcePlay, units: readonly SourceUnit[], style
         push({ text: p.raw, italic: style.inline.italic }, p.truth, true);
         continue;
       }
+      let italic = false;
       p.raw.split('\n').forEach((lineRaw, k) => {
         if (k > 0) lines.push({ runs: [], truth: [] });
-        emphasisRuns(lineRaw).forEach((r, j) => push(r, p.truth, j === 0));
+        const e = emphasisRuns(lineRaw, italic);
+        italic = e.italic;
+        e.runs.forEach((r, j) => push(r, p.truth, j === 0));
       });
     }
     lines.forEach((l, k) => {
@@ -138,13 +146,13 @@ export function buildParas(play: SourcePlay, units: readonly SourceUnit[], style
   let frontIndex = 0;
   for (const u of units) {
     if (u.kind === 'frontMatter') {
-      const t = plain(u.text);
+      const t = stripMarks(u.text);
       para([{ text: t, bold: frontIndex === 0 }], 'front', [addTruth({ kind: 'frontMatter', text: t })], { align: frontIndex === 0 ? 'center' : 'left' });
       frontIndex++;
     } else if (u.kind === 'heading') {
       para([{ text: u.text, bold: true }], 'heading', [addTruth({ kind: 'heading', text: u.text })], { align: 'center', gapBefore: true });
     } else if (u.kind === 'direction') {
-      const t = wrapText(plain(u.text), style.direction.wrap);
+      const t = wrapText(stripMarks(u.text), style.direction.wrap);
       para([{ text: t, italic: style.direction.italic }], 'direction', [addTruth({ kind: 'direction', text: t })], {
         indent: style.direction.indent,
         gapBefore: true,
