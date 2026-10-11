@@ -241,7 +241,7 @@ The current `Stabilizer(2)` counts `update()` calls, which means one per `accept
 
 ```ts
 export class Stabilizer {
-  constructor(opts?: { stableSec?: number }); // default 0.2
+  constructor(opts?: { stableSec?: number }); // default 0.2 (tuned default 0.3, see docs/engine-pass-results.md)
   /** words: current hypothesis for the segment; audioSec: total seconds fed to the recognizer so far. */
   update(words: RawWord[], endpoint: boolean, audioSec: number): HeardWord[];
 }

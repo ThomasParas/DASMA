@@ -104,6 +104,17 @@ interface Recognizer {
   realtimeFactor(): number;
 }
 
+// asr: wrappers a recognizer implementation uses and the session wires
+class Stabilizer {
+  constructor(opts?: { stableSec?: number });  // default 0.3
+  update(words: RawWord[], endpoint: boolean, audioSec: number): HeardWord[]; // audioSec: seconds fed so far
+}
+class AudioQualityMeter {
+  constructor(opts?: { windowSec?: number });  // default 10
+  push(words: HeardWord[]): void;
+  value(): number;                             // in [0.6, 1]
+}
+
 // align
 interface ExpectedWord {
   idx: number; lineId: string; characterId: string;
@@ -113,7 +124,7 @@ interface ExpectedWord {
 type AlignEvent =
   | { type: 'matched'; idx: number; at: number }
   | { type: 'suspect'; idxs: number[]; at: number }
-  | { type: 'flag'; note: NoteDraft; alert: boolean; at: number }
+  | { type: 'flag'; note: NoteDraft; alert: boolean; at: number } // a note may be flagged twice: first alert: false, then once alert: true when the script position is confirmed after it
   | { type: 'stumble'; idx: number; heard: string; at: number }
   | { type: 'lost'; at: number; guesses: number[] }
   | { type: 'reanchored'; fromIdx: number; toIdx: number; lostFor: number; at: number }
@@ -133,7 +144,18 @@ interface Aligner {
   onEvent(cb: (e: AlignEvent) => void): () => void;
 }
 function createAligner(expected: ExpectedWord[], opts: AlignOptions): Aligner;
+interface AlignOptions {
+  patience: number; strictness: Strictness; windowSize: number; lostAfter: number; longLossSec: number;
+  alertMinConfidence: number;      // default 0.75
+  noteMinConfidence: number;       // default 0.65
+  heardConfidenceFloor: number;    // default 0
+}
 ```
+
+- **`Stabilizer`** (engine-change pass spec §7.1): a word is released once it has been unchanged for `stableSec` seconds of fed audio (default 0.3). The newest word also needs the recognizer to be `stableSec` past its end, because it may still grow. An endpoint releases everything. Time is measured in audio seconds, so behaviour does not depend on chunk size.
+- **`AudioQualityMeter`**: `push(words)` takes the stabilized words; `value()` is `clamp((m − 0.3) / 0.5, 0.6, 1)` where `m` is the mean word confidence over the trailing 10 s, and 1 before any words. The session wires it into the aligner (`recognizer.onWords → meter.push → aligner.setAudioQuality(meter.value())`, before `aligner.push`; the harness `runEngine` does this today). Since the pass's §8a rule counts recognizer confidence once, the aligner applies this factor only to notes that have no heard words and no other confidence evidence: dropped line, jumped cue and called-for line. Notes with heard words already carry the recognizer's confidence, and a dropped-words note carries it through its neighbours' confidence.
+- **`AlignOptions.heardConfidenceFloor`** (default 0): the floor of the heard-confidence multiplier for notes containing a content word. 0 means the full penalty.
+- **`flag` event:** a note may be flagged twice, first with `alert: false`, then once with `alert: true` when the script position is confirmed after it. Consumers count alerts from flags with `alert: true`.
 
 ## 5. Data model
 
@@ -177,7 +199,7 @@ Tag accuracy target is "fast to fix," not perfect — the correction screen is t
 - Phonetic key per word: Double Metaphone (primary + alternate).
 
 ### 7.2 Core loop
-1. **Settled words only.** A `HeardWord` is acted on when `final` (or stable across N partial updates — set in `asr`).
+1. **Settled words only.** A `HeardWord` is acted on when `final` (or unchanged for `stableSec` seconds of audio — set in `asr`, see §4.2).
 2. **Cursor + look-ahead window** (~30 expected words), also fed to the recognizer as light hotwords (low boost) when supported.
 3. **Rolling alignment:** on each settled word, align the last ~8 heard words against the window (banded Needleman–Wunsch). Scores: exact 1.0; phonetic match ~0.9 (counts as correct); near-phonetic partial; gap penalties for skips/insertions. Fillers (`um`, `uh`, `er`, `ah`, `hmm`) are dropped before alignment.
 4. **States:** `pending → matched`, or `pending → suspect → confirmed | stumble`.
@@ -212,7 +234,26 @@ Each flag gets a confidence from: recognizer word confidence, phonetic distance 
 - **Low** → no alert; report "check" item with clip.
 - Contraction differences are capped at "check" (recognizers normalize contractions on their own).
 
-Defaults are conservative until real-audio data exists (*D21*).
+Defaults are conservative until real-audio data exists (*D21*). The defaults the engine-change pass settled on are `noteMinConfidence` 0.65 and `alertMinConfidence` 0.75.
+
+#### Engine-change pass (2026-10)
+
+The rules below were added by the engine-change pass (spec: [`2026-10-10-engine-pass-design.md`](2026-10-10-engine-pass-design.md); results: [`docs/engine-pass-results.md`](../../engine-pass-results.md)). Section numbers refer to the pass spec.
+
+- **Accents, symbols and abbreviations** are normalized on both sides: accents folded (é → e), `$n` and `n%` expanded, Mr/Mrs/Dr/St expanded (§5.5).
+- **Split and joined recognizer words:** a heard token that runs two expected words together is split ("norhan" → "nor hand"); two adjacent heard tokens that spell one expected word are joined ("any one" → "anyone") (§5.1, §5.5).
+- **Letter-agreement guard:** a phonetic match also needs normalized letter edit distance ≤ 0.4, so sir/sorry no longer sound alike (§5.4).
+- **Heard-confidence floor:** `heardConfidenceFloor` softens the penalty on low-confidence wrong words; shipped at 0 because raising it cost false notes and false alerts (§5.3).
+- **Per-pair similarity downgrade:** the sounds-similar downgrade applies per word pair and only when that pair was heard with confidence < 0.8 (§5.4).
+- **Evidence-based deletions:** a dropped-words note scores from its neighbours' confidence and whether other errors are adjacent, and a single dropped content word never raises an alert (§5.1).
+- **Anchored and deferred alerts:** an alert fires only once the surrounding region is anchored by 3 consecutive matched words; otherwise the note is flagged `alert: false` first and alerts later, or never (§6.1).
+- **Off-script runs become checks:** 4 or more consecutive resolved heard tokens with at most one match are chatter, and notes inside them are downgraded to checks without alerts (§6.2).
+- **Confirmed backward jumps with snapshot restore:** a backward re-anchor needs the same confirming words as a forward one, and lines it reset but the redo never reached get their earlier result back (§6.3).
+- **Patience-0 re-alignment and the line-end floor:** a block of mismatches that matches the start of a following line is re-aligned as skipped lines, and a commit that touches a line's last 2 words waits for 2 matches (§6.4).
+- **Recognizer fragments:** a wrong word that is a strict leading prefix of the scripted word ("cigar" for "cigarette", at least 2 letters heard) is a likely recognizer truncation. It becomes a quiet check capped at 0.45 and never alerts (§8a, item 1).
+- **Recognizer confidence counted once:** the audio-quality factor scales only dropped-line, jumped-cue and called-for-line notes; the other notes use their own heard-word or neighbour evidence (§8a, item 2).
+
+Poor audio therefore downgrades the notes that have no other evidence, and the other notes through the recognizer confidence they already carry.
 
 ## 8. Run experience (`session`, `cue`, `ui`)
 
@@ -279,6 +320,8 @@ Principle: **degrade toward silence, never toward false accusations.**
 | Recall: dropped/wrong word, dropped line | ≥ 90% | ≥ 75% |
 | Alert latency at fastest Patience | p50 < 500 ms | n/a |
 
+**Gate condition:** harness `solo-close-mic` (one actor, cues as silence, no director) on held-out seeds 11–30; latency at Patience 0, the rest at 0.5. Harness conditions are `<mode>-<room>`: `solo-close-mic`, `director-far-field` and `director-far-field-hard` carry targets; the others are tracked.
+
 If far-field results on real audio fall well short, the response is to bring per-actor audio forward — not to loosen the false-alarm budget.
 
 ## 11. Milestones
@@ -287,6 +330,7 @@ Each milestone gets its own implementation plan.
 
 1. **M0 — Scaffold:** repo layout (Vite + React + TS app, `packages/align`, `packages/asr`, `harness/`), lint, Vitest, CI.
 2. **M1 — Engine & harness (go/no-go):** `align` built test-first with the scenario DSL and property tests; sherpa-onnx in Node; synthetic scene generator + room simulation; metrics + baselines. **Checkpoint:** review numbers against §10 targets before building UI.
+   - **Engine-change pass** ([pass spec](2026-10-10-engine-pass-design.md)): M3 starts only on GO in [`docs/engine-pass-results.md`](../../engine-pass-results.md). Outcome: **NO-GO**. After two rounds, `solo-close-mic` passes false alerts only (core recall 0.313 against ≥ 0.90, false notes 1.604 against ≤ 1, alert latency p50 1.035 s against < 0.5 s). The results doc lists the options for the user to decide; M3 remains blocked until that decision.
 3. **M2 — Scripts:** import (PDF, docx, paste), clean-up, auto-tag, tag-correction screen, cuts/overlaps, `.dasma` export/import, re-import diff.
 4. **M3 — Solo mode:** browser recognizer worker + model download/caching, mic pipeline, run setup + mic check, solo run screen, cues (local TTS + recorded), alerts, report, "lines to work on."
 5. **M4 — Director mode:** director run screen, lost/re-anchor UI, manual jump, on-book "Line!" prompting, quick-mark, clips + retention settings, cast list, per-actor PDF export.
