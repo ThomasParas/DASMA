@@ -35,7 +35,7 @@ const { report, runs } = evaluate(
     errorRate: 0.35,
     benignRate: 0.2,
     heardConfidenceFloor: 0,
-    noteMinConfidence: 0.5,
+    noteMinConfidence: 0.65,
     alertMinConfidence: 0.75,
     model: 'oracle (perfect recognizer, confidence 0.95)',
   },

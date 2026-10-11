@@ -12,7 +12,7 @@ const base = {
   'benign-rate': '0.2',
   'heard-floor': '0',
   'stable-sec': '0.3',
-  'note-min': '0.5',
+  'note-min': '0.65',
   'alert-min': '0.75',
 };
 const parse = (over: Partial<Record<keyof typeof base, string>> = {}) => parseEvaluateOptions({ ...base, ...over });
@@ -30,7 +30,7 @@ describe('parseEvaluateOptions', () => {
       benignRate: 0.2,
       heardConfidenceFloor: 0,
       stableSec: 0.3,
-      noteMinConfidence: 0.5,
+      noteMinConfidence: 0.65,
       alertMinConfidence: 0.75,
     });
   });

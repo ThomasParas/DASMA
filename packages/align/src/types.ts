@@ -97,6 +97,6 @@ export const DEFAULT_ALIGN_OPTIONS: AlignOptions = {
   lostAfter: 6,
   longLossSec: 10,
   alertMinConfidence: 0.75,
-  noteMinConfidence: 0.5,
+  noteMinConfidence: 0.65,
   heardConfidenceFloor: 0,
 };

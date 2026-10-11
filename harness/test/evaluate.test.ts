@@ -11,7 +11,7 @@ const config: EvalConfig = {
   rooms: ['close-mic'],
   patience: 0.5,
   heardConfidenceFloor: 0,
-  noteMinConfidence: 0.5,
+  noteMinConfidence: 0.65,
   alertMinConfidence: 0.75,
   strictness: { mode: 'word-perfect' },
   errorRate: 0.35,
