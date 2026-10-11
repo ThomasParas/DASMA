@@ -16,7 +16,7 @@ export class Stabilizer {
   private readonly stableSec: number;
 
   constructor(opts: { stableSec?: number } = {}) {
-    this.stableSec = opts.stableSec ?? 0.2;
+    this.stableSec = opts.stableSec ?? 0.3;
   }
 
   update(words: RawWord[], endpoint: boolean, audioSec: number): HeardWord[] {

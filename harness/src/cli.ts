@@ -28,7 +28,7 @@ const USAGE = `Usage: npm run harness -- <command> [options]
       --error-rate <0..1>       default 0.35
       --benign-rate <0..1>      default 0.2
       --heard-floor <0..1>      heard-confidence floor for content words, default 0
-      --stable-sec <s>          stabilizer: seconds a word must stay unchanged, default 0.2
+      --stable-sec <s>          stabilizer: seconds a word must stay unchanged, default 0.3
       --out <dir>               default harness/out/<timestamp>
       --save-audio              also write each rehearsal as WAV
   gate --report <path> [--baseline <path>]    Exit 1 if results regressed vs the baseline
@@ -51,7 +51,7 @@ async function runEvaluate(args: string[]): Promise<void> {
       'error-rate': { type: 'string', default: '0.35' },
       'benign-rate': { type: 'string', default: '0.2' },
       'heard-floor': { type: 'string', default: '0' },
-      'stable-sec': { type: 'string', default: '0.2' },
+      'stable-sec': { type: 'string', default: '0.3' },
       out: { type: 'string' },
       'save-audio': { type: 'boolean', default: false },
     },

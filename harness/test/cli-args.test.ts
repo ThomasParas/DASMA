@@ -11,7 +11,7 @@ const base = {
   'error-rate': '0.35',
   'benign-rate': '0.2',
   'heard-floor': '0',
-  'stable-sec': '0.2',
+  'stable-sec': '0.3',
 };
 const parse = (over: Partial<Record<keyof typeof base, string>> = {}) => parseEvaluateOptions({ ...base, ...over });
 
@@ -27,7 +27,7 @@ describe('parseEvaluateOptions', () => {
       errorRate: 0.35,
       benignRate: 0.2,
       heardConfidenceFloor: 0,
-      stableSec: 0.2,
+      stableSec: 0.3,
     });
   });
 
