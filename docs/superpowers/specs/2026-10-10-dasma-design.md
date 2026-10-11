@@ -90,7 +90,7 @@ interface HeardWord {
   start: number;       // seconds, run clock
   end: number;
   confidence: number;  // 0..1
-  final: boolean;      // settled (final, or stable across N partial updates)
+  final: boolean;      // settled (final, or unchanged for stableSec seconds of audio)
 }
 interface Recognizer {
   load(model: ModelRef, onProgress?: (p: number) => void): Promise<void>;
@@ -243,17 +243,17 @@ The rules below were added by the engine-change pass (spec: [`2026-10-10-engine-
 - **Accents, symbols and abbreviations** are normalized on both sides: accents folded (é → e), `$n` and `n%` expanded, Mr/Mrs/Dr/St expanded (§5.5).
 - **Split and joined recognizer words:** a heard token that runs two expected words together is split ("norhan" → "nor hand"); two adjacent heard tokens that spell one expected word are joined ("any one" → "anyone") (§5.1, §5.5).
 - **Letter-agreement guard:** a phonetic match also needs normalized letter edit distance ≤ 0.4, so sir/sorry no longer sound alike (§5.4).
-- **Heard-confidence floor:** `heardConfidenceFloor` softens the penalty on low-confidence wrong words; shipped at 0 because raising it cost false notes and false alerts (§5.3).
+- **Heard-confidence floor:** `heardConfidenceFloor` softens the heard-confidence penalty on any note that has heard words and at least one content word; shipped at 0 because raising it cost false notes and false alerts (§5.3).
 - **Per-pair similarity downgrade:** the sounds-similar downgrade applies per word pair and only when that pair was heard with confidence < 0.8 (§5.4).
 - **Evidence-based deletions:** a dropped-words note scores from its neighbours' confidence and whether other errors are adjacent, and a single dropped content word never raises an alert (§5.1).
 - **Anchored and deferred alerts:** an alert fires only once the surrounding region is anchored by 3 consecutive matched words; otherwise the note is flagged `alert: false` first and alerts later, or never (§6.1).
 - **Off-script runs become checks:** 4 or more consecutive resolved heard tokens with at most one match are chatter, and notes inside them are downgraded to checks without alerts (§6.2).
 - **Confirmed backward jumps with snapshot restore:** a backward re-anchor needs the same confirming words as a forward one, and lines it reset but the redo never reached get their earlier result back (§6.3).
-- **Patience-0 re-alignment and the line-end floor:** a block of mismatches that matches the start of a following line is re-aligned as skipped lines, and a commit that touches a line's last 2 words waits for 2 matches (§6.4).
-- **Recognizer fragments:** a wrong word that is a strict leading prefix of the scripted word ("cigar" for "cigarette", at least 2 letters heard) is a likely recognizer truncation. It becomes a quiet check capped at 0.45 and never alerts (§8a, item 1).
+- **Re-alignment and the instant-Patience line-end floor:** at every Patience, a block of mismatches that matches the start of one of the next 2 lines is re-aligned as skipped lines; at instant Patience only, a commit that touches a line's last 2 words waits for 2 matches (§6.4).
+- **Recognizer fragments:** a wrong word that is a strict leading prefix of the scripted word ("cigar" for "cigarette", at least 2 letters heard) is a likely recognizer truncation. It becomes a quiet check capped at 0.45 and never alerts. A scripted contraction is never a fragment: "did" for "didn't" is a dropped negation and stays a real error (§8a, item 1).
 - **Recognizer confidence counted once:** the audio-quality factor scales only dropped-line, jumped-cue and called-for-line notes; the other notes use their own heard-word or neighbour evidence (§8a, item 2).
 
-Poor audio therefore downgrades the notes that have no other evidence, and the other notes through the recognizer confidence they already carry.
+Poor audio therefore lowers the confidence of the notes that have no other evidence (dropped line, jumped cue, called for line), which can push them below the note threshold to a check; the other notes are affected only through the recognizer confidence they already carry.
 
 ## 8. Run experience (`session`, `cue`, `ui`)
 
@@ -287,7 +287,7 @@ Principle: **degrade toward silence, never toward false accusations.**
 | Situation | Behavior |
 |---|---|
 | Off-script talk (director notes, chatter) | Aligner goes `lost`; no notes while lost; long loss → `notRun` on re-anchor (§7.2) |
-| Poor audio (low signal-to-noise) | Status "Poor audio"; alerts suppressed; flags downgraded to "check"; span shaded in report |
+| Poor audio (low signal-to-noise) | Engine (since the engine-change pass, see §7.4): the audio-quality factor scales only notes with no heard words (dropped line, jumped cue, called for line); a note it pushes below the note threshold becomes a check, and only notes at or above the alert threshold alert. There is no blanket alert suppression. UI (M3/M4): status "Poor audio"; span shaded in report |
 | Long pauses | Not errors; streaming transducer models don't hallucinate in silence |
 | Mic permission denied / no mic | Explanation + browser-specific steps |
 | Mic disconnects mid-run | Pause run; banner; resume on reconnect; gap marked "not heard" |

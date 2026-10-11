@@ -374,3 +374,17 @@ Options for the user (these need a decision and, except (a), a new spec):
 - **(d) A better recognizer model, or hotword/contextual biasing toward the script words.** A stronger model or biasing should raise confidence on correctly spoken words and cut mishearings. Biasing also pushes the recognizer to write the script word when the actor said something close (already seen where the script word is "sir", the actor said "sore", and the recognizer wrote "sir"), so it could hide real errors. Neither was measured.
 
 Not recommended without new evidence: further threshold or `stableSec` tuning. The grid above shows no pair in range passes more than one target, and the held-out numbers match it.
+
+### Known blind spots and post-measurement changes
+
+Found in the final review of the pass. None of them is in the numbers above.
+
+- **(a) The off-script rule can hide a confident multi-word substitution.** "As far as the organ was considered" for "As far as the piano is concerned" gives three unmatched heard words next to one match, which is an off-script run (§6.2). The 0.85 wrong-words note becomes a check and does not alert, at Patience 0 and 0.5. This is unmeasured: the harness plants no multi-word substitutions.
+- **(b) A director quote that stops mid-line can replace a genuine earlier note on the quoted line.** A quote long enough to confirm a jump back (the trigram plus 2 words) has matched words of the quoted line, so the redo has reached that line (§6.3). The redo's partial result then replaces the line's earlier result, including a real note made before the jump.
+- **(c) Dropped negations are not planted by the harness.** "did" for "didn't" was a quiet fragment check before the fix in (d), and no run measured it.
+- **(d) Two fixes landed after the round-2 measurement**, so the round-2 numbers predate them and were not re-measured:
+  - A note committed on a line reset by a backward jump, before the redo matched any word of that line, was lost. Such notes are now held and stand once the redo reaches the line (`f5486ae`).
+  - A scripted contraction is never a fragment, so "did" for "didn't" is a wrong-words note again (`df340f6`, spec §8a item 1).
+
+  Expected effect: a small recall gain and no change in false alarms. On the perfect-recognizer end-to-end test (`harness/test/evaluate.test.ts`) both fixes leave the numbers unchanged.
+- **(e) Merging changes main's engine defaults** (`noteMinConfidence` 0.5 → 0.65; `alertMinConfidence` stays 0.75; `heardConfidenceFloor` 0 and `stableSec` 0.3 are new) along with the round-1 and round-2 rules. `npm run harness -- gate` against the committed Step 0 baseline then fails on core recall in every condition. This is intended: the baseline is the Step 0 engine, kept so the pass's worsenings stay visible.
