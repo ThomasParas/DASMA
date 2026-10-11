@@ -58,6 +58,8 @@ export const WORD_LEVEL_CATEGORIES: ReadonlySet<Category> = new Set<Category>([
 export const CONTRACTION_CAP = 0.45;
 /** A deletion next to another mismatch is less believable: the surrounding alignment may be off. */
 export const BUSY_FACTOR = 0.6;
+/** Pass spec §8a: a heard word that is a leading fragment of the scripted word is a likely recognizer truncation. */
+export const FRAGMENT_CAP = 0.45;
 const JUMP_GAP_SEC = 1.5;
 const STUMBLE_PAUSE_SEC = 0.25;
 const SIMILAR_SUB_SCORE = 0.3;
@@ -68,6 +70,12 @@ type SubOp = Extract<Op, { kind: 'sub' }>;
 type DelOp = Extract<Op, { kind: 'del' }>;
 
 const round3 = (x: number) => Math.round(x * 1000) / 1000;
+
+export function isFragment(heardNorm: string, expectedNorm: string): boolean {
+  const h = heardNorm.replace(/[^a-z]/g, '');
+  const e = expectedNorm.replace(/[^a-z]/g, '');
+  return h.length >= 2 && h.length < e.length && e.startsWith(h);
+}
 
 export function makeNote(
   category: Category,
@@ -86,7 +94,10 @@ export function makeNote(
     c *= floor + (1 - floor) * mean;
   }
   if (functionOnly) c *= 0.5;
-  const confidence = round3(Math.min(opts.cap ?? 1, Math.max(0, c * ctx.audioQuality)));
+  // Pass spec §8a: recognizer confidence enters a note once. Notes with heard words already carry it, and
+  // dropped-words carry it through neighbour evidence; only notes with no other evidence take the audio-quality factor.
+  const quality = heard.length === 0 && category !== 'dropped-words' ? ctx.audioQuality : 1;
+  const confidence = round3(Math.min(opts.cap ?? 1, Math.max(0, c * quality)));
   return {
     lineId: owner.lineId,
     characterId: owner.characterId,
@@ -270,11 +281,18 @@ export function classifyOps(ops: Op[], ctx: ClassifyContext): Classified {
     const idx = Array.from({ length: j - i }, (_, k) => i + k);
     const subs = idx.filter((k) => ops[k]!.kind === 'sub' && E((ops[k] as SubOp).e).zone === 'checked');
     for (const group of groupBy(subs, (k) => E((ops[k] as SubOp).e).lineId)) {
-      const pairs = group.map((k) => ops[k] as SubOp);
+      const fragments = group.filter((k) => isFragment(H((ops[k] as SubOp).h).norm, E((ops[k] as SubOp).e).norm));
+      for (const k of fragments) {
+        const o = ops[k] as SubOp;
+        add('wrong-words', [E(o.e)], [H(o.h)], E(o.e), [k, k], { cap: FRAGMENT_CAP, quiet: true });
+      }
+      const rest = group.filter((k) => !fragments.includes(k));
+      if (!rest.length) continue;
+      const pairs = rest.map((k) => ops[k] as SubOp);
       // Per pair (pass spec §5.4): a similar-sounding pair is a likely mishearing only when the recognizer was unsure of it.
       const factor =
         pairs.reduce((s, o) => s + (o.score >= SIMILAR_SUB_SCORE && H(o.h).confidence < SIMILAR_CONFIDENT ? 0.6 : 1), 0) / pairs.length;
-      add('wrong-words', pairs.map((o) => E(o.e)), pairs.map((o) => H(o.h)), E(pairs[0]!.e), [group[0]!, group.at(-1)!], { factor });
+      add('wrong-words', pairs.map((o) => E(o.e)), pairs.map((o) => H(o.h)), E(pairs[0]!.e), [rest[0]!, rest.at(-1)!], { factor });
     }
     const dels = idx.filter((k) => ops[k]!.kind === 'del' && E((ops[k] as DelOp).e).zone === 'checked');
     const whole: Array<{ words: ExpectedWord[]; span: [number, number] }> = [];

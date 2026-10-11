@@ -111,6 +111,18 @@ describe('aligner: line errors', () => {
     expect(r.lineNotes).toEqual([expect.objectContaining({ lineId: 'L5', category: 'wrong-words', expected: 'sir', heard: 'sorry', status: 'note' })]);
   });
 
+  it('a recognizer fragment never buzzes and is only a check', () => {
+    const CIG: ScriptLineInput[] = [
+      { id: 'C1', characterId: 'JACK', text: 'I simply want my cigarette case back.' },
+      { id: 'C2', characterId: 'ALGY', text: 'Here it is.' },
+    ];
+    for (const patience of [0, 0.5]) {
+      const r = runScenario(CIG, heard('I simply want my cigar case back. Here it is.'), { patience });
+      expect(r.lineNotes.filter((n) => n.status === 'note'), `patience ${patience}`).toEqual([]);
+      expect(r.flags.filter((f) => f.alert), `patience ${patience}`).toEqual([]);
+    }
+  });
+
   it.each([0, 0.5, 1])('wrong word (patience %s)', (patience) => {
     const r = runScenario(EARNEST, heard(WITH_FEELING), { patience });
     expect(r.lineNotes).toEqual([

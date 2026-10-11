@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { classifyOps, type ClassifyContext } from '../src/classify';
+import { classifyOps, isFragment, type ClassifyContext } from '../src/classify';
 import { buildExpected, countCheckedWords, toHeardTokens } from '../src/expected';
 import type { ScriptLineInput, Strictness } from '../src/types';
 import { alignWindow } from '../src/window-align';
@@ -140,9 +140,9 @@ describe('classifyOps', () => {
     expect(notes).toEqual([expect.objectContaining({ category: 'wrong-words', status: 'check', confidence: 0.425 })]);
   });
 
-  it('poor audio quality turns a note into a check', () => {
-    const { notes } = classify([perf('L1', 'L2', 'L3'), L4_FEELING, perf('L5')].join(' '), { ctx: { audioQuality: 0.5 } });
-    expect(notes).toEqual([expect.objectContaining({ status: 'check', confidence: 0.425 })]);
+  it('poor audio quality turns a dropped line into a check', () => {
+    const { notes } = classify(perf('L1', 'L2', 'L4', 'L5'), { ctx: { audioQuality: 0.5 } });
+    expect(notes).toEqual([expect.objectContaining({ category: 'dropped-line', confidence: 0.475, status: 'check' })]);
   });
 
   it('ignores differences inside overlap zones', () => {
@@ -223,5 +223,48 @@ describe('classifyOps: dropped words', () => {
     const del = r.notes.find((n) => n.category === 'dropped-words')!;
     expect(del.expected).toBe('wonderful expression');
     expect(r.meta.get(del)!.quiet).toBe(false);
+  });
+});
+
+describe('classifyOps: recognizer fragments and confidence counted once (pass spec §8a)', () => {
+  const CIG: ScriptLineInput[] = [
+    { id: 'C1', characterId: 'JACK', text: 'I simply want my cigarette case back.' },
+    { id: 'C2', characterId: 'ALGY', text: 'Here it is.' },
+  ];
+
+  it('isFragment: a strict leading prefix of 2+ letters', () => {
+    expect(isFragment('cigar', 'cigarette')).toBe(true);
+    expect(isFragment('de', 'dear')).toBe(true);
+    expect(isFragment('d', 'dear')).toBe(false);
+    expect(isFragment('dear', 'dear')).toBe(false);
+    expect(isFragment('impression', 'expression')).toBe(false);
+  });
+
+  it('a heard leading fragment of the scripted word is a quiet check, not a note', () => {
+    const r = classify('I simply want my cigar case back. Here it is.', { lines: CIG });
+    expect(r.notes).toEqual([expect.objectContaining({ category: 'wrong-words', expected: 'cigarette', heard: 'cigar', status: 'check' })]);
+    expect(r.meta.get(r.notes[0]!)!.quiet).toBe(true);
+  });
+
+  it('a different word is still a note', () => {
+    const r = classify('I simply want my silver case back. Here it is.', { lines: CIG });
+    expect(r.notes).toEqual([expect.objectContaining({ heard: 'silver', status: 'note' })]);
+  });
+
+  it('audio quality no longer scales notes that have heard words', () => {
+    const { notes } = classify([perf('L1', 'L2', 'L3'), L4_FEELING, perf('L5')].join(' '), { ctx: { audioQuality: 0.5 } });
+    expect(notes).toEqual([expect.objectContaining({ category: 'wrong-words', status: 'note', confidence: 0.85 })]);
+  });
+
+  it('audio quality still scales a dropped line', () => {
+    const { notes } = classify(perf('L1', 'L2', 'L4', 'L5'), { ctx: { audioQuality: 0.5 } });
+    expect(notes).toEqual([expect.objectContaining({ category: 'dropped-line', confidence: 0.475, status: 'check' })]);
+  });
+
+  it('dropped-words use neighbour evidence only, not audio quality', () => {
+    const DROP_SAKE = [perf('L1', 'L2'), "I'm sorry for that. I don't play accurately.", perf('L4', 'L5')].join(' ');
+    expect(classify(DROP_SAKE, { ctx: { audioQuality: 0.5 } }).notes).toEqual([
+      expect.objectContaining({ category: 'dropped-words', confidence: 0.8 }),
+    ]);
   });
 });

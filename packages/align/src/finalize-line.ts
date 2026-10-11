@@ -61,7 +61,8 @@ export function finalizeLine(state: LineState, ctx: FinalizeContext): NoteDraft[
       const meanConf = state.heard.length
         ? state.heard.reduce((s, t) => s + t.confidence, 0) / state.heard.length
         : 1;
-      const confidence = round3(BASE_CONFIDENCE.paraphrase * meanConf * ctx.audioQuality);
+      // Pass spec §8a: recognizer confidence enters once, through the heard words' mean confidence.
+      const confidence = round3(BASE_CONFIDENCE.paraphrase * meanConf);
       notes = [
         ...notes.filter((n) => !WORD_LEVEL_CATEGORIES.has(n.category)),
         {
