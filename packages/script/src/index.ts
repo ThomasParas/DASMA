@@ -17,3 +17,5 @@ export { CATEGORY, STATES, tagLines } from './tag';
 export type { LineCategory, LineState, TaggedLine } from './tag';
 export { applyOverlapMarks } from './overlap';
 export { INLINE_ITALIC_MIN_WORDS, buildUnits } from './units';
+export { UNKNOWN_CHARACTER, toAlignLines } from './align-adapter';
+export { UNTITLED, importScript, sniffUnsupported } from './import';
