@@ -29,6 +29,8 @@ const USAGE = `Usage: npm run harness -- <command> [options]
       --benign-rate <0..1>      default 0.2
       --heard-floor <0..1>      heard-confidence floor for content words, default 0
       --stable-sec <s>          stabilizer: seconds a word must stay unchanged, default 0.3
+      --note-min <0..1>         confidence at or above which a mismatch is a note, default 0.5
+      --alert-min <0..1>        confidence at or above which a note raises a live alert, default 0.75
       --out <dir>               default harness/out/<timestamp>
       --save-audio              also write each rehearsal as WAV
   gate --report <path> [--baseline <path>]    Exit 1 if results regressed vs the baseline
@@ -52,6 +54,8 @@ async function runEvaluate(args: string[]): Promise<void> {
       'benign-rate': { type: 'string', default: '0.2' },
       'heard-floor': { type: 'string', default: '0' },
       'stable-sec': { type: 'string', default: '0.3' },
+      'note-min': { type: 'string', default: '0.5' },
+      'alert-min': { type: 'string', default: '0.75' },
       out: { type: 'string' },
       'save-audio': { type: 'boolean', default: false },
     },
@@ -75,6 +79,8 @@ async function runEvaluate(args: string[]): Promise<void> {
       errorRate: opts.errorRate,
       benignRate: opts.benignRate,
       heardConfidenceFloor: opts.heardConfidenceFloor,
+      noteMinConfidence: opts.noteMinConfidence,
+      alertMinConfidence: opts.alertMinConfidence,
       model: values.model,
     },
     {

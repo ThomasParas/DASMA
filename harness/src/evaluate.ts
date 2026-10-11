@@ -25,6 +25,9 @@ export interface EvalConfig {
   benignRate: number;
   /** AlignOptions.heardConfidenceFloor (pass spec §5.3). */
   heardConfidenceFloor: number;
+  /** AlignOptions.noteMinConfidence / alertMinConfidence (threshold tuning). */
+  noteMinConfidence: number;
+  alertMinConfidence: number;
   model: string;
 }
 
@@ -62,6 +65,8 @@ export function evaluate(config: EvalConfig, deps: EvalDeps): { report: EvalRepo
     patience: config.patience,
     strictness: config.strictness,
     heardConfidenceFloor: config.heardConfidenceFloor,
+    noteMinConfidence: config.noteMinConfidence,
+    alertMinConfidence: config.alertMinConfidence,
   };
   const scored = new Map<string, Array<ScoredRun & { durationSec: number; rtf: number }>>();
   for (const mode of config.modes) for (const room of config.rooms) scored.set(conditionName(mode, room), []);

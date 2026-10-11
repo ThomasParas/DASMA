@@ -12,6 +12,8 @@ const base = {
   'benign-rate': '0.2',
   'heard-floor': '0',
   'stable-sec': '0.3',
+  'note-min': '0.5',
+  'alert-min': '0.75',
 };
 const parse = (over: Partial<Record<keyof typeof base, string>> = {}) => parseEvaluateOptions({ ...base, ...over });
 
@@ -28,6 +30,8 @@ describe('parseEvaluateOptions', () => {
       benignRate: 0.2,
       heardConfidenceFloor: 0,
       stableSec: 0.3,
+      noteMinConfidence: 0.5,
+      alertMinConfidence: 0.75,
     });
   });
 
@@ -43,7 +47,7 @@ describe('parseEvaluateOptions', () => {
     expect(() => parse({ seeds })).toThrow(/--seeds must be a positive integer/);
   });
 
-  it.each(['patience', 'error-rate', 'benign-rate', 'heard-floor'] as const)('rejects a non-finite or out-of-range --%s', (key) => {
+  it.each(['patience', 'error-rate', 'benign-rate', 'heard-floor', 'note-min', 'alert-min'] as const)('rejects a non-finite or out-of-range --%s', (key) => {
     for (const bad of ['-0.1', '1.1', 'NaN', 'Infinity', 'abc', '', ' ']) {
       expect(() => parse({ [key]: bad }), `${key}=${JSON.stringify(bad)}`).toThrow(new RegExp(`--${key} must be a number from 0 to 1`));
     }

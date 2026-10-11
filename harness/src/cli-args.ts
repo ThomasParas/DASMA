@@ -13,6 +13,8 @@ export interface EvaluateOptions {
   benignRate: number;
   heardConfidenceFloor: number;
   stableSec: number;
+  noteMinConfidence: number;
+  alertMinConfidence: number;
 }
 
 function unitInterval(name: string, raw: string): number {
@@ -33,6 +35,8 @@ export function parseEvaluateOptions(values: {
   'benign-rate': string;
   'heard-floor': string;
   'stable-sec': string;
+  'note-min': string;
+  'alert-min': string;
 }): EvaluateOptions {
   if (!/^\d+$/.test(values.seeds) || Number(values.seeds) < 1) throw new Error(`--seeds must be a positive integer, got "${values.seeds}"`);
   const modes = [...new Set(values.modes.split(',').map((m) => m.trim()).filter(Boolean))];
@@ -62,5 +66,7 @@ export function parseEvaluateOptions(values: {
     benignRate: unitInterval('benign-rate', values['benign-rate']),
     heardConfidenceFloor: unitInterval('heard-floor', values['heard-floor']),
     stableSec,
+    noteMinConfidence: unitInterval('note-min', values['note-min']),
+    alertMinConfidence: unitInterval('alert-min', values['alert-min']),
   };
 }
