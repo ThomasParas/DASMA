@@ -129,6 +129,14 @@ describe('aligner: line errors', () => {
     }
   });
 
+  it.each([0, 0.5])('a dropped negation ("did" for "didn\'t") is a note and alerts (patience %s)', (patience) => {
+    const r = runScenario(EARNEST, heard(`${perf('L1')} I did think it polite to listen, sir. ${perf('L3', 'L4', 'L5')}`), { patience });
+    expect(r.lineNotes).toEqual([
+      expect.objectContaining({ lineId: 'L2', category: 'wrong-words', expected: "didn't", heard: 'did', status: 'note', confidence: 0.85 }),
+    ]);
+    expect(r.flags.filter((f) => f.note.lineId === 'L2').map((f) => f.alert)).toContain(true);
+  });
+
   it.each([0, 0.5, 1])('wrong word (patience %s)', (patience) => {
     const r = runScenario(EARNEST, heard(WITH_FEELING), { patience });
     expect(r.lineNotes).toEqual([

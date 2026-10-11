@@ -240,6 +240,20 @@ describe('classifyOps: recognizer fragments and confidence counted once (pass sp
     expect(isFragment('impression', 'expression')).toBe(false);
   });
 
+  it('isFragment: a pair whose scripted word is a contraction is never a fragment (a dropped negation)', () => {
+    expect(isFragment('did', "didn't")).toBe(false);
+    expect(isFragment('do', "don't")).toBe(false);
+  });
+
+  it.each([
+    { got: 'did', exp: "didn't", lineId: 'L2', text: `${perf('L1')} I did think it polite to listen, sir.` },
+    { got: 'do', exp: "don't", lineId: 'L3', text: `${perf('L1', 'L2')} I'm sorry for that, for your sake. I do play accurately.` },
+  ])('a dropped negation ("$got" for "$exp") is a wrong-words note, not a quiet check', ({ got, exp, lineId, text }) => {
+    const r = classify(text);
+    expect(r.notes).toEqual([expect.objectContaining({ lineId, category: 'wrong-words', expected: exp, heard: got, status: 'note', confidence: 0.85 })]);
+    expect(r.meta.get(r.notes[0]!)!.quiet).toBe(false);
+  });
+
   it('a heard leading fragment of the scripted word is a quiet check, not a note', () => {
     const r = classify('I simply want my cigar case back. Here it is.', { lines: CIG });
     expect(r.notes).toEqual([expect.objectContaining({ category: 'wrong-words', expected: 'cigarette', heard: 'cigar', status: 'check' })]);

@@ -323,7 +323,7 @@ The homophone check found no homophone-spelling false notes, so the pronunciatio
 
 **Round 2 therefore contains, in this order:**
 
-1. **Fragment rule.** In `classifyOps`, a substitution pair whose heard word is a strict leading prefix of the expected word (both compared on letters only, heard ≥ 2 letters) is a likely recognizer truncation. It is classified as its own `wrong-words` note capped at `FRAGMENT_CAP = 0.45` (always a check) and marked quiet (never alerts). Other pairs in the same group are classified as before.
+1. **Fragment rule.** In `classifyOps`, a substitution pair whose heard word is a strict leading prefix of the expected word (both compared on letters only, heard ≥ 2 letters) is a likely recognizer truncation. It is classified as its own `wrong-words` note capped at `FRAGMENT_CAP = 0.45` (always a check) and marked quiet (never alerts). Other pairs in the same group are classified as before. A pair whose expected word is a contraction is never a fragment (a dropped negation is a real error).
 2. **Recognizer confidence counted once.** The audio-quality factor multiplies only notes that have no heard words and no other confidence evidence: `dropped-line`, `jumped-cue`, `called-for-line`. Notes with heard words use heard confidence only; `dropped-words` uses the §5.1 neighbour evidence only; the paraphrase note in `finalizeLine` uses mean heard confidence only. The meter stays wired in the harness.
 3. **Re-sweep `stableSec`** ∈ {0.1, 0.2, 0.3} on the tuning seeds with the §7.1 rule, since the fragment rule changes the trade-off (lower `stableSec` lowers latency).
 4. **Threshold re-tune** (§8 Task 19) on the tuning seeds.

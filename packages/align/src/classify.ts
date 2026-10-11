@@ -71,7 +71,9 @@ type DelOp = Extract<Op, { kind: 'del' }>;
 
 const round3 = (x: number) => Math.round(x * 1000) / 1000;
 
+/** Pass spec §8a: a likely recognizer truncation. A scripted contraction is never one: "did" for "didn't" drops a negation. */
 export function isFragment(heardNorm: string, expectedNorm: string): boolean {
+  if (isContraction(expectedNorm)) return false;
   const h = heardNorm.replace(/[^a-z]/g, '');
   const e = expectedNorm.replace(/[^a-z]/g, '');
   return h.length >= 2 && h.length < e.length && e.startsWith(h);
