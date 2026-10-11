@@ -13,3 +13,5 @@ export { capsShare, isStopToken, matchCue, normalizeCueToken } from './cues';
 export type { CueMatch } from './cues';
 export { FLAG_BELOW, MANY_FLAGGED_SHARE } from './weights';
 export { clusterBands, nearestBand, profileDoc } from './profile';
+export { CATEGORY, STATES, tagLines } from './tag';
+export type { LineCategory, LineState, TaggedLine } from './tag';

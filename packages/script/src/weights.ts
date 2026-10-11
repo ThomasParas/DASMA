@@ -21,3 +21,29 @@ export const STOP_TOKENS = new Set([
 ]);
 /** A token whose first word is one of these is never a speaker name ("ENTER HAMLET"). */
 export const STOP_FIRST_WORDS = new Set(['ENTER', 'EXIT', 'EXEUNT', 'ACT', 'SCENE', 'THE END']);
+
+/** Line-state emission log-scores (spec §5.2). "PerMark" terms are multiplied by the profile's direction-mark shares. */
+export const EMISSION = {
+  temperature: 1,
+  base: { cue: -3, cueInline: -3, dialogue: 0, direction: -1, heading: -5, front: -2 },
+  cue: { shape: 2, known: 3, inCast: 1, primary: 1.5, speakerBand: 1.5, bold: 0.5, nextCueShaped: -3, notShape: -12 },
+  cueInline: { shape: 2, known: 3, inCast: 1, primary: 1.5, notShape: -12 },
+  dialogue: { dialogueBand: 1, italic: 1, italicPerMark: 2.5, bracketBlock: 1, bracketPerMark: 3, offBandPerMark: 1, knownCueShape: -2 },
+  direction: { italic: 1, italicPerMark: 2.5, bracketBlock: 1.5, bracketPerMark: 3, directionBand: 1, directionBandPerMark: 1.5 },
+  heading: { pattern: 8, notPattern: -10 },
+  front: { before: 4, after: -6 },
+  sceneBreak: { direction: 6, other: -6 },
+};
+
+type State = 'cue' | 'cueInline' | 'dialogue' | 'dirIn' | 'dirOut' | 'heading' | 'front';
+/** Transition log-scores; a missing entry is forbidden. dirIn: a direction inside a speech; dirOut: outside one. */
+export const TRANSITIONS: Record<State, Partial<Record<State, number>>> = {
+  cue: { dialogue: -0.1, dirIn: -1.5 },
+  cueInline: { dialogue: -0.3, dirIn: -1.5, cue: -0.8, cueInline: -0.8, dirOut: -1.5, heading: -2.5 },
+  dialogue: { dialogue: -0.3, cue: -0.8, cueInline: -0.8, dirIn: -1.5, dirOut: -1.5, heading: -2.5 },
+  dirIn: { dialogue: -0.5, dirIn: -0.8, cue: -1, cueInline: -1, dirOut: -2, heading: -2.5 },
+  dirOut: { dirOut: -0.5, cue: -0.5, cueInline: -0.5, heading: -1.5, dialogue: -5 },
+  heading: { heading: -1, dirOut: -0.5, cue: -0.5, cueInline: -0.5, dialogue: -5 },
+  front: { front: -0.1, heading: -1, dirOut: -2, cue: -2, cueInline: -2 },
+};
+export const START: Partial<Record<State, number>> = { front: 0, heading: -1, dirOut: -1, cue: -1, cueInline: -1, dialogue: -6 };
