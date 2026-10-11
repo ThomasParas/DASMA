@@ -15,3 +15,5 @@ export { FLAG_BELOW, MANY_FLAGGED_SHARE } from './weights';
 export { clusterBands, nearestBand, profileDoc } from './profile';
 export { CATEGORY, STATES, tagLines } from './tag';
 export type { LineCategory, LineState, TaggedLine } from './tag';
+export { applyOverlapMarks } from './overlap';
+export { INLINE_ITALIC_MIN_WORDS, buildUnits } from './units';
