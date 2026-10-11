@@ -117,7 +117,7 @@ Only 0.3 satisfies the rule (0.1 and 0.2 are both far above it), so **`stableSec
 
 **`heardConfidenceFloor` = 0** (unchanged), so no noise-property test was added. Floor above 0 buys recall (0.47 → 0.59) at the price of false alerts and false notes, and neither is close to its target.
 
-Defaults changed: `Stabilizer` and the CLI `--stable-sec` default 0.2 → 0.3, and the `cli-args` defaults test (commit `7ca1c2e`). The browser recognizer also takes the new default.
+Defaults changed: `Stabilizer` and the CLI `--stable-sec` default 0.2 → 0.3, and the `cli-args` defaults test (commit `7ca1c2e`). Any recognizer built on `Stabilizer` takes the new default.
 
 ### Solo targets on held-out seeds 11–30 (solo close-mic, 140 runs, 237.0 min, 454 planted errors)
 
@@ -132,7 +132,7 @@ Patience 0 (reported, not gated): false alerts 14.68 → 0.675 per 10 min, false
 
 Other solo close-mic metrics, Step 0 → round 1: recall 0.758 → 0.533; recall counting checks 0.927 → 0.943; false checks per run 4.27 → 6.62; same-category rate 0.623 → 0.425; benign violations per run 0.207 → 0.329; latency p95 (P0.5) 9.16 s → 6.72 s.
 
-Sound-alike detection rate (`soundAlikeRecall`, 33 planted sound-alikes): 0.091 (3) → 0.303 (10).
+Sound-alike detection rate (`soundAlikeRecall`, 33 planted sound-alikes), solo close-mic only: 0.091 (3) → 0.303 (10). It fell in the far-field rooms (see the worsenings list below).
 
 | Category | Planted | Step 0 detected | Round 1 detected |
 |---|---|---|---|
@@ -156,11 +156,22 @@ Round 1 did what the spec expected for false alerts (−87%, now passing) and fo
 
 Against the spec targets (≤ 1 alert, ≤ 2 notes per scene, recall ≥ 0.75): director-far-field and director-far-field-hard now pass the alert and note targets, and still fail recall. The same comparison for the solo far-field rooms: solo-far-field core recall 0.715 → 0.301, solo-far-field-hard 0.585 → 0.138, with false alerts and false notes down in both.
 
-**Worsenings (reported, not blocking, spec §1).** `gate` exits FAIL, and every line of it is core recall: all three director conditions and all three solo conditions are below baseline. False alerts and false notes improved or held in every condition. Other worsenings: director-close-mic benign violations per run 0.45 → 0.65, and false checks per run rose in every condition (director-close-mic 7.75 → 12.28, director-far-field 17.0 → 22.8, director-far-field-hard 31.9 → 42.1); director-far-field-hard has no alerts at all now, so its latency is undefined (was p50 3.06 s).
+**Worsenings (reported, not blocking, spec §1).** `gate` exits FAIL, and every line of it is core recall: all three director conditions and all three solo conditions are below baseline. Every worsening against the Step 0 baseline (held-out seeds, `r1-gate` vs `s0-gate`):
+
+- Core recall fell in all six conditions (figures above and in the solo far-field line above).
+- Overall recall fell in every condition: solo close-mic 0.758 → 0.533, solo far-field 0.709 → 0.315, solo far-field-hard 0.548 → 0.101, director close-mic 0.776 → 0.594, director far-field 0.710 → 0.373, director far-field-hard 0.583 → 0.102.
+- Same-category rate fell in every condition: solo 0.623 → 0.425, 0.529 → 0.231, 0.256 → 0.097; director 0.649 → 0.503, 0.522 → 0.312, 0.224 → 0.083 (close-mic, far-field, far-field-hard).
+- Sound-alike recall fell in the far-field rooms: solo-far-field 0.182 → 0.152, solo-far-field-hard 0.394 → 0, director-far-field 0.276 → 0.103, director-far-field-hard 0.310 → 0.034. The gain 0.091 → 0.303 is solo close-mic only (director-close-mic also rose, 0.103 → 0.172).
+- False notes per 10 min rose in solo close-mic, 9.58 → 10.761 (1.621 → 1.821 per run); the gate passes it only because it is within its tolerance. All other conditions' false notes fell or held (director-close-mic 3.017 → 2.867 per scene). False alerts fell in every condition.
+- False checks per run rose in every room: solo 4.27 → 6.62, 8.75 → 11.42, 17.8 → 21.7; director 7.75 → 12.28, 17.0 → 22.8, 31.9 → 42.1 (close-mic, far-field, far-field-hard).
+- Benign violations per run rose in solo close-mic (0.207 → 0.329) and director-close-mic (0.45 → 0.65).
+- Latency p50: solo-far-field-hard 2.50 s → 5.99 s; director-far-field-hard has no alerts at all now, so its latency is undefined (was 3.06 s).
 
 Cause (from the Step 5 attribution on tuning seeds, and the same classification on the held-out director-far-field-hard runs): the recall loss is the note threshold, not missed detection. Recall counting checks rose or held in every condition (director-close-mic 0.923 → 0.948, far-field 0.931 → 0.953, far-field-hard 0.765 → 0.801). Missed core labels are almost all checks whose confidence is under 0.5. Mean word confidence is about 0.73 close-mic, 0.68 far-field, 0.46–0.50 far-field-hard, so the audio-quality factor is about 0.86, 0.75 and 0.60. A wrong-words note is 0.85 × (mean heard-word confidence) × (audio quality) ≈ 0.53 close-mic before any similarity downgrade, ≈ 0.25 in far-field-hard. Both factors come from the same recognizer confidence, so a low-confidence stretch is penalised twice. A dropped-words note is 0.8 × (neighbour confidence) × 0.6 if a mismatch is adjacent × audio quality, which lands near or below 0.5 (these two products are arithmetic from `classify.ts`, not separately measured). In far-field-hard 67 of 144 core labels are checks with confidence under 0.30 and 28 produced no note or check at all.
 
 ### Where the solo false notes and misses come from (tuning seeds 1–10, Step 5)
+
+The held-out breakdowns quoted in this section (the far-field-hard and 246-label miss counts) are explanatory only; nothing was chosen from them.
 
 Commands: `npx tsx harness/scripts/false-note-causes.ts harness/out/r1-tune/runs.json -v` and `label-outcomes.ts … --misses`. Output saved as `harness/out/r1-tune-causes.txt` and `r1-tune-outcomes.txt`. Extra counting (not part of the committed scripts) was done with throw-away scripts outside the repo. The false-note counts below follow the script's rule (status `note` on a line with no planted error), so they are lower than the `falseNotes` metric, which also counts surplus notes on lines with planted errors. Step 0's 54 used the same rule.
 
@@ -189,7 +200,7 @@ Round-2 candidate (information only; the committed default is unchanged, chosen 
 | 0.4 | 2.005 | 0.167 | 0.442 | 1.557 |
 | 0.5 | 2.005 | 0.167 | 0.442 | 1.657 |
 
-Raising the hold to 0.4 s would cut false notes six-fold on tuning seeds for 0.03 of core recall and about 0.08 s of latency; it does not reach the ≤ 1 target by itself. Not measured on held-out seeds.
+Raising the hold to 0.4 s would cut false notes six-fold on tuning seeds for 0.03 of core recall and about 0.08 s of latency; it does not reach the ≤ 1 target by itself. Not measured on held-out seeds: this candidate rests on tuning seeds alone.
 
 **Missed core labels (solo close-mic, tuning seeds: 104 core labels, 49 detected, 55 missed):**
 
