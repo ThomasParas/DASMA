@@ -3,7 +3,7 @@ import { NodeSherpaRecognizer, loadSherpa, resolveAsrModel } from '@dasma/asr/no
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve, sep } from 'node:path';
 import { parseArgs } from 'node:util';
-import { parseEvaluateOptions } from './cli-args';
+import { ALIGN_FLAG_OPTIONS, ENGINE_FLAG_DEFAULTS, STABLE_SEC_OPTION, parseEvaluateOptions } from './cli-args';
 import { evaluate } from './evaluate';
 import { compareToBaseline, formatReport, type EvalReport } from './metrics';
 import { fetchModels } from './models';
@@ -27,10 +27,10 @@ const USAGE = `Usage: npm run harness -- <command> [options]
       --strictness <mode>       word-perfect | lenient   default word-perfect
       --error-rate <0..1>       default 0.35
       --benign-rate <0..1>      default 0.2
-      --heard-floor <0..1>      heard-confidence floor for content words, default 0
-      --stable-sec <s>          stabilizer: seconds a word must stay unchanged, default 0.3
-      --note-min <0..1>         confidence at or above which a mismatch is a note, default 0.65
-      --alert-min <0..1>        confidence at or above which a note raises a live alert, default 0.75
+      --heard-floor <0..1>      heard-confidence floor for content words, default ${ENGINE_FLAG_DEFAULTS['heard-floor']}
+      --stable-sec <s>          stabilizer: seconds a word must stay unchanged, default ${ENGINE_FLAG_DEFAULTS['stable-sec']}
+      --note-min <0..1>         confidence at or above which a mismatch is a note, default ${ENGINE_FLAG_DEFAULTS['note-min']}
+      --alert-min <0..1>        confidence at or above which a note raises a live alert, default ${ENGINE_FLAG_DEFAULTS['alert-min']}
       --out <dir>               default harness/out/<timestamp>
       --save-audio              also write each rehearsal as WAV
   gate --report <path> [--baseline <path>]    Exit 1 if results regressed vs the baseline
@@ -52,10 +52,8 @@ async function runEvaluate(args: string[]): Promise<void> {
       strictness: { type: 'string', default: 'word-perfect' },
       'error-rate': { type: 'string', default: '0.35' },
       'benign-rate': { type: 'string', default: '0.2' },
-      'heard-floor': { type: 'string', default: '0' },
-      'stable-sec': { type: 'string', default: '0.3' },
-      'note-min': { type: 'string', default: '0.65' },
-      'alert-min': { type: 'string', default: '0.75' },
+      ...ALIGN_FLAG_OPTIONS,
+      ...STABLE_SEC_OPTION,
       out: { type: 'string' },
       'save-audio': { type: 'boolean', default: false },
     },

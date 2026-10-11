@@ -1,22 +1,26 @@
 /**
  * Re-run one (scene, seed, condition) and print the performance, what the recognizer heard, and every aligner event.
  * The condition is `<mode>-<room>`, e.g. `solo-close-mic` or `director-far-field`; solo also needs the character.
- * `oracle` uses a perfect recognizer; `asr` uses the real model. Note that TTS audio is not reproducible run to run.
+ * `oracle` uses a perfect recognizer; `asr` uses the real model. TTS audio comes from the same cache as `evaluate`, so a
+ * cached rehearsal replays exactly; engine flags and their defaults are the same as `evaluate`'s.
  *
  *   npx tsx harness/scripts/trace-run.ts <scene-id> <seed> <condition> <oracle|asr> [character] [--patience 0.5] [--model id]
+ *     [--stable-sec s] [--note-min p] [--alert-min p] [--heard-floor p]
  */
 import { DEFAULT_ALIGN_OPTIONS, buildExpected } from '@dasma/align';
 import { findModel, type Recognizer } from '@dasma/asr';
 import { NodeSherpaRecognizer, resolveAsrModel } from '@dasma/asr/node';
 import { parseArgs } from 'node:util';
-import { MODELS_DIR } from '../src/paths';
+import { ALIGN_FLAG_OPTIONS, STABLE_SEC_OPTION, parseAlignFlags, parseStableSec } from '../src/cli-args';
+import { MODELS_DIR, TTS_CACHE_DIR } from '../src/paths';
 import type { Mode } from '../src/evaluate';
 import { SOLO_BENIGN_KINDS, SOLO_ERROR_KINDS, perturbScene } from '../src/perturb';
 import { hashSeed, mulberry32 } from '../src/rng';
 import { ROOM_PRESETS, applyRoom, type RoomName } from '../src/room';
 import { runEngine } from '../src/run-engine';
 import { loadScenes, toScriptLines } from '../src/scenes';
-import { assignVoices, createSherpaTts, renderPerformance } from '../src/tts';
+import { TTS_MODEL_ID, assignVoices, createSherpaTts, renderPerformance } from '../src/tts';
+import { cachedTts } from '../src/tts-cache';
 import { ScriptedRecognizer, oracleWords } from '../test/helpers/scripted-recognizer';
 
 const { values, positionals } = parseArgs({
@@ -24,8 +28,12 @@ const { values, positionals } = parseArgs({
   options: {
     patience: { type: 'string', default: '0.5' },
     model: { type: 'string', default: 'zipformer-en-2023-06-21' },
+    ...ALIGN_FLAG_OPTIONS,
+    ...STABLE_SEC_OPTION,
   },
 });
+const align = parseAlignFlags(values);
+const stableSec = parseStableSec(values['stable-sec']);
 const [sceneId, seedArg, conditionArg, mode, characterArg] = positionals;
 if (!sceneId || !seedArg || !conditionArg || (mode !== 'oracle' && mode !== 'asr')) {
   throw new Error('Usage: trace-run.ts <scene-id> <seed> <condition> <oracle|asr> [character] [--patience p] [--model id]');
@@ -50,7 +58,7 @@ const perf = perturbScene(scene, rng, {
   ...(character ? { solo: character, errorKinds: SOLO_ERROR_KINDS, benignKinds: SOLO_BENIGN_KINDS } : {}),
 });
 const voices = assignVoices([...new Set(perf.segments.map((s) => s.speaker))], rng);
-const rendered = renderPerformance(perf, voices, createSherpaTts());
+const rendered = renderPerformance(perf, voices, cachedTts(createSherpaTts(), TTS_CACHE_DIR, TTS_MODEL_ID));
 const audio = applyRoom(
   rendered.samples,
   rendered.sampleRate,
@@ -65,7 +73,7 @@ for (const s of rendered.segments)
 let recognizer: Recognizer;
 if (mode === 'oracle') recognizer = new ScriptedRecognizer(oracleWords(rendered));
 else {
-  const asr = new NodeSherpaRecognizer();
+  const asr = new NodeSherpaRecognizer({ stableSec });
   await asr.load(resolveAsrModel(MODELS_DIR, findModel(values.model)));
   recognizer = asr;
 }
@@ -75,6 +83,7 @@ recognizer.onWords((ws) =>
 );
 const run = runEngine(audio, rendered.sampleRate, recognizer, expected, {
   ...DEFAULT_ALIGN_OPTIONS,
+  ...align,
   patience: Number(values.patience),
 });
 console.log('HEARD', heard.join(' '));

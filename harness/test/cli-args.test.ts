@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { parseEvaluateOptions } from '../src/cli-args';
+import { DEFAULT_ALIGN_OPTIONS } from '@dasma/align';
+import { DEFAULT_STABLE_SEC, Stabilizer } from '@dasma/asr';
+import { ALIGN_FLAG_OPTIONS, ENGINE_FLAG_DEFAULTS, STABLE_SEC_OPTION, parseAlignFlags, parseEvaluateOptions, parseStableSec } from '../src/cli-args';
 
 const base = {
   seeds: '10',
@@ -16,6 +18,28 @@ const base = {
   'alert-min': '0.75',
 };
 const parse = (over: Partial<Record<keyof typeof base, string>> = {}) => parseEvaluateOptions({ ...base, ...over });
+
+describe('engine flag defaults', () => {
+  it('equal the engine defaults, so an evaluate run without flags measures the shipped engine', () => {
+    expect(parseAlignFlags(ENGINE_FLAG_DEFAULTS)).toEqual({
+      heardConfidenceFloor: DEFAULT_ALIGN_OPTIONS.heardConfidenceFloor,
+      noteMinConfidence: DEFAULT_ALIGN_OPTIONS.noteMinConfidence,
+      alertMinConfidence: DEFAULT_ALIGN_OPTIONS.alertMinConfidence,
+    });
+    expect(parseStableSec(ENGINE_FLAG_DEFAULTS['stable-sec'])).toBe(DEFAULT_STABLE_SEC);
+    expect(Object.fromEntries(Object.entries({ ...ALIGN_FLAG_OPTIONS, ...STABLE_SEC_OPTION }).map(([k, o]) => [k, o.default]))).toEqual(
+      ENGINE_FLAG_DEFAULTS,
+    );
+  });
+
+  it('the stabilizer uses the same default', () => {
+    const word = { text: 'hello', start: 0, end: 0.2, confidence: 1 };
+    const s = new Stabilizer();
+    expect(s.update([word], false, 0.2)).toEqual([]);
+    expect(s.update([word], false, 0.2 + DEFAULT_STABLE_SEC - 0.05)).toEqual([]);
+    expect(s.update([word], false, 0.2 + DEFAULT_STABLE_SEC)).toEqual([expect.objectContaining({ text: 'hello', final: true })]);
+  });
+});
 
 describe('parseEvaluateOptions', () => {
   it('parses the defaults', () => {

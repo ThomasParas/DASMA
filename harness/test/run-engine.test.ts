@@ -49,4 +49,24 @@ describe('runEngine', () => {
     expect(confidenceOf(0.55)).toBe(Math.round(0.85 * 0.55 * 1000) / 1000);
     expect(confidenceOf(0.95)).toBe(Math.round(0.85 * 0.95 * 1000) / 1000);
   });
+
+  it('the audio-quality meter scales a dropped line by the confidence of the words around it (pass spec §5.2, §8a)', () => {
+    const THREE: ScriptLineInput[] = [
+      { id: 'A', characterId: 'X', text: 'one two three four five six' },
+      { id: 'B', characterId: 'Y', text: 'seven eight nine ten' },
+      { id: 'C', characterId: 'Y', text: 'apple banana cherry grape lemon' },
+    ];
+    const exp3 = buildExpected(THREE, { mode: 'word-perfect' });
+    const droppedLineConfidence = (c: number) => {
+      const heard = words('one two three four five six apple banana cherry grape lemon').map((w) => ({ ...w, confidence: c }));
+      const run = runEngine(new Float32Array(SR * 6), SR, new ScriptedRecognizer(heard), exp3, { ...options, patience: 0.5 });
+      const notes = run.events.flatMap(({ event }) => (event.type === 'lineDone' && event.lineId === 'B' ? event.notes : []));
+      expect(notes).toEqual([expect.objectContaining({ category: 'dropped-line' })]);
+      return notes[0]!.confidence;
+    };
+    // Confident words around it: the meter reads 1 and the dropped line keeps its base 0.95.
+    expect(droppedLineConfidence(0.95)).toBe(0.95);
+    // Words heard at 0.5: the meter reads clamp((0.5 − 0.3) / 0.5, 0.6, 1) = 0.6, so 0.95 × 0.6.
+    expect(droppedLineConfidence(0.5)).toBe(0.57);
+  });
 });

@@ -1,6 +1,9 @@
 import type { HeardWord } from '@dasma/align';
 import type { RawWord } from './types';
 
+/** Default seconds of audio a word must stay unchanged before it is emitted (pass spec §7.1, round-2 sweep). */
+export const DEFAULT_STABLE_SEC = 0.3;
+
 /** Absorbs floating-point error in audio-time differences (1.0 - 0.8 < 0.2 in binary). */
 const EPS = 1e-9;
 
@@ -16,7 +19,7 @@ export class Stabilizer {
   private readonly stableSec: number;
 
   constructor(opts: { stableSec?: number } = {}) {
-    this.stableSec = opts.stableSec ?? 0.3;
+    this.stableSec = opts.stableSec ?? DEFAULT_STABLE_SEC;
   }
 
   update(words: RawWord[], endpoint: boolean, audioSec: number): HeardWord[] {
