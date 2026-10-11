@@ -89,7 +89,17 @@ export function extractDocx(bytes: Uint8Array): RawDoc {
     }
     throw new ScriptImportError('unreadable');
   }
-  const styles = files['word/styles.xml'] ? readStyles(strFromU8(files['word/styles.xml'])) : new Map<string, StyleProps>();
+  try {
+    return parseDocx(documentXml, files['word/styles.xml']);
+  } catch (err) {
+    // Damaged XML (for example an out-of-range character reference) is an unreadable file, not a crash.
+    if (err instanceof ScriptImportError) throw err;
+    throw new ScriptImportError('unreadable');
+  }
+}
+
+function parseDocx(documentXml: Uint8Array, stylesXml: Uint8Array | undefined): RawDoc {
+  const styles = stylesXml ? readStyles(strFromU8(stylesXml)) : new Map<string, StyleProps>();
 
   const lines: RawLine[] = [];
   let page = 1;
@@ -99,11 +109,15 @@ export function extractDocx(bytes: Uint8Array): RawDoc {
   let para: Para | null = null;
   let run: Run | null = null;
   let inText = false;
+  // True right after an explicit page break advanced `page`, until any text follows. Word writes a
+  // lastRenderedPageBreak at the start of the next run, which must not advance the page a second time.
+  let justBroke = false;
 
   const emit = (p: Para): void => {
     if (p.breakBefore && lines.length > 0) {
       page++;
       sawBreak = true;
+      justBroke = true;
     }
     const style = styles.get(p.styleId) ?? {};
     const runs = p.runs.filter((r) => r.text.length > 0);
@@ -145,20 +159,34 @@ export function extractDocx(bytes: Uint8Array): RawDoc {
         bold: spanShare(spans, (s) => s.bold) > 0.5,
         size: 0,
       });
+      justBroke = false;
     }
-    if (p.breakAfter) page++;
+    if (p.breakAfter) {
+      page++;
+      justBroke = true;
+    }
   };
 
-  const pageBreak = (): void => {
-    sawBreak = true;
+  const pageBreak = (explicit: boolean): void => {
     const hasText = para !== null && (para.runs.some((r) => r.text.trim()) || (run !== null && run.text.trim() !== ''));
+    if (!explicit) {
+      // Already counted by the explicit break (or pageBreakBefore) this one follows.
+      if (justBroke || (para !== null && para.breakBefore && !hasText)) return;
+    }
+    sawBreak = true;
     if (para !== null && hasText) para.breakAfter = true;
-    else page++;
+    else {
+      page++;
+      justBroke = true;
+    }
   };
 
   for (const e of xmlEvents(strFromU8(documentXml))) {
     if (e.type === 'text') {
-      if (inText && run) run.text += e.text;
+      if (inText && run) {
+        run.text += e.text;
+        if (e.text.trim()) justBroke = false;
+      }
       continue;
     }
     if (e.type === 'close') {
@@ -207,11 +235,11 @@ export function extractDocx(bytes: Uint8Array): RawDoc {
         if (run && parent === 'w:r') run.text += '\t';
         break;
       case 'w:br':
-        if (e.attrs['w:type'] === 'page') pageBreak();
+        if (e.attrs['w:type'] === 'page') pageBreak(true);
         else if (run) run.text += ' ';
         break;
       case 'w:lastRenderedPageBreak':
-        pageBreak();
+        pageBreak(false);
         break;
       case 'w:pgSz':
         if (e.attrs['w:w']) pageWidth = Number(e.attrs['w:w']) / TWIPS_PER_POINT;

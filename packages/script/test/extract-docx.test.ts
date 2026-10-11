@@ -74,9 +74,63 @@ describe('extractDocx', () => {
     ]);
   });
 
-  it('turns a soft line break into a space (review focus 4)', () => {
+  it('turns a soft line break into a space', () => {
     const doc = extractDocx(rawDocx('<w:p><w:r><w:t>To be,</w:t><w:br/><w:t>or not to be.</w:t></w:r></w:p>'));
     expect(doc.lines.map((l) => l.text)).toEqual(['To be, or not to be.']);
+  });
+
+  it('counts an explicit page break once when Word also writes lastRenderedPageBreak', () => {
+    const doc = extractDocx(
+      rawDocx(
+        '<w:p><w:r><w:t>One</w:t></w:r></w:p><w:p><w:r><w:br w:type="page"/></w:r></w:p>' +
+          '<w:p><w:r><w:lastRenderedPageBreak/><w:t>Two</w:t></w:r></w:p>',
+      ),
+    );
+    expect(doc.lines.map((l) => [l.text, l.page])).toEqual([
+      ['One', 1],
+      ['Two', 2],
+    ]);
+    expect(doc.pages).toBe(2);
+  });
+
+  it('counts pageBreakBefore once when Word also writes lastRenderedPageBreak', () => {
+    const doc = extractDocx(
+      rawDocx(
+        '<w:p><w:r><w:t>One</w:t></w:r></w:p>' +
+          '<w:p><w:pPr><w:pageBreakBefore/></w:pPr><w:r><w:lastRenderedPageBreak/><w:t>Two</w:t></w:r></w:p>',
+      ),
+    );
+    expect(doc.lines.map((l) => [l.text, l.page])).toEqual([
+      ['One', 1],
+      ['Two', 2],
+    ]);
+    expect(doc.pages).toBe(2);
+  });
+
+  it('starts a new page at a lastRenderedPageBreak on its own', () => {
+    const doc = extractDocx(
+      rawDocx('<w:p><w:r><w:t>One</w:t></w:r></w:p><w:p><w:r><w:lastRenderedPageBreak/><w:t>Two</w:t></w:r></w:p>'),
+    );
+    expect(doc.lines.map((l) => [l.text, l.page])).toEqual([
+      ['One', 1],
+      ['Two', 2],
+    ]);
+    expect(doc.realPages).toBe(true);
+  });
+
+  it('starts a new page at pageBreakBefore', () => {
+    const doc = extractDocx(
+      rawDocx('<w:p><w:r><w:t>One</w:t></w:r></w:p><w:p><w:pPr><w:pageBreakBefore/></w:pPr><w:r><w:t>Two</w:t></w:r></w:p>'),
+    );
+    expect(doc.lines.map((l) => [l.text, l.page])).toEqual([
+      ['One', 1],
+      ['Two', 2],
+    ]);
+    expect(doc.pages).toBe(2);
+  });
+
+  it('treats damaged XML as unreadable', () => {
+    expect(thrownCode(() => extractDocx(rawDocx('<w:p><w:r><w:t>&#x110000;</w:t></w:r></w:p>')))).toBe('unreadable');
   });
 
   it('decodes XML entities', () => {
