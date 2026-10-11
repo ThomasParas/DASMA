@@ -1,13 +1,16 @@
 {
   "name": "@dasma/asr",
   "version": "0.0.0",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
     "./node": "./src/node/index.ts"
   },
-  "scripts": { "typecheck": "tsc -p ." },
+  "scripts": {
+    "typecheck": "tsc -p ."
+  },
   "dependencies": {
     "@dasma/align": "*",
     "sherpa-onnx-node": "^1.13.8"

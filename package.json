@@ -1,6 +1,7 @@
 {
   "name": "dasma",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "workspaces": [
     "apps/*",
