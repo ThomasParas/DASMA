@@ -5,3 +5,5 @@ export { CHARS_PER_PAGE_LINE, PAGE_LINES, assignEstimatedPages, estimatedPages }
 export { TEXT_COLUMN, extractText } from './extract/text';
 export { DOCX_TAB_INDENT, extractDocx } from './extract/docx';
 export { extractPdf } from './extract/pdf';
+export { cleanDoc, normalizeText } from './clean';
+export { CAST_LIST_HEADER, SCENE_BREAK, isHeading } from './patterns';
