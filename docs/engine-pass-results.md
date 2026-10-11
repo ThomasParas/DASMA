@@ -2,6 +2,14 @@
 
 Spec: docs/superpowers/specs/2026-10-10-engine-pass-design.md · Numbers are per machine (TTS audio is cached per machine).
 
+## Summary
+
+- **Decision: M3 NO-GO.** Three of four solo targets fail after the two permitted rounds; no third round (spec §1, §3).
+- **Solo close-mic, held-out seeds 11–30:** false alerts 0.211 per 10 min (≤ 1, PASS); false notes 1.604 (≤ 1, FAIL); core recall 0.313 (≥ 0.90, FAIL); alert latency p50 at Patience 0 1.035 s (< 0.5 s, FAIL).
+- **Chosen defaults:** `stableSec` 0.3, `heardConfidenceFloor` 0, `noteMinConfidence` 0.65, `alertMinConfidence` 0.75.
+- **Director conditions vs Step 0:** false alerts and false notes fall in every condition (far-field-hard 11.77 → 0.02 alerts, 11.65 → 0.07 notes per scene), but core recall falls in all (0.72 → 0.42, 0.70 → 0.33, 0.54 → 0.00), with more false checks and lower same-category rate.
+- **Next step:** the user picks from the options at the end of "Round 2": accept a named shortfall, two-speed stabilizer spec, per-actor audio / real recordings, or a better recognizer or hotword biasing.
+
 ## Step 0 — baseline (engine unchanged since M1)
 
 Config: scenes all (solo: earnest-act1, earnest-act1-cigarette, hamlet-to-be, romeo-balcony; director: earnest-act1, earnest-act1-cigarette, romeo-balcony only, hamlet-to-be is solo-only) · held-out seeds 11–30 · error rate 0.35 · benign rate 0.2 · model zipformer-en-2023-06-21.
@@ -230,3 +238,139 @@ By kind: dropped-words 19 of 29 missed (all checks), wrong-words 28 of 44 (19 ch
 Targets missed: false notes per 10 min (10.761 vs ≤ 1), core recall (0.492 vs ≥ 0.90), alert latency p50 at Patience 0 (1.087 s vs < 0.5 s) → Round 2 (Task 18). Only the false-alerts target passes (0.633 vs ≤ 1).
 
 Inputs for round 2, from the attribution: (1) the stabilizer fragment problem accounts for about 88% of solo false notes, and a longer hold (0.4 s on tuning seeds) removes most of them; (2) recall is limited by note confidence (double penalty from heard-word confidence and the audio-quality factor, the similarity downgrade, and the dropped-word evidence factor), with 42 of 55 misses being checks under 0.5 (the other 13 raise nothing, mostly the "sir"/"sore" sound-alike); (3) homophones are not a measurable cause, so no pronunciation dictionary is needed for them; (4) the director quote residual is small (2 notes in 40 runs).
+
+## Round 2 — fragment rule, confidence counted once, re-tuned on seeds 1–10, measured on held-out seeds 11–30
+
+Engine state: `feat/engine-pass` at `f40124d`. Same config as Step 0 and Round 1 (all scenes, error rate 0.35, benign rate 0.2, model zipformer-en-2023-06-21). Held-out runs: `harness/out/r2-gate` (all six conditions, Patience 0.5), `harness/out/r2-gate-p0` (solo close-mic, Patience 0), gate comparison in `harness/out/r2-gate-compare.log`. Defaults in force: `stableSec` 0.3, `heardConfidenceFloor` 0, `noteMinConfidence` 0.65, `alertMinConfidence` 0.75.
+
+### Changes made in round 2 (spec §8a)
+
+Selected by the Round 1 attribution (88% of solo false notes were leading-fragment wrong-words; recognizer confidence was counted twice). The pronunciation dictionary and the two-speed stabilizer were not selected.
+
+1. **Fragment rule** (`d41cd9f`, `classifyOps`): a substitution pair whose heard word is a strict leading prefix of the expected word (letters only, heard ≥ 2 letters) is classified as its own `wrong-words` note capped at 0.45 (always a check) and marked quiet (never alerts). Other pairs in the group are classified as before.
+2. **Recognizer confidence counted once** (`d41cd9f`): the audio-quality factor now multiplies only notes with no heard words and no other confidence evidence (`dropped-line`, `jumped-cue`, `called-for-line`). Notes with heard words use heard confidence only; `dropped-words` uses the neighbour evidence only; the paraphrase note uses mean heard confidence only. Two existing tests changed expectation deliberately (named in the commit message): `classify.test.ts` 'poor audio quality turns a note into a check' (replaced by 'poor audio quality turns a dropped line into a check') and the `run-engine.test.ts` meter test (now expects 0.85 × 0.55 with no meter factor).
+3. **`stableSec` re-sweep** (tuning seeds): rule unchanged, 0.3 kept.
+4. **Threshold re-tune** (`df99e0a` adds `--note-min` / `--alert-min`; `f40124d` sets the values): `noteMin` 0.5 → 0.65, `alertMin` 0.75 (unchanged value, now explicit).
+
+### Tuning, seeds 1–10, solo close-mic (70 runs, 119.7 min, 192 planted errors; tables copied from the `f40124d` commit message)
+
+`--stable-sec` re-sweep with the round-2 engine (rule, spec §7.1: smallest `s` whose false notes at Patience 0.5 is ≤ the value at 0.3). These runs used the thresholds in force before the re-tune (noteMin 0.5; the 0.3 / P0.5 row equals the noteMin 0.5, alertMin 0.75 row of the grid below).
+
+| stableSec | Patience | False alerts /10 min | False notes /10 min | Core recall | Targets passed (of 3) | Latency p50, s |
+|---|---|---|---|---|---|---|
+| 0.1 | 0.5 | 0.33 | 6.60 | 0.510 | 1 | 1.50 |
+| 0.1 | 0 | 0.58 | 10.19 | 0.462 | 1 | 0.94 |
+| 0.2 | 0.5 | 0.33 | 6.60 | 0.510 | 1 | 1.60 |
+| 0.2 | 0 | 0.58 | 10.53 | 0.481 | 1 | 0.96 |
+| 0.3 | 0.5 | 0.25 | 4.43 | 0.548 | 1 | 1.33 |
+| 0.3 | 0 | 0.84 | 6.68 | 0.490 | 1 | 1.17 |
+
+0.1 and 0.2 give 6.60 false notes, above the 4.43 at 0.3, so **`stableSec` = 0.3** stays. No `align` test expectation changed.
+
+Threshold grid at Patience 0.5, `stableSec` 0.3. Targets: false alerts ≤ 1, false notes ≤ 1, core recall ≥ 0.90 per 10 min. Every pair passes exactly 1 of 3 (false alerts). `alertMin` does not affect notes or recall, only false alerts. Rule: most targets passed, then lower false notes, then higher core recall, then closest to (0.5, 0.75), which gives **noteMin 0.65, alertMin 0.75**.
+
+| noteMin | alertMin | False alerts /10 min | False notes /10 min | Core recall | Targets passed (of 3) |
+|---|---|---|---|---|---|
+| 0.45 | 0.7 | 0.58 | 33.67 | 0.712 | 1 |
+| 0.45 | 0.75 | 0.25 | 33.67 | 0.712 | 1 |
+| 0.45 | 0.8 | 0.17 | 33.67 | 0.712 | 1 |
+| 0.45 | 0.85 | 0.00 | 33.67 | 0.712 | 1 |
+| 0.45 | 0.9 | 0.00 | 33.67 | 0.712 | 1 |
+| 0.5 | 0.7 | 0.58 | 4.43 | 0.548 | 1 |
+| 0.5 | 0.75 | 0.25 | 4.43 | 0.548 | 1 |
+| 0.5 | 0.8 | 0.17 | 4.43 | 0.548 | 1 |
+| 0.5 | 0.85 | 0.00 | 4.43 | 0.548 | 1 |
+| 0.5 | 0.9 | 0.00 | 4.43 | 0.548 | 1 |
+| 0.55 | 0.7 | 0.58 | 2.92 | 0.481 | 1 |
+| 0.55 | 0.75 | 0.25 | 2.92 | 0.481 | 1 |
+| 0.55 | 0.8 | 0.17 | 2.92 | 0.481 | 1 |
+| 0.55 | 0.85 | 0.00 | 2.92 | 0.481 | 1 |
+| 0.55 | 0.9 | 0.00 | 2.92 | 0.481 | 1 |
+| 0.6 | 0.7 | 0.58 | 2.09 | 0.404 | 1 |
+| 0.6 | 0.75 | 0.25 | 2.09 | 0.404 | 1 |
+| 0.6 | 0.8 | 0.17 | 2.09 | 0.404 | 1 |
+| 0.6 | 0.85 | 0.00 | 2.09 | 0.404 | 1 |
+| 0.6 | 0.9 | 0.00 | 2.09 | 0.404 | 1 |
+| 0.65 | 0.7 | 0.58 | 1.25 | 0.337 | 1 |
+| 0.65 | 0.75 | 0.25 | 1.25 | 0.337 | 1 |
+| 0.65 | 0.8 | 0.17 | 1.25 | 0.337 | 1 |
+| 0.65 | 0.85 | 0.00 | 1.25 | 0.337 | 1 |
+| 0.65 | 0.9 | 0.00 | 1.25 | 0.337 | 1 |
+
+The grid shows the structure of the problem: false notes fall as `noteMin` rises (33.67 → 1.25) and so does core recall (0.712 → 0.337). On the tuning seeds, no `noteMin` in 0.45–0.65 passes both, and the ≤ 1 false-note target is only approached at the top of the range, where recall is about a third.
+
+### Solo targets on held-out seeds 11–30 (solo close-mic, 140 runs, 237.0 min, 454 planted errors)
+
+| Target | Patience | Step 0 | Round 1 | Round 2 | Required | Result |
+|---|---|---|---|---|---|---|
+| False alerts per 10 min | 0.5 | 4.77 | 0.633 | **0.211** | ≤ 1 | PASS |
+| False notes per 10 min | 0.5 | 9.58 | 10.761 | **1.604** | ≤ 1 | FAIL (0.604 over) |
+| Core recall | 0.5 | 0.728 | 0.492 | **0.313** | ≥ 0.90 | FAIL (0.587 short) |
+| Alert latency p50 | 0 | 1.154 s | 1.087 s | **1.035 s** | < 0.5 s | FAIL (0.535 s over) |
+
+Round 2 against Round 1: false alerts 0.633 → 0.211 (better), false notes 10.761 → 1.604 (−85%, still above target), core recall 0.492 → 0.313 (worse), latency p50 1.087 → 1.035 s (barely moved). Only the false-alerts target passes.
+
+Patience 0 (reported, not gated; `r2-gate-p0`): false alerts 14.68 → 0.675 → **0.591** per 10 min, false notes 72.54 → 10.634 → **1.815** per 10 min, core recall 0.764 → 0.354 → **0.175**, latency p95 6.82 s → 6.93 s → 6.93 s.
+
+Other solo close-mic metrics, Step 0 → Round 1 → Round 2: recall 0.758 → 0.533 → 0.311; recall counting checks 0.927 → 0.943 → 0.943; false checks per run 4.27 → 6.62 → 8.16; same-category rate 0.623 → 0.425 → 0.253; benign violations per run 0.207 → 0.329 → 0.036; latency p95 (P0.5) 9.16 s → 6.72 s → 6.93 s; latency p50 (P0.5) 1.704 s → 1.540 s → 1.519 s.
+
+Sound-alike detection rate (`soundAlikeRecall`, 33 planted sound-alikes), solo close-mic: 0.091 (3) → 0.303 (10) → 0.091 (3).
+
+| Category | Planted | Step 0 detected | Round 1 detected | Round 2 detected |
+|---|---|---|---|---|
+| dropped-words | 82 | 68 | 29 | 10 |
+| transposed | 56 | 45 | 25 | 4 |
+| added-words | 63 | 44 | 26 | 8 |
+| wrong-words | 87 | 43 | 38 | 18 |
+| dropped-line | 77 | 68 | 54 | 49 |
+| called-for-line | 61 | 50 | 48 | 35 |
+| paraphrase | 28 | 26 | 22 | 17 |
+
+What happened: false notes fell by the amount the attribution predicted (the fragment rule plus the higher note bar), but the recognizer finds almost every error and the engine now shows it as a quiet check rather than a note. Recall counting checks is 0.943 in solo close-mic, while recall counting notes only is 0.311. False checks are 8.16 per run, about 48 per 10 min (arithmetic from the run totals), so the check channel holds the detections and is noisy. Arithmetic from the scoring rules (not separately measured): a wrong-words note is 0.85 × mean heard-word confidence, and mean word confidence close-mic is about 0.73, so a typical real error scores about 0.62 before any similarity downgrade, just under the 0.65 `noteMin`. That is why lowering `noteMin` buys recall and false notes together (below).
+
+#### Trade-off point, not a tuning input
+
+One extra run, solo close-mic, held-out seeds, Patience 0.5, `--note-min 0.5` (`harness/out/r2-gate-note050`). It is reported only to show the trade-off; the committed default is unchanged, and nothing was chosen from held-out seeds.
+
+| noteMin | False alerts /10 min | False notes /10 min | Core recall | Recall counting checks | False checks / run |
+|---|---|---|---|---|---|
+| 0.65 (committed) | 0.211 | 1.604 | 0.313 | 0.943 | 8.16 |
+| 0.5 (trade-off point) | 0.211 | 4.178 | 0.533 | 0.943 | 7.92 |
+
+Lowering `noteMin` from 0.65 to 0.5 adds 0.220 core recall for 2.57 extra false notes per 10 min; neither point passes both. The held-out figures agree with the tuning-seed grid (0.65: 1.25 / 0.337; 0.5: 4.43 / 0.548).
+
+### Director conditions against the Step 0 baseline (per scene, Patience 0.5, 60 runs per condition; Step 0 → Round 1 → Round 2)
+
+| Condition | False alerts / scene | False notes / scene | Core recall |
+|---|---|---|---|
+| director-close-mic | 1.367 → 0.117 → 0.117 | 3.017 → 2.867 → 0.450 | 0.722 → 0.514 → **0.417** |
+| director-far-field | 2.283 → 0.050 → 0.100 | 4.233 → 1.583 → 0.267 | 0.701 → 0.403 → **0.333** |
+| director-far-field-hard | 11.767 → 0 → 0.017 | 11.650 → 0.417 → 0.067 | 0.542 → 0.188 → **0.000** |
+
+Against the spec targets (≤ 1 alert, ≤ 2 notes per scene, recall ≥ 0.75): director-far-field and director-far-field-hard pass the alert and note targets and fail recall (0.333 and 0.000). director-close-mic has no target row. The solo far-field rooms behave the same way: solo-far-field false alerts 7.17 → 0.084 and false notes 12.49 → 1.139 per 10 min, core recall 0.715 → 0.220; solo-far-field-hard false alerts 27.98 → 0.042 and false notes 29.62 → 0.380 per 10 min, core recall 0.585 → 0.045.
+
+**Every worsening against the Step 0 baseline** (held-out seeds, `r2-gate` vs `s0-gate`; `gate` exits FAIL and every FAIL line is core recall, all six conditions):
+
+- **Core recall** fell in all six conditions: solo close-mic 0.728 → 0.313, solo far-field 0.715 → 0.220, solo far-field-hard 0.585 → 0.045; director close-mic 0.722 → 0.417, far-field 0.701 → 0.333, far-field-hard 0.542 → 0.000.
+- **Overall recall** fell in all six: solo 0.758 → 0.311, 0.709 → 0.196, 0.548 → 0.040; director 0.776 → 0.343, 0.710 → 0.196, 0.583 → 0.008 (close-mic, far-field, far-field-hard).
+- **Same-category rate** fell in all six: solo 0.623 → 0.253, 0.529 → 0.148, 0.256 → 0.024; director 0.649 → 0.298, 0.522 → 0.171, 0.224 → 0.003.
+- **Sound-alike recall** fell or held: solo close-mic 0.091 → 0.091 (equal; it was 0.303 in round 1), solo far-field 0.182 → 0, solo far-field-hard 0.394 → 0, director close-mic 0.103 → 0.069, director far-field 0.276 → 0.069, director far-field-hard 0.310 → 0.
+- **False checks per run** rose in all six: solo 4.27 → 8.16, 8.75 → 12.74, 17.81 → 22.52; director 7.75 → 14.48, 17.03 → 24.75, 31.88 → 43.90.
+- **Latency:** solo far-field p95 7.24 s → 8.56 s (worse); director-far-field-hard has no measurable alert latency any more (p50 was 3.06 s, p95 11.66 s; the condition raises one alert in 60 runs, and it is not a detection). Solo close-mic, director close-mic and director far-field p50 and p95 improved, as did solo far-field-hard p50 (2.50 s → 2.38 s) and p95 (13.21 s → 6.72 s).
+- **False alerts, false notes and benign violations** did not worsen against Step 0 in any condition (false alerts per run: solo 0.807 → 0.036, 1.214 → 0.014, 4.736 → 0.007; director 1.367 → 0.117, 2.283 → 0.100, 11.767 → 0.017. Benign violations per run fell in all six).
+- **Recall counting checks** rose in all six (solo close-mic 0.927 → 0.943, far-field 0.947 → 0.949, far-field-hard 0.808 → 0.813; director 0.923 → 0.948, 0.931 → 0.953, 0.765 → 0.801).
+
+**Also worse than Round 1** (so these are costs of round 2 specifically): core and overall recall, same-category rate and false checks per run in all six conditions; sound-alike recall in solo close-mic (0.303 → 0.091), solo far-field (0.152 → 0), director close-mic (0.172 → 0.069), director far-field (0.103 → 0.069), director far-field-hard (0.034 → 0); false alerts per run in solo far-field-hard (0 → 0.007, 0.042 per 10 min; benign violations 0 → 0.014), director far-field (0.050 → 0.100) and director far-field-hard (0 → 0.017); latency p95 in solo close-mic (6.72 → 6.93 s) and solo far-field (4.91 → 8.56 s); latency p50 in director far-field (1.265 → 1.285 s). The false-alert rises are one to six alerts across 60 or 140 runs, so they are noise-sized.
+
+### Decision: M3 NO-GO
+
+Solo close-mic after the two permitted rounds: false alerts 0.211 per 10 min (≤ 1, PASS), false notes 1.604 per 10 min (≤ 1, FAIL, 0.604 over), core recall 0.313 (≥ 0.90, FAIL, 0.587 short), alert latency p50 at Patience 0 1.035 s (< 0.5 s, FAIL, 0.535 s over). Three of four targets fail, so the rule in the pass spec (§1, §3) gives **NO-GO**. Targets are not loosened and there is no third round; the pass stops here.
+
+Options for the user (these need a decision and, except (a), a new spec):
+
+- **(a) Accept a named shortfall and start M3 anyway.** False notes are the nearest miss: 1.604 vs ≤ 1 is about one stray note per 6 minutes of rehearsal. Core recall and latency are not near: at 0.313, roughly two of three planted dropped-word, wrong-word and dropped-line errors never reach the actor as a note, and 1.035 s is about twice the target. Recall counting quiet checks is 0.943, with about 48 false checks per 10 min, so whether an error shown as a check is acceptable to the actor is a product question. That is a change in how the target is read, not a measured pass, and it is the user's call.
+- **(b) Spec the two-speed stabilizer for latency** (fast release for words that can raise alerts, with alert retraction). The evidence is mixed: in the tuning-seed re-sweep (Patience 0) latency p50 is 0.94 s at `stableSec` 0.1 and 1.17 s at 0.3, so even a 0.1 s hold leaves about 0.9 s that the stabilizer does not explain. I did not attribute that remainder (candidates are the commit/anchoring confirmation words in the aligner and the recognizer's own delay), so this option alone is unlikely to reach 0.5 s, and it does nothing for false notes or recall.
+- **(c) Per-actor audio or real recordings, to check whether synthetic TTS plus this recognizer is representative.** Every threshold in this pass was tuned on Piper audio through one recognizer, and the recall miss comes from the recognizer's word confidence (about 0.73 close-mic) landing just under the note bar. Real voices may give a different confidence distribution, in either direction; this is the only option that tests whether the target gap is real.
+- **(d) A better recognizer model, or hotword/contextual biasing toward the script words.** A stronger model or biasing should raise confidence on correctly spoken words and cut mishearings. Biasing also pushes the recognizer to write the script word when the actor said something close (already seen with "sir"/"sore", where the recognizer writes "sir"), so it could hide real errors. Neither was measured.
+
+Not recommended without new evidence: further threshold or `stableSec` tuning. The grid above shows no pair in range passes more than one target, and the held-out numbers match it.
