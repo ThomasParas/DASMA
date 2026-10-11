@@ -104,9 +104,9 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
 
   /** Every heard token the aligner has taken in, in order; H is always a suffix of this list (pass spec §6.2). */
   const marks: HeardMark[] = [];
-  const markOf = new Map<HeardToken, HeardMark>();
+  const markOf = new WeakMap<HeardToken, HeardMark>();
   /** Heard-time span of each note that has heard words, for downgrading earlier notes once a run turns out off-script. */
-  const noteTimes = new Map<NoteDraft, [number, number]>();
+  const noteTimes = new WeakMap<NoteDraft, [number, number]>();
   const MAX_MARKS = 64;
 
   function track(tok: HeardToken): void {
@@ -176,7 +176,6 @@ export function createAligner(expected: ExpectedWord[], options: AlignOptions): 
     }
     const notes = finalizeLine(lines.get(id)!, {
       strictness: options.strictness,
-      audioQuality,
       noteMin: options.noteMinConfidence,
       at,
     });

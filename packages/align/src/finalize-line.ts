@@ -13,7 +13,6 @@ export interface LineState {
 
 export interface FinalizeContext {
   strictness: Strictness;
-  audioQuality: number;
   noteMin: number;
   at: number;
 }

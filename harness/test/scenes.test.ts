@@ -19,7 +19,7 @@ describe('scenes', () => {
     expect(soloCharacters(h!)).toEqual(['HAMLET']);
   });
 
-  it('soloCharacters keeps characters with at least 4 lines, in first-appearance order (Review Focus 5)', () => {
+  it('soloCharacters keeps characters with at least 4 lines, in first-appearance order', () => {
     const mk = (counts: Array<[string, number]>): Scene => ({
       id: 'x', title: 'x', source: 'x',
       lines: counts.flatMap(([c, n]) => Array.from({ length: n }, (_, k) => ({ id: `${c}${k}`, character: c, text: 'a b c' }))),

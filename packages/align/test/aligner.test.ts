@@ -357,7 +357,7 @@ describe('aligner: recognizer word boundaries and abbreviations', () => {
     expect(r.flags).toEqual([]);
   });
 
-  it('keeps two heard words apart when the script has them as two words (Review Focus 2)', () => {
+  it('keeps two heard words apart when the script has them as two words', () => {
     const ANY: ScriptLineInput[] = [
       { id: 'A1', characterId: 'X', text: 'Pick any one card you like.' },
       { id: 'A2', characterId: 'Y', text: 'Anyone can do that.' },
@@ -560,7 +560,7 @@ describe('aligner: backward jumps (pass spec §6.3)', () => {
     expect(r.flags.filter((f) => f.note.lineId === 'L4').map((f) => f.alert)).toEqual([false, true]);
   });
 
-  // Review Focus 3 (guard): the run ends right after a confirmed jump back; later lines keep their earlier results.
+  // Guard: the run ends right after a confirmed jump back; later lines keep their earlier results.
   it('a confirmed jump back followed by the end of the run leaves no dropped lines', () => {
     const r = runScenario(LONG_SCENE, heard(`${perfLong('L1', 'L2', 'L3', 'L4', 'L5')} | Did you hear what I was playing`), P0);
     const final = new Map<string, unknown[]>();

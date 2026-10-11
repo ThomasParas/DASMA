@@ -52,7 +52,7 @@ describe('Stabilizer (audio time, pass spec §7.1)', () => {
     expect(texts(s.update([w('C', 1.0)], true, 1.45))).toEqual(['C']);
   });
 
-  it('a hypothesis that shrinks never releases a stale word later (Review Focus 4)', () => {
+  it('a hypothesis that shrinks never releases a stale word later', () => {
     const s = new Stabilizer({ stableSec: 0.2 });
     expect(s.update([w('A', 0), w('B', 0.4), w('C', 0.8)], false, 1.0)).toEqual([]);
     expect(s.update([w('A', 0)], false, 1.1)).toEqual([]);

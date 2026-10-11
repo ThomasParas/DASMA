@@ -6,7 +6,7 @@ import { heard } from './helpers/dsl';
 import { textOf } from './helpers/fixtures';
 
 const WP: Strictness = { mode: 'word-perfect' };
-const CTX = { strictness: WP, audioQuality: 1, noteMin: 0.5, at: 0 };
+const CTX = { strictness: WP, noteMin: 0.5, at: 0 };
 const words = buildExpected([{ id: 'L4', characterId: 'ALGERNON', text: textOf('L4') }], WP); // 10 words, idx 0..9
 
 function state(res: Array<'matched' | 'sub' | 'del'>, notes: NoteDraft[], heardText = ''): LineState {

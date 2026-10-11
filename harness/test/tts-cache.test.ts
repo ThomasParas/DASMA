@@ -53,7 +53,7 @@ describe('cachedTts', () => {
     expect(cacheKey('m', 1, 1, 't')).toBe(keys[0]);
   });
 
-  it('re-renders a truncated cache file instead of failing (Review Focus 1)', () => {
+  it('re-renders a truncated cache file instead of failing', () => {
     const dir = tmp();
     const inner = counting();
     const tts = cachedTts(inner, dir, 'model-a');
