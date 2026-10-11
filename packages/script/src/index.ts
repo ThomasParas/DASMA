@@ -7,3 +7,8 @@ export { DOCX_TAB_INDENT, extractDocx } from './extract/docx';
 export { extractPdf } from './extract/pdf';
 export { cleanDoc, normalizeText } from './clean';
 export { CAST_LIST_HEADER, SCENE_BREAK, isHeading } from './patterns';
+export { buildCast, inCastList, slugId } from './characters';
+export type { Cast } from './characters';
+export { capsShare, isStopToken, matchCue, normalizeCueToken } from './cues';
+export type { CueMatch } from './cues';
+export { FLAG_BELOW, MANY_FLAGGED_SHARE } from './weights';
