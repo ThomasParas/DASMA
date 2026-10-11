@@ -19,3 +19,4 @@ export { applyOverlapMarks } from './overlap';
 export { INLINE_ITALIC_MIN_WORDS, buildUnits } from './units';
 export { UNKNOWN_CHARACTER, toAlignLines } from './align-adapter';
 export { UNTITLED, importScript, sniffUnsupported } from './import';
+export { DASMA_EXTENSION, DASMA_FORMAT, DASMA_FORMAT_VERSION, DASMA_MIME, readDasma, writeDasma } from './format';
