@@ -4,10 +4,11 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from
 import { dirname, join, resolve, sep } from 'node:path';
 import { parseArgs } from 'node:util';
 import { ALIGN_FLAG_OPTIONS, ENGINE_FLAG_DEFAULTS, STABLE_SEC_OPTION, parseEvaluateOptions } from './cli-args';
+import { PLAY_CONFIGS, convertGutenberg } from './corpus/convert-gutenberg';
 import { evaluate } from './evaluate';
 import { compareToBaseline, formatReport, type EvalReport } from './metrics';
 import { fetchModels } from './models';
-import { BASELINE_FILE, MODELS_DIR, OUT_DIR, TTS_CACHE_DIR } from './paths';
+import { BASELINE_FILE, MODELS_DIR, OUT_DIR, PLAYS_DIR, TTS_CACHE_DIR } from './paths';
 import { createSherpaTts, TTS_MODEL_ID } from './tts';
 import { cachedTts } from './tts-cache';
 
@@ -34,9 +35,22 @@ const USAGE = `Usage: npm run harness -- <command> [options]
       --out <dir>               default harness/out/<timestamp>
       --save-audio              also write each rehearsal as WAV
   gate --report <path> [--baseline <path>]    Exit 1 if results regressed vs the baseline
-  baseline --report <path>                    Make a report the new baseline`;
+  baseline --report <path>                    Make a report the new baseline
+  convert-plays --from <dir>                  One-off: convert downloaded Gutenberg texts (pg<id>.txt) into harness/corpus/plays`;
 
 const fromCwd = (p: string) => resolve(process.env.INIT_CWD ?? process.cwd(), p);
+
+function runConvertPlays(args: string[]): void {
+  const { values } = parseArgs({ args, options: { from: { type: 'string' } } });
+  if (!values.from) throw new Error('convert-plays needs --from <dir with pg<id>.txt files>');
+  mkdirSync(PLAYS_DIR, { recursive: true });
+  for (const cfg of PLAY_CONFIGS) {
+    const play = convertGutenberg(readFileSync(join(fromCwd(values.from), `pg${cfg.gutenbergId}.txt`), 'utf8'), cfg);
+    writeFileSync(join(PLAYS_DIR, `${cfg.id}.json`), `${JSON.stringify(play, null, 2)}\n`);
+    const count = (k: string) => play.units.filter((u) => u.kind === k).length;
+    console.log(`${cfg.id}: ${play.cast.length} speakers, ${count('dialogue')} speeches, ${count('direction')} directions, ${count('heading')} headings, ${count('frontMatter')} front-matter lines`);
+  }
+}
 
 async function runEvaluate(args: string[]): Promise<void> {
   const { values } = parseArgs({
@@ -145,6 +159,8 @@ async function main(): Promise<void> {
       return runGate(args);
     case 'baseline':
       return runBaseline(args);
+    case 'convert-plays':
+      return runConvertPlays(args);
     default:
       console.log(USAGE);
       if (command && command !== '--help') process.exitCode = 1;

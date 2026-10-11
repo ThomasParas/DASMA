@@ -1,0 +1,3613 @@
+{
+  "id": "seagull",
+  "title": "THE SEA-GULL",
+  "source": "Anton Chekhov, The Sea-Gull, English translation published before 1931. Project Gutenberg eBook #1754, header and licence removed. Public domain in the US.",
+  "cast": [
+    {
+      "id": "medviedenko",
+      "name": "MEDVIEDENKO",
+      "aliases": []
+    },
+    {
+      "id": "masha",
+      "name": "MASHA",
+      "aliases": []
+    },
+    {
+      "id": "sorin",
+      "name": "SORIN",
+      "aliases": []
+    },
+    {
+      "id": "treplieff",
+      "name": "TREPLIEFF",
+      "aliases": []
+    },
+    {
+      "id": "jacob",
+      "name": "JACOB",
+      "aliases": []
+    },
+    {
+      "id": "nina",
+      "name": "NINA",
+      "aliases": []
+    },
+    {
+      "id": "paulina",
+      "name": "PAULINA",
+      "aliases": []
+    },
+    {
+      "id": "dorn",
+      "name": "DORN",
+      "aliases": []
+    },
+    {
+      "id": "shamraeff",
+      "name": "SHAMRAEFF",
+      "aliases": []
+    },
+    {
+      "id": "arkadina",
+      "name": "ARKADINA",
+      "aliases": []
+    },
+    {
+      "id": "trigorin",
+      "name": "TRIGORIN",
+      "aliases": []
+    },
+    {
+      "id": "the-voice-of-arkadina",
+      "name": "THE VOICE OF ARKADINA",
+      "aliases": []
+    },
+    {
+      "id": "the-cook",
+      "name": "THE COOK",
+      "aliases": []
+    }
+  ],
+  "units": [
+    {
+      "kind": "frontMatter",
+      "text": "THE SEA-GULL"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "by Anton Chekhov"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "CHARACTERS"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "IRINA ABKADINA, an actress"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "CONSTANTINE TREPLIEFF, her son"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "PETER SORIN, her brother"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "NINA ZARIETCHNAYA, a young girl, the daughter of a rich landowner"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "ILIA SHAMRAEFF, the manager of SORIN’S estate"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "PAULINA, his wife"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "MASHA, their daughter"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "BORIS TRIGORIN, an author"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "EUGENE DORN, a doctor"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "SIMON MEDVIEDENKO, a schoolmaster"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "JACOB, a workman"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "A COOK"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "A MAIDSERVANT"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "_The scene is laid on SORIN’S estate. Two years elapse between the third"
+    },
+    {
+      "kind": "frontMatter",
+      "text": "and fourth acts_."
+    },
+    {
+      "kind": "heading",
+      "text": "ACT I"
+    },
+    {
+      "kind": "direction",
+      "text": "The scene is laid in the park on SORIN’S estate. A broad avenue of trees leads away from the audience toward a lake which lies lost in the depths of the park. The avenue is obstructed by a rough stage, temporarily erected for the performance of amateur theatricals, and which screens the lake from view. There is a dense growth of bushes to the left and right of the stage. A few chairs and a little table are placed in front of the stage. The sun has just set. JACOB and some other workmen are heard hammering and coughing on the stage behind the lowered curtain."
+    },
+    {
+      "kind": "direction",
+      "text": "MASHA and MEDVIEDENKO come in from the left, returning from a walk."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "Why do you always wear mourning?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "I dress in black to match my life. I am unhappy."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "Why should you be unhappy? [Thinking it over] I don’t understand it. You are healthy, and though your father is not rich, he has a good competency. My life is far harder than yours. I only have twenty-three roubles a month to live on, but I don’t wear mourning. [They sit down]."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Happiness does not depend on riches; poor men are often happy."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "In theory, yes, but not in reality. Take my case, for instance; my mother, my two sisters, my little brother and I must all live somehow on my salary of twenty-three roubles a month. We have to eat and drink, I take it. You wouldn’t have us go without tea and sugar, would you? Or tobacco? Answer me that, if you can."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "[Looking in the direction of the stage] The play will soon begin."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "Yes, Nina Zarietchnaya is going to act in Treplieff’s play. They love one another, and their two souls will unite to-night in the effort to interpret the same idea by different means. There is no ground on which your soul and mine can meet. I love you. Too restless and sad to stay at home, I tramp here every day, six miles and back, to be met only by your indifference. I am poor, my family is large, you can have no inducement to marry a man who cannot even find sufficient food for his own mouth."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "It is not that. [She takes snuff] I am touched by your affection, but I cannot return it, that is all. [She offers him the snuff-box] Will you take some?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "No, thank you. [A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "The air is sultry; a storm is brewing for to-night. You do nothing but moralise or else talk about money. To you, poverty is the greatest misfortune that can befall a man, but I think it is a thousand times easier to go begging in rags than to--You wouldn’t understand that, though."
+    },
+    {
+      "kind": "direction",
+      "text": "SORIN leaning on a cane, and TREPLIEFF come in."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "For some reason, my boy, country life doesn’t suit me, and I am sure I shall never get used to it. Last night I went to bed at ten and woke at nine this morning, feeling as if, from oversleep, my brain had stuck to my skull. [Laughing] And yet I accidentally dropped off to sleep again after dinner, and feel utterly done up at this moment. It is like a nightmare."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "There is no doubt that you should live in town. [He catches sight of MASHA and MEDVIEDENKO] You shall be called when the play begins, my friends, but you must not stay here now. Go away, please."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Miss Masha, will you kindly ask your father to leave the dog unchained? It howled so last night that my sister was unable to sleep."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "You must speak to my father yourself. Please excuse me; I can’t do so. [To MEDVIEDENKO] Come, let us go."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "You will let us know when the play begins?"
+    },
+    {
+      "kind": "direction",
+      "text": "MASHA and MEDVIEDENKO go out."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "I foresee that that dog is going to howl all night again. It is always this way in the country; I have never been able to live as I like here. I come down for a month’s holiday, to rest and all, and am plagued so by their nonsense that I long to escape after the first day. [Laughing] I have always been glad to get away from this place, but I have been retired now, and this was the only place I had to come to. Willy-nilly, one must live somewhere."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "jacob",
+      "text": "[To TREPLIEFF] We are going to take a swim, Mr. Constantine."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Very well, but you must be back in ten minutes."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "jacob",
+      "text": "We will, sir."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Looking at the stage] Just like a real theatre! See, there we have the curtain, the foreground, the background, and all. No artificial scenery is needed. The eye travels direct to the lake, and rests on the horizon. The curtain will be raised as the moon rises at half-past eight."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Splendid!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Of course the whole effect will be ruined if Nina is late. She should be here by now, but her father and stepmother watch her so closely that it is like stealing her from a prison to get her away from home. [He straightens SORIN’S collar] Your hair and beard are all on end. Oughtn’t you to have them trimmed?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "[Smoothing his beard] They are the tragedy of my existence. Even when I was young I always looked as if I were drunk, and all. Women have never liked me. [Sitting down] Why is my sister out of temper?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Why? Because she is jealous and bored. [Sitting down beside SORIN] She is not acting this evening, but Nina is, and so she has set herself against me, and against the performance of the play, and against the play itself, which she hates without ever having read it."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "[Laughing] Does she, really?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Yes, she is furious because Nina is going to have a success on this little stage. [Looking at his watch] My mother is a psychological curiosity. Without doubt brilliant and talented, capable of sobbing over a novel, of reciting all Nekrasoff’s poetry by heart, and of nursing the sick like an angel of heaven, you should see what happens if any one begins praising Duse to her! She alone must be praised and written about, raved over, her marvellous acting in “La Dame aux Camelias” extolled to the skies. As she cannot get all that rubbish in the country, she grows peevish and cross, and thinks we are all against her, and to blame for it all. She is superstitious, too. She dreads burning three candles, and fears the thirteenth day of the month. Then she is stingy. I know for a fact that she has seventy thousand roubles in a bank at Odessa, but she is ready to burst into tears if you ask her to lend you a penny."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "You have taken it into your head that your mother dislikes your play, and the thought of it has excited you, and all. Keep calm; your mother adores you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Pulling a flower to pieces] She loves me, loves me not; loves--loves me not; loves--loves me not! [Laughing] You see, she doesn’t love me, and why should she? She likes life and love and gay clothes, and I am already twenty-five years old; a sufficient reminder to her that she is no longer young. When I am away she is only thirty-two, in my presence she is forty-three, and she hates me for it. She knows, too, that I despise the modern stage. She adores it, and imagines that she is working on it for the benefit of humanity and her sacred art, but to me the theatre is merely the vehicle of convention and prejudice. When the curtain rises on that little three-walled room, when those mighty geniuses, those high-priests of art, show us people in the act of eating, drinking, loving, walking, and wearing their coats, and attempt to extract a moral from their insipid talk; when playwrights give us under a thousand different guises the same, same, same old stuff, then I must needs run from it, as Maupassant ran from the Eiffel Tower that was about to crush him by its vulgarity."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "But we can’t do without a theatre."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "No, but we must have it under a new form. If we can’t do that, let us rather not have it at all. [Looking at his watch] I love my mother, I love her devotedly, but I think she leads a stupid life. She always has this man of letters of hers on her mind, and the newspapers are always frightening her to death, and I am tired of it. Plain, human egoism sometimes speaks in my heart, and I regret that my mother is a famous actress. If she were an ordinary woman I think I should be a happier man. What could be more intolerable and foolish than my position, Uncle, when I find myself the only nonentity among a crowd of her guests, all celebrated authors and artists? I feel that they only endure me because I am her son. Personally I am nothing, nobody. I pulled through my third year at college by the skin of my teeth, as they say. I have neither money nor brains, and on my passport you may read that I am simply a citizen of Kiev. So was my father, but he was a well-known actor. When the celebrities that frequent my mother’s drawing-room deign to notice me at all, I know they only look at me to measure my insignificance; I read their thoughts, and suffer from humiliation."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Tell me, by the way, what is Trigorin like? I can’t understand him, he is always so silent."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Trigorin is clever, simple, well-mannered, and a little, I might say, melancholic in disposition. Though still under forty, he is surfeited with praise. As for his stories, they are--how shall I put it?--pleasing, full of talent, but if you have read Tolstoi or Zola you somehow don’t enjoy Trigorin."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Do you know, my boy, I like literary men. I once passionately desired two things: to marry, and to become an author. I have succeeded in neither. It must be pleasant to be even an insignificant author."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Listening] I hear footsteps! [He embraces his uncle] I cannot live without her; even the sound of her footsteps is music to me. I am madly happy. [He goes quickly to meet NINA, who comes in at that moment] My enchantress! My girl of dreams!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[Excitedly] It can’t be that I am late? No, I am not late."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Kissing her hands] No, no, no!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "I have been in a fever all day, I was so afraid my father would prevent my coming, but he and my stepmother have just gone driving. The sky is clear, the moon is rising. How I hurried to get here! How I urged my horse to go faster and faster! [Laughing] I am _so_ glad to see you! [She shakes hands with SORIN.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Oho! Your eyes look as if you had been crying. You mustn’t do that."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "It is nothing, nothing. Do let us hurry. I must go in half an hour. No, no, for heaven’s sake do not urge me to stay. My father doesn’t know I am here."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "As a matter of fact, it is time to begin now. I must call the audience."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Let me call them--and all--I am going this minute. [He goes toward the right, begins to sing “The Two Grenadiers,” then stops.] I was singing that once when a fellow-lawyer said to me: “You have a powerful voice, sir.” Then he thought a moment and added, “But it is a disagreeable one!” [He goes out laughing.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "My father and his wife never will let me come here; they call this place Bohemia and are afraid I shall become an actress. But this lake attracts me as it does the gulls. My heart is full of you. [She glances about her.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "We are alone."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Isn’t that some one over there?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "No. [They kiss one another.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "What is that tree?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "An elm."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Why does it look so dark?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "It is evening; everything looks dark now. Don’t go away early, I implore you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "I must."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "What if I were to follow you, Nina? I shall stand in your garden all night with my eyes on your window."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "That would be impossible; the watchman would see you, and Treasure is not used to you yet, and would bark."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "I love you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Hush!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Listening to approaching footsteps] Who is that? Is it you, Jacob?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "jacob",
+      "text": "[On the stage] Yes, sir."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "To your places then. The moon is rising; the play must commence."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Yes, sir."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Is the alcohol ready? Is the sulphur ready? There must be fumes of sulphur in the air when the red eyes shine out. [To NINA] Go, now, everything is ready. Are you nervous?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Yes, very. I am not so much afraid of your mother as I am of Trigorin. I am terrified and ashamed to act before him; he is so famous. Is he young?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Yes."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "What beautiful stories he writes!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Coldly] I have never read any of them, so I can’t say."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Your play is very hard to act; there are no living characters in it."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Living characters! Life must be represented not as it is, but as it ought to be; as it appears in dreams."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "There is so little action; it seems more like a recitation. I think love should always come into every play."
+    },
+    {
+      "kind": "direction",
+      "text": "NINA and TREPLIEFF go up onto the little stage; PAULINA and DORN come in."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "It is getting damp. Go back and put on your goloshes."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "I am quite warm."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "You never will take care of yourself; you are quite obstinate about it, and yet you are a doctor, and know quite well that damp air is bad for you. You like to see me suffer, that’s what it is. You sat out on the terrace all yesterday evening on purpose."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "[Sings]"
+    },
+    {
+      "kind": "direction",
+      "text": "“Oh, tell me not that youth is wasted.”"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "You were so enchanted by the conversation of Madame Arkadina that you did not even notice the cold. Confess that you admire her."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "I am fifty-five years old."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "A trifle. That is not old for a man. You have kept your looks magnificently, and women still like you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "What are you trying to tell me?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "You men are all ready to go down on your knees to an actress, all of you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "[Sings]"
+    },
+    {
+      "kind": "direction",
+      "text": "“Once more I stand before thee.”"
+    },
+    {
+      "kind": "direction",
+      "text": "It is only right that artists should be made much of by society and treated differently from, let us say, merchants. It is a kind of idealism."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "When women have loved you and thrown themselves at your head, has that been idealism?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "[Shrugging his shoulders] I can’t say. There has been a great deal that was admirable in my relations with women. In me they liked, above all, the superior doctor. Ten years ago, you remember, I was the only decent doctor they had in this part of the country--and then, I have always acted like a man of honour."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "[Seizes his hand] Dearest!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Be quiet! Here they come."
+    },
+    {
+      "kind": "direction",
+      "text": "ARKADINA comes in on SORIN’S arm; also TRIGORIN, SHAMRAEFF, MEDVIEDENKO, and MASHA."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "She acted most beautifully at the Poltava Fair in 1873; she was really magnificent. But tell me, too, where Tchadin the comedian is now? He was inimitable as Rasplueff, better than Sadofski. Where is he now?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Don’t ask me where all those antediluvians are! I know nothing about them. [She sits down.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "[Sighing] Pashka Tchadin! There are none left like him. The stage is not what it was in his time. There were sturdy oaks growing on it then, where now but stumps remain."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "It is true that we have few dazzling geniuses these days, but, on the other hand, the average of acting is much higher."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "I cannot agree with you; however, that is a matter of taste, _de gustibus._"
+    },
+    {
+      "kind": "direction",
+      "text": "Enter TREPLIEFF from behind the stage."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "When will the play begin, my dear boy?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "In a moment. I must ask you to have patience."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[Quoting from Hamlet] My son,"
+    },
+    {
+      "kind": "direction",
+      "text": "“Thou turn’st mine eyes into my very soul; And there I see such black grained spots As will not leave their tinct.”"
+    },
+    {
+      "kind": "direction",
+      "text": "A horn is blown behind the stage."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Attention, ladies and gentlemen! The play is about to begin. [A pause] I shall commence. [He taps the door with a stick, and speaks in a loud voice] O, ye time-honoured, ancient mists that drive at night across the surface of this lake, blind you our eyes with sleep, and show us in our dreams that which will be in twice ten thousand years!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "There won’t be anything in twice ten thousand years."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Then let them now show us that nothingness."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Yes, let them--we are asleep."
+    },
+    {
+      "kind": "direction",
+      "text": "The curtain rises. A vista opens across the lake. The moon hangs low above the horizon and is reflected in the water. NINA, dressed in white, is seen seated on a great rock."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "All men and beasts, lions, eagles, and quails, horned stags, geese, spiders, silent fish that inhabit the waves, starfish from the sea, and creatures invisible to the eye--in one word, life--all, all life, completing the dreary round imposed upon it, has died out at last. A thousand years have passed since the earth last bore a living creature on her breast, and the unhappy moon now lights her lamp in vain. No longer are the cries of storks heard in the meadows, or the drone of beetles in the groves of limes. All is cold, cold. All is void, void, void. All is terrible, terrible--[A pause] The bodies of all living creatures have dropped to dust, and eternal matter has transformed them into stones and water and clouds; but their spirits have flowed together into one, and that great world-soul am I! In me is the spirit of the great Alexander, the spirit of Napoleon, of Caesar, of Shakespeare, and of the tiniest leech that swims. In me the consciousness of man has joined hands with the instinct of the animal; I understand all, all, all, and each life lives again in me."
+    },
+    {
+      "kind": "direction",
+      "text": "The will-o-the-wisps flicker out along the lake shore."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[Whispers] What decadent rubbish is this?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Imploringly] Mother!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "I am alone. Once in a hundred years my lips are opened, my voice echoes mournfully across the desert earth, and no one hears. And you, poor lights of the marsh, you do not hear me. You are engendered at sunset in the putrid mud, and flit wavering about the lake till dawn, unconscious, unreasoning, unwarmed by the breath of life. Satan, father of eternal matter, trembling lest the spark of life should glow in you, has ordered an unceasing movement of the atoms that compose you, and so you shift and change for ever. I, the spirit of the universe, I alone am immutable and eternal. [A pause] Like a captive in a dungeon deep and void, I know not where I am, nor what awaits me. One thing only is not hidden from me: in my fierce and obstinate battle with Satan, the source of the forces of matter, I am destined to be victorious in the end. Matter and spirit will then be one at last in glorious harmony, and the reign of freedom will begin on earth. But this can only come to pass by slow degrees, when after countless eons the moon and earth and shining Sirius himself shall fall to dust. Until that hour, oh, horror! horror! horror! [A pause. Two glowing red points are seen shining across the lake] Satan, my mighty foe, advances; I see his dread and lurid eyes."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "I smell sulphur. Is that done on purpose?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Yes."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Oh, I see; that is part of the effect."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Mother!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "He longs for man--"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "[To DORN] You have taken off your hat again! Put it on, you will catch cold."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "The doctor has taken off his hat to Satan father of eternal matter--"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Loudly and angrily] Enough of this! There’s an end to the performance. Down with the curtain!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Why, what are you so angry about?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Stamping his foot] The curtain; down with it! [The curtain falls] Excuse me, I forgot that only a chosen few might write plays or act them. I have infringed the monopoly. I--I---"
+    },
+    {
+      "kind": "direction",
+      "text": "He would like to say more, but waves his hand instead, and goes out to the left."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "What is the matter with him?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "You should not handle youthful egoism so roughly, sister."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "What did I say to him?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "You hurt his feelings."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "But he told me himself that this was all in fun, so I treated his play as if it were a comedy."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Nevertheless---"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Now it appears that he has produced a masterpiece, if you please! I suppose it was not meant to amuse us at all, but that he arranged the performance and fumigated us with sulphur to demonstrate to us how plays should be written, and what is worth acting. I am tired of him. No one could stand his constant thrusts and sallies. He is a wilful, egotistic boy."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "He had hoped to give you pleasure."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Is that so? I notice, though, that he did not choose an ordinary play, but forced his decadent trash on us. I am willing to listen to any raving, so long as it is not meant seriously, but in showing us this, he pretended to be introducing us to a new form of art, and inaugurating a new era. In my opinion, there was nothing new about it, it was simply an exhibition of bad temper."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Everybody must write as he feels, and as best he may."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Let him write as he feels and can, but let him spare me his nonsense."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Thou art angry, O Jove!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "I am a woman, not Jove. [She lights a cigarette] And I am not angry, I am only sorry to see a young man foolishly wasting his time. I did not mean to hurt him."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "No one has any ground for separating life from matter, as the spirit may well consist of the union of material atoms. [Excitedly, to TRIGORIN] Some day you should write a play, and put on the stage the life of a schoolmaster. It is a hard, hard life."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "I agree with you, but do not let us talk about plays or atoms now. This is such a lovely evening. Listen to the singing, friends, how sweet it sounds."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "Yes, they are singing across the water. [A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[To TRIGORIN] Sit down beside me here. Ten or fifteen years ago we had music and singing on this lake almost all night. There are six houses on its shores. All was noise and laughter and romance then, such romance! The young star and idol of them all in those days was this man here, [Nods toward DORN] Doctor Eugene Dorn. He is fascinating now, but he was irresistible then. But my conscience is beginning to prick me. Why did I hurt my poor boy? I am uneasy about him. [Loudly] Constantine! Constantine!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Shall I go and find him?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "If you please, my dear."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "[Goes off to the left, calling] Mr. Constantine! Oh, Mr. Constantine!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[Comes in from behind the stage] I see that the play will never be finished, so now I can go home. Good evening. [She kisses ARKADINA and PAULINA.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Bravo! Bravo!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Bravo! Bravo! We were quite charmed by your acting. With your looks and such a lovely voice it is a crime for you to hide yourself in the country. You must be very talented. It is your duty to go on the stage, do you hear me?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "It is the dream of my life, which will never come true."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Who knows? Perhaps it will. But let me present Monsieur Boris Trigorin."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "I am delighted to meet you. [Embarrassed] I have read all your books."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[Drawing NINA down beside her] Don’t be afraid of him, dear. He is a simple, good-natured soul, even if he is a celebrity. See, he is embarrassed himself."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Couldn’t the curtain be raised now? It is depressing to have it down."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "[Loudly] Jacob, my man! Raise the curtain!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[To TRIGORIN] It was a curious play, wasn’t it?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Very. I couldn’t understand it at all, but I watched it with the greatest pleasure because you acted with such sincerity, and the setting was beautiful. [A pause] There must be a lot of fish in this lake."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Yes, there are."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "I love fishing. I know of nothing pleasanter than to sit on a lake shore in the evening with one’s eyes on a floating cork."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Why, I should think that for one who has tasted the joys of creation, no other pleasure could exist."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Don’t talk like that. He always begins to flounder when people say nice things to him."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "I remember when the famous Silva was singing once in the Opera House at Moscow, how delighted we all were when he took the low C. Well, you can imagine our astonishment when one of the church cantors, who happened to be sitting in the gallery, suddenly boomed out: “Bravo, Silva!” a whole octave lower. Like this: [In a deep bass voice] “Bravo, Silva!” The audience was left breathless. [A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "An angel of silence is flying over our heads."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "I must go. Good-bye."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Where to? Where must you go so early? We shan’t allow it."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "My father is waiting for me."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "How cruel he is, really. [They kiss each other] Then I suppose we can’t keep you, but it is very hard indeed to let you go."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "If you only knew how hard it is for me to leave you all."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Somebody must see you home, my pet."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[Startled] No, no!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "[Imploringly] Don’t go!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "I must."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Stay just one hour more, and all. Come now, really, you know."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[Struggling against her desire to stay; through her tears] No, no, I can’t. [She shakes hands with him and quickly goes out.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "An unlucky girl! They say that her mother left the whole of an immense fortune to her husband, and now the child is penniless because the father has already willed everything away to his second wife. It is pitiful."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Yes, her papa is a perfect beast, and I don’t mind saying so--it is what he deserves."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "[Rubbing his chilled hands] Come, let us go in; the night is damp, and my legs are aching."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Yes, you act as if they were turned to stone; you can hardly move them. Come, you unfortunate old man. [She takes his arm.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "[Offering his arm to his wife] Permit me, madame."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "I hear that dog howling again. Won’t you please have it unchained, Shamraeff?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "No, I really can’t, sir. The granary is full of millet, and I am afraid thieves might break in if the dog were not there. [Walking beside MEDVIEDENKO] Yes, a whole octave lower: “Bravo, Silva!” and he wasn’t a singer either, just a simple church cantor."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "What salary does the church pay its singers? [All go out except DORN.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "I may have lost my judgment and my wits, but I must confess I liked that play. There was something in it. When the girl spoke of her solitude and the Devil’s eyes gleamed across the lake, I felt my hands shaking with excitement. It was so fresh and naive. But here he comes; let me say something pleasant to him."
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF comes in."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "All gone already?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "I am here."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Masha has been yelling for me all over the park. An insufferable creature."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Constantine, your play delighted me. It was strange, of course, and I did not hear the end, but it made a deep impression on me. You have a great deal of talent, and must persevere in your work."
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF seizes his hand and squeezes it hard, then kisses him impetuously."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Tut, tut! how excited you are. Your eyes are full of tears. Listen to me. You chose your subject in the realm of abstract thought, and you did quite right. A work of art should invariably embody some lofty idea. Only that which is seriously meant can ever be beautiful. How pale you are!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "So you advise me to persevere?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Yes, but use your talent to express only deep and eternal truths. I have led a quiet life, as you know, and am a contented man, but if I should ever experience the exaltation that an artist feels during his moments of creation, I think I should spurn this material envelope of my soul and everything connected with it, and should soar away into heights above this earth."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "I beg your pardon, but where is Nina?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "And yet another thing: every work of art should have a definite object in view. You should know why you are writing, for if you follow the road of art without a goal before your eyes, you will lose yourself, and your genius will be your ruin."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Impetuously] Where is Nina?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "She has gone home."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[In despair] Gone home? What shall I do? I want to see her; I must see her! I shall follow her."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "My dear boy, keep quiet."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "I am going. I must go."
+    },
+    {
+      "kind": "direction",
+      "text": "MASHA comes in."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Your mother wants you to come in, Mr. Constantine. She is waiting for you, and is very uneasy."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Tell her I have gone away. And for heaven’s sake, all of you, leave me alone! Go away! Don’t follow me about!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Come, come, old chap, don’t act like this; it isn’t kind at all."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Through his tears] Good-bye, doctor, and thank you."
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF goes out."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "[Sighing] Ah, youth, youth!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "It is always “Youth, youth,” when there is nothing else to be said."
+    },
+    {
+      "kind": "direction",
+      "text": "She takes snuff. DORN takes the snuff-box out of her hands and flings it into the bushes."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Don’t do that, it is horrid. [A pause] I hear music in the house. I must go in."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Wait a moment."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "What do you want?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Let me tell you again. I feel like talking. [She grows more and more excited] I do not love my father, but my heart turns to you. For some reason, I feel with all my soul that you are near to me. Help me! Help me, or I shall do something foolish and mock at my life, and ruin it. I am at the end of my strength."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "What is the matter? How can I help you?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "I am in agony. No one, no one can imagine how I suffer. [She lays her head on his shoulder and speaks softly] I love Constantine."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Oh, how excitable you all are! And how much love there is about this lake of spells! [Tenderly] But what can I do for you, my child? What? What?"
+    },
+    {
+      "kind": "direction",
+      "text": "The curtain falls."
+    },
+    {
+      "kind": "heading",
+      "text": "ACT II"
+    },
+    {
+      "kind": "direction",
+      "text": "The lawn in front of SORIN’S house. The house stands in the background, on a broad terrace. The lake, brightly reflecting the rays of the sun, lies to the left. There are flower-beds here and there. It is noon; the day is hot. ARKADINA, DORN, and MASHA are sitting on a bench on the lawn, in the shade of an old linden. An open book is lying on DORN’S knees."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[To MASHA] Come, get up. [They both get up] Stand beside me. You are twenty-two and I am almost twice your age. Tell me, Doctor, which of us is the younger looking?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "You are, of course."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "You see! Now why is it? Because I work; my heart and mind are always busy, whereas you never move off the same spot. You don’t live. It is a maxim of mine never to look into the future. I never admit the thought of old age or death, and just accept what comes to me."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "I feel as if I had been in the world a thousand years, and I trail my life behind me like an endless scarf. Often I have no desire to live at all. Of course that is foolish. One ought to pull oneself together and shake off such nonsense."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "[Sings softly]"
+    },
+    {
+      "kind": "direction",
+      "text": "“Tell her, oh flowers--”"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "And then I keep myself as correct-looking as an Englishman. I am always well-groomed, as the saying is, and carefully dressed, with my hair neatly arranged. Do you think I should ever permit myself to leave the house half-dressed, with untidy hair? Certainly not! I have kept my looks by never letting myself slump as some women do. [She puts her arms akimbo, and walks up and down on the lawn] See me, tripping on tiptoe like a fifteen-year-old girl."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "I see. Nevertheless, I shall continue my reading. [He takes up his book] Let me see, we had come to the grain-dealer and the rats."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "And the rats. Go on. [She sits down] No, give me the book, it is my turn to read. [She takes the book and looks for the place] And the rats. Ah, here it is. [She reads] “It is as dangerous for society to attract and indulge authors as it is for grain-dealers to raise rats in their granaries. Yet society loves authors. And so, when a woman has found one whom she wishes to make her own, she lays siege to him by indulging and flattering him.” That may be so in France, but it certainly is not so in Russia. We do not carry out a programme like that. With us, a woman is usually head over ears in love with an author before she attempts to lay siege to him. You have an example before your eyes, in me and Trigorin."
+    },
+    {
+      "kind": "direction",
+      "text": "SORIN comes in leaning on a cane, with NINA beside him. MEDVIEDENKO follows, pushing an arm-chair."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "[In a caressing voice, as if speaking to a child] So we are happy now, eh? We are enjoying ourselves to-day, are we? Father and stepmother have gone away to Tver, and we are free for three whole days!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[Sits down beside ARKADINA, and embraces her] I am so happy. I belong to you now."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "[Sits down in his arm-chair] She looks lovely to-day."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Yes, she has put on her prettiest dress, and looks sweet. That was nice of you. [She kisses NINA] But we mustn’t praise her too much; we shall spoil her. Where is Trigorin?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "He is fishing off the wharf."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "I wonder he isn’t bored. [She begins to read again.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "What are you reading?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "“On the Water,” by Maupassant. [She reads a few lines to herself] But the rest is neither true nor interesting. [She lays down the book] I am uneasy about my son. Tell me, what is the matter with him? Why is he so dull and depressed lately? He spends all his days on the lake, and I scarcely ever see him any more."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "His heart is heavy. [Timidly, to NINA] Please recite something from his play."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[Shrugging her shoulders] Shall I? Is it so interesting?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "[With suppressed rapture] When he recites, his eyes shine and his face grows pale. His voice is beautiful and sad, and he has the ways of a poet."
+    },
+    {
+      "kind": "direction",
+      "text": "SORIN begins to snore."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Pleasant dreams!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Peter!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Eh?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Are you asleep?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Not a bit of it. [A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "You don’t do a thing for your health, brother, but you really ought to."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "The idea of doing anything for one’s health at sixty-five!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "One still wants to live at sixty-five."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "[Crossly] Ho! Take some camomile tea."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "I think a journey to some watering-place would be good for him."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Why, yes; he might go as well as not."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "You don’t understand."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "There is nothing to understand in this case; it is quite clear."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "He ought to give up smoking."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "What nonsense! [A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "No, that is not nonsense. Wine and tobacco destroy the individuality. After a cigar or a glass of vodka you are no longer Peter Sorin, but Peter Sorin plus somebody else. Your ego breaks in two: you begin to think of yourself in the third person."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "It is easy for you to condemn smoking and drinking; you have known what life is, but what about me? I have served in the Department of Justice for twenty-eight years, but I have never lived, I have never had any experiences. You are satiated with life, and that is why you have an inclination for philosophy, but I want to live, and that is why I drink my wine for dinner and smoke cigars, and all."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "One must take life seriously, and to take a cure at sixty-five and regret that one did not have more pleasure in youth is, forgive my saying so, trifling."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "It must be lunch-time. [She walks away languidly, with a dragging step] My foot has gone to sleep."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "She is going to have a couple of drinks before lunch."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "The poor soul is unhappy."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "That is a trifle, your honour."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "You judge her like a man who has obtained all he wants in life."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Oh, what could be duller than this dear tedium of the country? The air is hot and still, nobody does anything but sit and philosophise about life. It is pleasant, my friends, to sit and listen to you here, but I had rather a thousand times sit alone in the room of a hotel learning a role by heart."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[With enthusiasm] You are quite right. I understand how you feel."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Of course it is pleasanter to live in town. One can sit in one’s library with a telephone at one’s elbow, no one comes in without being first announced by the footman, the streets are full of cabs, and all---"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "[Sings]"
+    },
+    {
+      "kind": "direction",
+      "text": "“Tell her, oh flowers---”"
+    },
+    {
+      "kind": "direction",
+      "text": "SHAMRAEFF comes in, followed by PAULINA."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "Here they are. How do you do? [He kisses ARKADINA’S hand and then NINA’S] I am delighted to see you looking so well. [To ARKADINA] My wife tells me that you mean to go to town with her to-day. Is that so?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Yes, that is what I had planned to do."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "Hm--that is splendid, but how do you intend to get there, madam? We are hauling rye to-day, and all the men are busy. What horses would you take?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "What horses? How do I know what horses we shall have?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Why, we have the carriage horses."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "The carriage horses! And where am I to find the harness for them? This is astonishing! My dear madam, I have the greatest respect for your talents, and would gladly sacrifice ten years of my life for you, but I cannot let you have any horses to-day."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "But if I must go to town? What an extraordinary state of affairs!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "You do not know, madam, what it is to run a farm."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[In a burst of anger] That is an old story! Under these circumstances I shall go back to Moscow this very day. Order a carriage for me from the village, or I shall go to the station on foot."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "[losing his temper] Under these circumstances I resign my position. You must find yourself another manager. [He goes out.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "It is like this every summer: every summer I am insulted here. I shall never set foot here again."
+    },
+    {
+      "kind": "direction",
+      "text": "She goes out to the left, in the direction of the wharf. In a few minutes she is seen entering the house, followed by TRIGORIN, who carries a bucket and fishing-rod."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "[Losing his temper] What the deuce did he mean by his impudence? I want all the horses brought here at once!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[To PAULINA] How could he refuse anything to Madame Arkadina, the famous actress? Is not every wish, every caprice even, of hers, more important than any farm work? This is incredible."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "[In despair] What can I do about it? Put yourself in my place and tell me what I can do."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "[To NINA] Let us go and find my sister, and all beg her not to go. [He looks in the direction in which SHAMRAEFF went out] That man is insufferable; a regular tyrant."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[Preventing him from getting up] Sit still, sit still, and let us wheel you. [She and MEDVIEDENKO push the chair before them] This is terrible!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Yes, yes, it is terrible; but he won’t leave. I shall have a talk with him in a moment. [They go out. Only DORN and PAULINA are left.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "How tiresome people are! Your husband deserves to be thrown out of here neck and crop, but it will all end by this old granny Sorin and his sister asking the man’s pardon. See if it doesn’t."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "He has sent the carriage horses into the fields too. These misunderstandings occur every day. If you only knew how they excite me! I am ill; see! I am trembling all over! I cannot endure his rough ways. [Imploringly] Eugene, my darling, my beloved, take me to you. Our time is short; we are no longer young; let us end deception and concealment, even though it is only at the end of our lives. [A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "I am fifty-five years old. It is too late now for me to change my ways of living."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "I know that you refuse me because there are other women who are near to you, and you cannot take everybody. I understand. Excuse me--I see I am only bothering you."
+    },
+    {
+      "kind": "direction",
+      "text": "NINA is seen near the house picking a bunch of flowers."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "No, it is all right."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "I am tortured by jealousy. Of course you are a doctor and cannot escape from women. I understand."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "[TO NINA, who comes toward him] How are things in there?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Madame Arkadina is crying, and Sorin is having an attack of asthma."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Let us go and give them both some camomile tea."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[Hands him the bunch of flowers] Here are some flowers for you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Thank you. [He goes into the house.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "[Following him] What pretty flowers! [As they reach the house she says in a low voice] Give me those flowers! Give them to me!"
+    },
+    {
+      "kind": "direction",
+      "text": "DORN hands her the flowers; she tears them to pieces and flings them away. They both go into the house."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[Alone] How strange to see a famous actress weeping, and for such a trifle! Is it not strange, too, that a famous author should sit fishing all day? He is the idol of the public, the papers are full of him, his photograph is for sale everywhere, his works have been translated into many foreign languages, and yet he is overjoyed if he catches a couple of minnows. I always thought famous people were distant and proud; I thought they despised the common crowd which exalts riches and birth, and avenged themselves on it by dazzling it with the inextinguishable honour and glory of their fame. But here I see them weeping and playing cards and flying into passions like everybody else."
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF comes in without a hat on, carrying a gun and a dead seagull."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Are you alone here?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Yes."
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF lays the sea-gull at her feet."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "What do you mean by this?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "I was base enough to-day to kill this gull. I lay it at your feet."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "What is happening to you? [She picks up the gull and stands looking at it.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[After a pause] So shall I soon end my own life."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "You have changed so that I fail to recognise you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Yes, I have changed since the time when I ceased to recognise you. You have failed me; your look is cold; you do not like to have me near you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "You have grown so irritable lately, and you talk so darkly and symbolically that you must forgive me if I fail to follow you. I am too simple to understand you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "All this began when my play failed so dismally. A woman never can forgive failure. I have burnt the manuscript to the last page. Oh, if you could only fathom my unhappiness! Your estrangement is to me terrible, incredible; it is as if I had suddenly waked to find this lake dried up and sunk into the earth. You say you are too simple to understand me; but, oh, what is there to understand? You disliked my play, you have no faith in my powers, you already think of me as commonplace and worthless, as many are. [Stamping his foot] How well I can understand your feelings! And that understanding is to me like a dagger in the brain. May it be accursed, together with my stupidity, which sucks my life-blood like a snake! [He sees TRIGORIN, who approaches reading a book] There comes real genius, striding along like another Hamlet, and with a book, too. [Mockingly] “Words, words, words.” You feel the warmth of that sun already, you smile, your eyes melt and glow liquid in its rays. I shall not disturb you. [He goes out.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "[Making notes in his book] Takes snuff and drinks vodka; always wears black dresses; is loved by a schoolteacher--"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "How do you do?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "How are you, Miss Nina? Owing to an unforeseen development of circumstances, it seems that we are leaving here today. You and I shall probably never see each other again, and I am sorry for it. I seldom meet a young and pretty girl now; I can hardly remember how it feels to be nineteen, and the young girls in my books are seldom living characters. I should like to change places with you, if but for an hour, to look out at the world through your eyes, and so find out what sort of a little person you are."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "And I should like to change places with you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Why?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "To find out how a famous genius feels. What is it like to be famous? What sensations does it give you?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "What sensations? I don’t believe it gives any. [Thoughtfully] Either you exaggerate my fame, or else, if it exists, all I can say is that one simply doesn’t feel fame in any way."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "But when you read about yourself in the papers?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "If the critics praise me, I am happy; if they condemn me, I am out of sorts for the next two days."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "This is a wonderful world. If you only knew how I envy you! Men are born to different destinies. Some dully drag a weary, useless life behind them, lost in the crowd, unhappy, while to one out of a million, as to you, for instance, comes a bright destiny full of interest and meaning. You are lucky."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "I, lucky? [He shrugs his shoulders] H-m--I hear you talking about fame, and happiness, and bright destinies, and those fine words of yours mean as much to me--forgive my saying so--as sweetmeats do, which I never eat. You are very young, and very kind."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Your life is beautiful."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "I see nothing especially lovely about it. [He looks at his watch] Excuse me, I must go at once, and begin writing again. I am in a hurry. [He laughs] You have stepped on my pet corn, as they say, and I am getting excited, and a little cross. Let us discuss this bright and beautiful life of mine, though. [After a few moments’ thought] Violent obsessions sometimes lay hold of a man: he may, for instance, think day and night of nothing but the moon. I have such a moon. Day and night I am held in the grip of one besetting thought, to write, write, write! Hardly have I finished one book than something urges me to write another, and then a third, and then a fourth--I write ceaselessly. I am, as it were, on a treadmill. I hurry for ever from one story to another, and can’t help myself. Do you see anything bright and beautiful in that? Oh, it is a wild life! Even now, thrilled as I am by talking to you, I do not forget for an instant that an unfinished story is awaiting me. My eye falls on that cloud there, which has the shape of a grand piano; I instantly make a mental note that I must remember to mention in my story a cloud floating by that looked like a grand piano. I smell heliotrope; I mutter to myself: a sickly smell, the colour worn by widows; I must remember that in writing my next description of a summer evening. I catch an idea in every sentence of yours or of my own, and hasten to lock all these treasures in my literary store-room, thinking that some day they may be useful to me. As soon as I stop working I rush off to the theatre or go fishing, in the hope that I may find oblivion there, but no! Some new subject for a story is sure to come rolling through my brain like an iron cannonball. I hear my desk calling, and have to go back to it and begin to write, write, write, once more. And so it goes for everlasting. I cannot escape myself, though I feel that I am consuming my life. To prepare the honey I feed to unknown crowds, I am doomed to brush the bloom from my dearest flowers, to tear them from their stems, and trample the roots that bore them under foot. Am I not a madman? Should I not be treated by those who know me as one mentally diseased? Yet it is always the same, same old story, till I begin to think that all this praise and admiration must be a deception, that I am being hoodwinked because they know I am crazy, and I sometimes tremble lest I should be grabbed from behind and whisked off to a lunatic asylum. The best years of my youth were made one continual agony for me by my writing. A young author, especially if at first he does not make a success, feels clumsy, ill-at-ease, and superfluous in the world. His nerves are all on edge and stretched to the point of breaking; he is irresistibly attracted to literary and artistic people, and hovers about them unknown and unnoticed, fearing to look them bravely in the eye, like a man with a passion for gambling, whose money is all gone. I did not know my readers, but for some reason I imagined they were distrustful and unfriendly; I was mortally afraid of the public, and when my first play appeared, it seemed to me as if all the dark eyes in the audience were looking at it with enmity, and all the blue ones with cold indifference. Oh, how terrible it was! What agony!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "But don’t your inspiration and the act of creation give you moments of lofty happiness?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Yes. Writing is a pleasure to me, and so is reading the proofs, but no sooner does a book leave the press than it becomes odious to me; it is not what I meant it to be; I made a mistake to write it at all; I am provoked and discouraged. Then the public reads it and says: “Yes, it is clever and pretty, but not nearly as good as Tolstoi,” or “It is a lovely thing, but not as good as Turgenieff’s ‘Fathers and Sons,’” and so it will always be. To my dying day I shall hear people say: “Clever and pretty; clever and pretty,” and nothing more; and when I am gone, those that knew me will say as they pass my grave: “Here lies Trigorin, a clever writer, but he was not as good as Turgenieff.”"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "You must excuse me, but I decline to understand what you are talking about. The fact is, you have been spoilt by your success."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "What success have I had? I have never pleased myself; as a writer, I do not like myself at all. The trouble is that I am made giddy, as it were, by the fumes of my brain, and often hardly know what I am writing. I love this lake, these trees, the blue heaven; nature’s voice speaks to me and wakes a feeling of passion in my heart, and I am overcome by an uncontrollable desire to write. But I am not only a painter of landscapes, I am a man of the city besides. I love my country, too, and her people; I feel that, as a writer, it is my duty to speak of their sorrows, of their future, also of science, of the rights of man, and so forth. So I write on every subject, and the public hounds me on all sides, sometimes in anger, and I race and dodge like a fox with a pack of hounds on his trail. I see life and knowledge flitting away before me. I am left behind them like a peasant who has missed his train at a station, and finally I come back to the conclusion that all I am fit for is to describe landscapes, and that whatever else I attempt rings abominably false."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "You work too hard to realise the importance of your writings. What if you are discontented with yourself? To others you appear a great and splendid man. If I were a writer like you I should devote my whole life to the service of the Russian people, knowing at the same time that their welfare depended on their power to rise to the heights I had attained, and the people should send me before them in a chariot of triumph."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "In a chariot? Do you think I am Agamemnon? [They both smile.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "For the bliss of being a writer or an actress I could endure want, and disillusionment, and the hatred of my friends, and the pangs of my own dissatisfaction with myself; but I should demand in return fame, real, resounding fame! [She covers her face with her hands] Whew! My head reels!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "the-voice-of-arkadina",
+      "text": "[From inside the house] Boris! Boris!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "She is calling me, probably to come and pack, but I don’t want to leave this place. [His eyes rest on the lake] What a blessing such beauty is!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Do you see that house there, on the far shore?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Yes."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "That was my dead mother’s home. I was born there, and have lived all my life beside this lake. I know every little island in it."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "This is a beautiful place to live. [He catches sight of the dead sea-gull] What is that?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "A gull. Constantine shot it."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "What a lovely bird! Really, I can’t bear to go away. Can’t you persuade Irina to stay? [He writes something in his note-book.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "What are you writing?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Nothing much, only an idea that occurred to me. [He puts the book back in his pocket] An idea for a short story. A young girl grows up on the shores of a lake, as you have. She loves the lake as the gulls do, and is as happy and free as they. But a man sees her who chances to come that way, and he destroys her out of idleness, as this gull here has been destroyed. [A pause. ARKADINA appears at one of the windows.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Boris! Where are you?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "I am coming this minute."
+    },
+    {
+      "kind": "direction",
+      "text": "He goes toward the house, looking back at NINA. ARKADINA remains at the window."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "What do you want?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "We are not going away, after all."
+    },
+    {
+      "kind": "direction",
+      "text": "TRIGORIN goes into the house. NINA comes forward and stands lost in thought."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "It is a dream!"
+    },
+    {
+      "kind": "direction",
+      "text": "The curtain falls."
+    },
+    {
+      "kind": "heading",
+      "text": "ACT III"
+    },
+    {
+      "kind": "direction",
+      "text": "The dining-room of SORIN’S house. Doors open out of it to the right and left. A table stands in the centre of the room. Trunks and boxes encumber the floor, and preparations for departure are evident. TRIGORIN is sitting at a table eating his breakfast, and MASHA is standing beside him."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "I am telling you all these things because you write books and they may be useful to you. I tell you honestly, I should not have lived another day if he had wounded himself fatally. Yet I am courageous; I have decided to tear this love of mine out of my heart by the roots."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "How will you do it?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "By marrying Medviedenko."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "The school-teacher?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Yes."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "I don’t see the necessity for that."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Oh, if you knew what it is to love without hope for years and years, to wait for ever for something that will never come! I shall not marry for love, but marriage will at least be a change, and will bring new cares to deaden the memories of the past. Shall we have another drink?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Haven’t you had enough?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Fiddlesticks! [She fills a glass] Don’t look at me with that expression on your face. Women drink oftener than you imagine, but most of them do it in secret, and not openly, as I do. They do indeed, and it is always either vodka or brandy. [They touch glasses] To your good health! You are so easy to get on with that I am sorry to see you go. [They drink.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "And I am sorry to leave."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "You should ask her to stay."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "She would not do that now. Her son has been behaving outrageously. First he attempted suicide, and now I hear he is going to challenge me to a duel, though what his provocation may be I can’t imagine. He is always sulking and sneering and preaching about a new form of art, as if the field of art were not large enough to accommodate both old and new without the necessity of jostling."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "It is jealousy. However, that is none of my business. [A pause. JACOB walks through the room carrying a trunk; NINA comes in and stands by the window] That schoolteacher of mine is none too clever, but he is very good, poor man, and he loves me dearly, and I am sorry for him. However, let me say good-bye and wish you a pleasant journey. Remember me kindly in your thoughts. [She shakes hands with him] Thanks for your goodwill. Send me your books, and be sure to write something in them; nothing formal, but simply this: “To Masha, who, forgetful of her origin, for some unknown reason is living in this world.” Good-bye. [She goes out.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[Holding out her closed hand to TRIGORIN] Is it odd or even?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Even."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[With a sigh] No, it is odd. I had only one pea in my hand. I wanted to see whether I was to become an actress or not. If only some one would advise me what to do!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "One cannot give advice in a case like this. [A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "We shall soon part, perhaps never to meet again. I should like you to accept this little medallion as a remembrance of me. I have had your initials engraved on it, and on this side is the name of one of your books: “Days and Nights.”"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "How sweet of you! [He kisses the medallion] It is a lovely present."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Think of me sometimes."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "I shall never forget you. I shall always remember you as I saw you that bright day--do you recall it?--a week ago, when you wore your light dress, and we talked together, and the white seagull lay on the bench beside us."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[Lost in thought] Yes, the sea-gull. [A pause] I beg you to let me see you alone for two minutes before you go."
+    },
+    {
+      "kind": "direction",
+      "text": "She goes out to the left. At the same moment ARKADINA comes in from the right, followed by SORIN in a long coat, with his orders on his breast, and by JACOB, who is busy packing."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Stay here at home, you poor old man. How could you pay visits with that rheumatism of yours? [To TRIGORIN] Who left the room just now, was it Nina?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Yes."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "I beg your pardon; I am afraid we interrupted you. [She sits down] I think everything is packed. I am absolutely exhausted."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "[Reading the inscription on the medallion] “Days and Nights, page 121, lines 11 and 12.”"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "jacob",
+      "text": "[Clearing the table] Shall I pack your fishing-rods, too, sir?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Yes, I shall need them, but you can give my books away."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "jacob",
+      "text": "Very well, sir."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "[To himself] Page 121, lines 11 and 12. [To ARKADINA] Have we my books here in the house?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Yes, they are in my brother’s library, in the corner cupboard."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Page 121--[He goes out.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "You are going away, and I shall be lonely without you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "What would you do in town?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Oh, nothing in particular, but somehow--[He laughs] They are soon to lay the corner-stone of the new court-house here. How I should like to leap out of this minnow-pond, if but for an hour or two! I am tired of lying here like an old cigarette stump. I have ordered the carriage for one o’clock. We can go away together."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[After a pause] No, you must stay here. Don’t be lonely, and don’t catch cold. Keep an eye on my boy. Take good care of him; guide him along the proper paths. [A pause] I am going away, and so shall never find out why Constantine shot himself, but I think the chief reason was jealousy, and the sooner I take Trigorin away, the better."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "There were--how shall I explain it to you?--other reasons besides jealousy for his act. Here is a clever young chap living in the depths of the country, without money or position, with no future ahead of him, and with nothing to do. He is ashamed and afraid of being so idle. I am devoted to him and he is fond of me, but nevertheless he feels that he is useless here, that he is little more than a dependent in this house. It is the pride in him."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "He is a misery to me! [Thoughtfully] He might possibly enter the army."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "[Gives a whistle, and then speaks with hesitation] It seems to me that the best thing for him would be if you were to let him have a little money. For one thing, he ought to be allowed to dress like a human being. See how he looks! Wearing the same little old coat that he has had for three years, and he doesn’t even possess an overcoat! [Laughing] And it wouldn’t hurt the youngster to sow a few wild oats; let him go abroad, say, for a time. It wouldn’t cost much."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Yes, but--However, I think I might manage about his clothes, but I couldn’t let him go abroad. And no, I don’t think I can let him have his clothes even, now. [Decidedly] I have no money at present."
+    },
+    {
+      "kind": "direction",
+      "text": "SORIN laughs."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "I haven’t indeed."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "[Whistles] Very well. Forgive me, darling; don’t be angry. You are a noble, generous woman!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[Weeping] I really haven’t the money."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "If I had any money of course I should let him have some myself, but I haven’t even a penny. The farm manager takes my pension from me and puts it all into the farm or into cattle or bees, and in that way it is always lost for ever. The bees die, the cows die, they never let me have a horse."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Of course I have some money, but I am an actress and my expenses for dress alone are enough to bankrupt me."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "You are a dear, and I am very fond of you, indeed I am. But something is the matter with me again. [He staggers] I feel giddy. [He leans against the table] I feel faint, and all."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[Frightened ] Peter! [She tries to support him] Peter! dearest! [She calls] Help! Help!"
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF and MEDVIEDENKO come in; TREPLIEFF has a bandage around his head."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "He is fainting!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "I am all right. [He smiles and drinks some water] It is all over now."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[To his mother] Don’t be frightened, mother, these attacks are not dangerous; my uncle often has them now. [To his uncle] You must go and lie down, Uncle."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Yes, I think I shall, for a few minutes. I am going to Moscow all the same, but I shall lie down a bit before I start. [He goes out leaning on his cane.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "[Giving him his arm] Do you know this riddle? On four legs in the morning; on two legs at noon; and on three legs in the evening?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "[Laughing] Yes, exactly, and on one’s back at night. Thank you, I can walk alone."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "Dear me, what formality! [He and SORIN go out.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "He gave me a dreadful fright."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "It is not good for him to live in the country. Mother, if you would only untie your purse-strings for once, and lend him a thousand roubles! He could then spend a whole year in town."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "I have no money. I am an actress and not a banker. [A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Please change my bandage for me, mother, you do it so gently."
+    },
+    {
+      "kind": "direction",
+      "text": "ARKADINA goes to the cupboard and takes out a box of bandages and a bottle of iodoform."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "The doctor is late."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Yes, he promised to be here at nine, and now it is noon already."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Sit down. [She takes the bandage off his head] You look as if you had a turban on. A stranger that was in the kitchen yesterday asked to what nationality you belonged. Your wound is almost healed. [She kisses his head] You won’t be up to any more of these silly tricks again, will you, when I am gone?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "No, mother. I did that in a moment of insane despair, when I had lost all control over myself. It will never happen again. [He kisses her hand] Your touch is golden. I remember when you were still acting at the State Theatre, long ago, when I was still a little chap, there was a fight one day in our court, and a poor washerwoman was almost beaten to death. She was picked up unconscious, and you nursed her till she was well, and bathed her children in the washtubs. Have you forgotten it?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Yes, entirely. [She puts on a new bandage.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Two ballet dancers lived in the same house, and they used to come and drink coffee with you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "I remember that."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "They were very pious. [A pause] I love you again, these last few days, as tenderly and trustingly as I did as a child. I have no one left me now but you. Why, why do you let yourself be controlled by that man?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "You don’t understand him, Constantine. He has a wonderfully noble personality."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Nevertheless, when he has been told that I wish to challenge him to a duel his nobility does not prevent him from playing the coward. He is about to beat an ignominious retreat."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "What nonsense! I have asked him myself to go."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "A noble personality indeed! Here we are almost quarrelling over him, and he is probably in the garden laughing at us at this very moment, or else enlightening Nina’s mind and trying to persuade her into thinking him a man of genius."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "You enjoy saying unpleasant things to me. I have the greatest respect for that man, and I must ask you not to speak ill of him in my presence."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "I have no respect for him at all. You want me to think him a genius, as you do, but I refuse to lie: his books make me sick."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "You envy him. There is nothing left for people with no talent and mighty pretensions to do but to criticise those who are really gifted. I hope you enjoy the consolation it brings."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[With irony] Those who are really gifted, indeed! [Angrily] I am cleverer than any of you, if it comes to that! [He tears the bandage off his head] You are the slaves of convention, you have seized the upper hand and now lay down as law everything that you do; all else you strangle and trample on. I refuse to accept your point of view, yours and his, I refuse!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "That is the talk of a decadent."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Go back to your beloved stage and act the miserable ditch-water plays you so much admire!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "I never acted in a play like that in my life. You couldn’t write even the trashiest music-hall farce, you idle good-for-nothing!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Miser!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Rag-bag!"
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF sits down and begins to cry softly."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[Walking up and down in great excitement] Don’t cry! You mustn’t cry! [She bursts into tears] You really mustn’t. [She kisses his forehead, his cheeks, his head] My darling child, forgive me. Forgive your wicked mother."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Embracing her] Oh, if you could only know what it is to have lost everything under heaven! She does not love me. I see I shall never be able to write. Every hope has deserted me."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Don’t despair. This will all pass. He is going away to-day, and she will love you once more. [She wipes away his tears] Stop crying. We have made peace again."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Kissing her hand] Yes, mother."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[Tenderly] Make your peace with him, too. Don’t fight with him. You surely won’t fight?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "I won’t, but you must not insist on my seeing him again, mother, I couldn’t stand it. [TRIGORIN comes in] There he is; I am going. [He quickly puts the medicines away in the cupboard] The doctor will attend to my head."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "[Looking through the pages of a book] Page 121, lines 11 and 12; here it is. [He reads] “If at any time you should have need of my life, come and take it.”"
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF picks up the bandage off the floor and goes out."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[Looking at her watch] The carriage will soon be here."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "[To himself] If at any time you should have need of my life, come and take it."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "I hope your things are all packed."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "[Impatiently] Yes, yes. [In deep thought] Why do I hear a note of sadness that wrings my heart in this cry of a pure soul? If at any time you should have need of my life, come and take it. [To ARKADINA] Let us stay here one more day!"
+    },
+    {
+      "kind": "direction",
+      "text": "ARKADINA shakes her head."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Do let us stay!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "I know, dearest, what keeps you here, but you must control yourself. Be sober; your emotions have intoxicated you a little."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "You must be sober, too. Be sensible; look upon what has happened as a true friend would. [Taking her hand] You are capable of self-sacrifice. Be a friend to me and release me!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[In deep excitement] Are you so much in love?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "I am irresistibly impelled toward her. It may be that this is just what I need."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "What, the love of a country girl? Oh, how little you know yourself!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "People sometimes walk in their sleep, and so I feel as if I were asleep, and dreaming of her as I stand here talking to you. My imagination is shaken by the sweetest and most glorious visions. Release me!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[Shuddering] No, no! I am only an ordinary woman; you must not say such things to me. Do not torment me, Boris; you frighten me."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "You could be an extraordinary woman if you only would. Love alone can bring happiness on earth, love the enchanting, the poetical love of youth, that sweeps away the sorrows of the world. I had no time for it when I was young and struggling with want and laying siege to the literary fortress, but now at last this love has come to me. I see it beckoning; why should I fly?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[With anger] You are mad!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Release me."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "You have all conspired together to torture me to-day. [She weeps.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "[Clutching his head desperately] She doesn’t understand me! She won’t understand me!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Am I then so old and ugly already that you can talk to me like this without any shame about another woman? [She embraces and kisses him] Oh, you have lost your senses! My splendid, my glorious friend, my love for you is the last chapter of my life. [She falls on her knees] You are my pride, my joy, my light. [She embraces his knees] I could never endure it should you desert me, if only for an hour; I should go mad. Oh, my wonder, my marvel, my king!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Some one might come in. [He helps her to rise.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Let them come! I am not ashamed of my love. [She kisses his hands] My jewel! My despair! You want to do a foolish thing, but I don’t want you to do it. I shan’t let you do it! [She laughs] You are mine, you are mine! This forehead is mine, these eyes are mine, this silky hair is mine. All your being is mine. You are so clever, so wise, the first of all living writers; you are the only hope of your country. You are so fresh, so simple, so deeply humourous. You can bring out every feature of a man or of a landscape in a single line, and your characters live and breathe. Do you think that these words are but the incense of flattery? Do you think I am not speaking the truth? Come, look into my eyes; look deep; do you find lies there? No, you see that I alone know how to treasure you. I alone tell you the truth. Oh, my very dear, you will go with me? You will? You will not forsake me?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "I have no will of my own; I never had. I am too indolent, too submissive, too phlegmatic, to have any. Is it possible that women like that? Take me. Take me away with you, but do not let me stir a step from your side."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[To herself] Now he is mine! [Carelessly, as if nothing unusual had happened] Of course you must stay here if you really want to. I shall go, and you can follow in a week’s time. Yes, really, why should you hurry away?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Let us go together."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "As you like. Let us go together then. [A pause. TRIGORIN writes something in his note-book] What are you writing?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "A happy expression I heard this morning: “A grove of maiden pines.” It may be useful. [He yawns] So we are really off again, condemned once more to railway carriages, to stations and restaurants, to Hamburger steaks and endless arguments!"
+    },
+    {
+      "kind": "direction",
+      "text": "SHAMRAEFF comes in."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "I am sorry to have to inform you that your carriage is at the door. It is time to start, honoured madam, the train leaves at two-five. Would you be kind enough, madam, to remember to inquire for me where Suzdaltzeff the actor is now? Is he still alive, I wonder? Is he well? He and I have had many a jolly time together. He was inimitable in “The Stolen Mail.” A tragedian called Izmailoff was in the same company, I remember, who was also quite remarkable. Don’t hurry, madam, you still have five minutes. They were both of them conspirators once, in the same melodrama, and one night when in the course of the play they were suddenly discovered, instead of saying “We have been trapped!” Izmailoff cried out: “We have been rapped!” [He laughs] Rapped!"
+    },
+    {
+      "kind": "direction",
+      "text": "While he has been talking JACOB has been busy with the trunks, and the maid has brought ARKADINA her hat, coat, parasol, and gloves. The cook looks hesitatingly through the door on the right, and finally comes into the room. PAULINA comes in. MEDVIEDENKO comes in."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "[Presenting ARKADINA with a little basket] Here are some plums for the journey. They are very sweet ones. You may want to nibble something good on the way."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "You are very kind, Paulina."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "Good-bye, my dearie. If things have not been quite as you could have wished, please forgive us. [She weeps.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "It has been delightful, delightful. You mustn’t cry."
+    },
+    {
+      "kind": "direction",
+      "text": "SORIN comes in through the door on the left, dressed in a long coat with a cape, and carrying his hat and cane. He crosses the room."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Come, sister, it is time to start, unless you want to miss the train. I am going to get into the carriage. [He goes out.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "I shall walk quickly to the station and see you off there. [He goes out.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Good-bye, all! We shall meet again next summer if we live. [The maid servant, JACOB, and the cook kiss her hand] Don’t forget me. [She gives the cook a rouble] There is a rouble for all three of you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "the-cook",
+      "text": "Thank you, mistress; a pleasant journey to you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "jacob",
+      "text": "God bless you, mistress."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "Send us a line to cheer us up. [TO TRIGORIN] Good-bye, sir."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Where is Constantine? Tell him I am starting. I must say good-bye to him. [To JACOB] I gave the cook a rouble for all three of you."
+    },
+    {
+      "kind": "direction",
+      "text": "All go out through the door on the right. The stage remains empty. Sounds of farewell are heard. The maid comes running back to fetch the basket of plums which has been forgotten. TRIGORIN comes back."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "I had forgotten my cane. I think I left it on the terrace. [He goes toward the door on the right and meets NINA, who comes in at that moment] Is that you? We are off."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "I knew we should meet again. [With emotion] I have come to an irrevocable decision, the die is cast: I am going on the stage. I am deserting my father and abandoning everything. I am beginning life anew. I am going, as you are, to Moscow. We shall meet there."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "[Glancing about him] Go to the Hotel Slavianski Bazar. Let me know as soon as you get there. I shall be at the Grosholski House in Moltchanofka Street. I must go now. [A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Just one more minute!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "[In a low voice] You are so beautiful! What bliss to think that I shall see you again so soon! [She sinks on his breast] I shall see those glorious eyes again, that wonderful, ineffably tender smile, those gentle features with their expression of angelic purity! My darling! [A prolonged kiss.]"
+    },
+    {
+      "kind": "direction",
+      "text": "The curtain falls."
+    },
+    {
+      "kind": "direction",
+      "text": "Two years elapse between the third and fourth acts."
+    },
+    {
+      "kind": "heading",
+      "text": "ACT IV"
+    },
+    {
+      "kind": "direction",
+      "text": "A sitting-room in SORIN’S house, which has been converted into a writing-room for TREPLIEFF. To the right and left are doors leading into inner rooms, and in the centre is a glass door opening onto a terrace. Besides the usual furniture of a sitting-room there is a writing-desk in the right-hand corner of the room. There is a Turkish divan near the door on the left, and shelves full of books stand against the walls. Books are lying scattered about on the windowsills and chairs. It is evening. The room is dimly lighted by a shaded lamp on a table. The wind moans in the tree tops and whistles down the chimney. The watchman in the garden is heard sounding his rattle. MEDVIEDENKO and MASHA come in."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "[Calling TREPLIEFF] Mr. Constantine, where are you? [Looking about her] There is no one here. His old uncle is forever asking for Constantine, and can’t live without him for an instant."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "He dreads being left alone. [Listening to the wind] This is a wild night. We have had this storm for two days."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "[Turning up the lamp] The waves on the lake are enormous."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "It is very dark in the garden. Do you know, I think that old theatre ought to be knocked down. It is still standing there, naked and hideous as a skeleton, with the curtain flapping in the wind. I thought I heard a voice weeping in it as I passed there last night."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "What an idea! [A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "Come home with me, Masha."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "[Shaking her head] I shall spend the night here."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "[Imploringly] Do come, Masha. The baby must be hungry."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Nonsense, Matriona will feed it. [A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "It is a pity to leave him three nights without his mother."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "You are getting too tiresome. You used sometimes to talk of other things besides home and the baby, home and the baby. That is all I ever hear from you now."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "Come home, Masha."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "You can go home if you want to."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "Your father won’t give me a horse."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Yes, he will; ask him."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "I think I shall. Are you coming home to-morrow?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Yes, yes, to-morrow."
+    },
+    {
+      "kind": "direction",
+      "text": "She takes snuff. TREPLIEFF and PAULINA come in. TREPLIEFF is carrying some pillows and a blanket, and PAULINA is carrying sheets and pillow cases. They lay them on the divan, and TREPLIEFF goes and sits down at his desk."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Who is that for, mother?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "Mr. Sorin asked to sleep in Constantine’s room to-night."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Let me make the bed."
+    },
+    {
+      "kind": "direction",
+      "text": "She makes the bed. PAULINA goes up to the desk and looks at the manuscripts lying on it. [A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "Well, I am going. Good-bye, Masha. [He kisses his wife’s hand] Good-bye, mother. [He tries to kiss his mother-in-law’s hand.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "[Crossly] Be off, in God’s name!"
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF shakes hands with him in silence, and MEDVIEDENKO goes out."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "[Looking at the manuscripts] No one ever dreamed, Constantine, that you would one day turn into a real author. The magazines pay you well for your stories. [She strokes his hair.] You have grown handsome, too. Dear, kind Constantine, be a little nicer to my Masha."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "[Still making the bed] Leave him alone, mother."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "She is a sweet child. [A pause] A woman, Constantine, asks only for kind looks. I know that from experience."
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF gets up from his desk and goes out without a word."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "There now! You have vexed him. I told you not to bother him."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "I am sorry for you, Masha."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Much I need your pity!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "My heart aches for you. I see how things are, and understand."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "You see what doesn’t exist. Hopeless love is only found in novels. It is a trifle; all one has to do is to keep a tight rein on oneself, and keep one’s head clear. Love must be plucked out the moment it springs up in the heart. My husband has been promised a school in another district, and when we have once left this place I shall forget it all. I shall tear my passion out by the roots. [The notes of a melancholy waltz are heard in the distance.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "Constantine is playing. That means he is sad."
+    },
+    {
+      "kind": "direction",
+      "text": "MASHA silently waltzes a few turns to the music."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "The great thing, mother, is not to have him continually in sight. If my Simon could only get his remove I should forget it all in a month or two. It is a trifle."
+    },
+    {
+      "kind": "direction",
+      "text": "DORN and MEDVIEDENKO come in through the door on the left, wheeling SORIN in an arm-chair."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "I have six mouths to feed now, and flour is at seventy kopecks."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "A hard riddle to solve!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "It is easy for you to make light of it. You are rich enough to scatter money to your chickens, if you wanted to."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "You think I am rich? My friend, after practising for thirty years, during which I could not call my soul my own for one minute of the night or day, I succeeded at last in scraping together one thousand roubles, all of which went, not long ago, in a trip which I took abroad. I haven’t a penny."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "[To her husband] So you didn’t go home after all?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "[Apologetically] How can I go home when they won’t give me a horse?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "[Under her breath, with bitter anger] Would I might never see your face again!"
+    },
+    {
+      "kind": "direction",
+      "text": "SORIN in his chair is wheeled to the left-hand side of the room. PAULINA, MASHA, and DORN sit down beside him. MEDVIEDENKO stands sadly aside."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "What a lot of changes you have made here! You have turned this sitting-room into a library."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Constantine likes to work in this room, because from it he can step out into the garden to meditate whenever he feels like it. [The watchman’s rattle is heard.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Where is my sister?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "She has gone to the station to meet Trigorin. She will soon be back."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "I must be dangerously ill if you had to send for my sister. [He falls silent for a moment] A nice business this is! Here I am dangerously ill, and you won’t even give me any medicine."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "What shall I prescribe for you? Camomile tea? Soda? Quinine?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Don’t inflict any of your discussions on me again. [He nods toward the sofa] Is that bed for me?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "Yes, for you, sir."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "Thank you."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "[Sings] “The moon swims in the sky to-night.”"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "I am going to give Constantine an idea for a story. It shall be called “The Man Who Wished--L’Homme qui a voulu.” When I was young, I wished to become an author; I failed. I wished to be an orator; I speak abominably, [Exciting himself] with my eternal “and all, and all,” dragging each sentence on and on until I sometimes break out into a sweat all over. I wished to marry, and I didn’t; I wished to live in the city, and here I am ending my days in the country, and all."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "You wished to become State Councillor, and--you are one!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "[Laughing] I didn’t try for that, it came of its own accord."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Come, you must admit that it is petty to cavil at life at sixty-two years of age."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "You are pig-headed! Can’t you see I want to live?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "That is futile. Nature has commanded that every life shall come to an end."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "You speak like a man who is satiated with life. Your thirst for it is quenched, and so you are calm and indifferent, but even you dread death."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "The fear of death is an animal passion which must be overcome. Only those who believe in a future life and tremble for sins committed, can logically fear death; but you, for one thing, don’t believe in a future life, and for another, you haven’t committed any sins. You have served as a Councillor for twenty-five years, that is all."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "[Laughing] Twenty-eight years!"
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF comes in and sits down on a stool at SORIN’S feet. MASHA fixes her eyes on his face and never once tears them away."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "We are keeping Constantine from his work."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "No matter. [A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "Of all the cities you visited when you were abroad, Doctor, which one did you like the best?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Genoa."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Why Genoa?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Because there is such a splendid crowd in its streets. When you leave the hotel in the evening, and throw yourself into the heart of that throng, and move with it without aim or object, swept along, hither and thither, their life seems to be yours, their soul flows into you, and you begin to believe at last in a great world spirit, like the one in your play that Nina Zarietchnaya acted. By the way, where is Nina now? Is she well?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "I believe so."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "I hear she has led rather a strange life; what happened?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "It is a long story, Doctor."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Tell it shortly. [A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "She ran away from home and joined Trigorin; you know that?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Yes."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "She had a child that died. Trigorin soon tired of her and returned to his former ties, as might have been expected. He had never broken them, indeed, but out of weakness of character had always vacillated between the two. As far as I can make out from what I have heard, Nina’s domestic life has not been altogether a success."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "What about her acting?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "I believe she made an even worse failure of that. She made her debut on the stage of the Summer Theatre in Moscow, and afterward made a tour of the country towns. At that time I never let her out of my sight, and wherever she went I followed. She always attempted great and difficult parts, but her delivery was harsh and monotonous, and her gestures heavy and crude. She shrieked and died well at times, but those were but moments."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Then she really has a talent for acting?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "I never could make out. I believe she has. I saw her, but she refused to see me, and her servant would never admit me to her rooms. I appreciated her feelings, and did not insist upon a meeting. [A pause] What more can I tell you? She sometimes writes to me now that I have come home, such clever, sympathetic letters, full of warm feeling. She never complains, but I can tell that she is profoundly unhappy; not a line but speaks to me of an aching, breaking nerve. She has one strange fancy; she always signs herself “The Sea-gull.” The miller in “Rusalka” called himself “The Crow,” and so she repeats in all her letters that she is a sea-gull. She is here now."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "What do you mean by “here?”"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "In the village, at the inn. She has been there for five days. I should have gone to see her, but Masha here went, and she refuses to see any one. Some one told me she had been seen wandering in the fields a mile from here yesterday evening."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "Yes, I saw her. She was walking away from here in the direction of the village. I asked her why she had not been to see us. She said she would come."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "But she won’t. [A pause] Her father and stepmother have disowned her. They have even put watchmen all around their estate to keep her away. [He goes with the doctor toward the desk] How easy it is, Doctor, to be a philosopher on paper, and how difficult in real life!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "sorin",
+      "text": "She was a beautiful girl. Even the State Councillor himself was in love with her for a time."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "You old Lovelace, you!"
+    },
+    {
+      "kind": "direction",
+      "text": "SHAMRAEFF’S laugh is heard."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "They are coming back from the station."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Yes, I hear my mother’s voice."
+    },
+    {
+      "kind": "direction",
+      "text": "ARKADINA and TRIGORIN come in, followed by SHAMRAEFF."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "We all grow old and wither, my lady, while you alone, with your light dress, your gay spirits, and your grace, keep the secret of eternal youth."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "You are still trying to turn my head, you tiresome old man."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "[To SORIN] How do you do, Peter? What, still ill? How silly of you! [With evident pleasure, as he catches sight of MASHA] How are you, Miss Masha?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "So you recognised me? [She shakes hands with him.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Did you marry him?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Long ago."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "You are happy now? [He bows to DORN and MEDVIEDENKO, and then goes hesitatingly toward TREPLIEFF] Your mother says you have forgotten the past and are no longer angry with me."
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF gives him his hand."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[To her son] Here is a magazine that Boris has brought you with your latest story in it."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[To TRIGORIN, as he takes the magazine] Many thanks; you are very kind."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Your admirers all send you their regards. Every one in Moscow and St. Petersburg is interested in you, and all ply me with questions about you. They ask me what you look like, how old you are, whether you are fair or dark. For some reason they all think that you are no longer young, and no one knows who you are, as you always write under an assumed name. You are as great a mystery as the Man in the Iron Mask."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Do you expect to be here long?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "No, I must go back to Moscow to-morrow. I am finishing another novel, and have promised something to a magazine besides. In fact, it is the same old business."
+    },
+    {
+      "kind": "direction",
+      "text": "During their conversation ARKADINA and PAULINA have put up a card-table in the centre of the room; SHAMRAEFF lights the candles and arranges the chairs, then fetches a box of lotto from the cupboard."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "The weather has given me a rough welcome. The wind is frightful. If it goes down by morning I shall go fishing in the lake, and shall have a look at the garden and the spot--do you remember?--where your play was given. I remember the piece very well, but should like to see again where the scene was laid."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "[To her father] Father, do please let my husband have a horse. He ought to go home."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "[Angrily] A horse to go home with! [Sternly] You know the horses have just been to the station. I can’t send them out again."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "But there are other horses. [Seeing that her father remains silent] You are impossible!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "I shall go on foot, Masha."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "[With a sigh] On foot in this weather? [She takes a seat at the card-table] Shall we begin?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "medviedenko",
+      "text": "It is only six miles. Good-bye. [He kisses his wife’s hand;] Good-bye, mother. [His mother-in-law gives him her hand unwillingly] I should not have troubled you all, but the baby--[He bows to every one] Good-bye. [He goes out with an apologetic air.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "He will get there all right, he is not a major-general."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "Come, let us begin. Don’t let us waste time, we shall soon be called to supper."
+    },
+    {
+      "kind": "direction",
+      "text": "SHAMRAEFF, MASHA, and DORN sit down at the card-table."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[To TRIGORIN] When the long autumn evenings descend on us we while away the time here by playing lotto. Look at this old set; we used it when our mother played with us as children. Don’t you want to take a hand in the game with us until supper time? [She and TRIGORIN sit down at the table] It is a monotonous game, but it is all right when one gets used to it. [She deals three cards to each of the players.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Looking through the pages of the magazine] He has read his own story, and hasn’t even cut the pages of mine."
+    },
+    {
+      "kind": "direction",
+      "text": "He lays the magazine on his desk and goes toward the door on the right, stopping as he passes his mother to give her a kiss."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Won’t you play, Constantine?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "No, excuse me please, I don’t feel like it. I am going to take a turn through the rooms. [He goes out.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Are you all ready? I shall begin: twenty-two."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Here it is."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Three."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Right."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Have you put down three? Eight. Eighty-one. Ten."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "Don’t go so fast."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Could you believe it? I am still dazed by the reception they gave me in Kharkoff."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Thirty-four. [The notes of a melancholy waltz are heard.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "The students gave me an ovation; they sent me three baskets of flowers, a wreath, and this thing here."
+    },
+    {
+      "kind": "direction",
+      "text": "She unclasps a brooch from her breast and lays it on the table."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "There is something worth while!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Fifty."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Fifty, did you say?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "I wore a perfectly magnificent dress; I am no fool when it comes to clothes."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "Constantine is playing again; the poor boy is sad."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "He has been severely criticised in the papers."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Seventy-seven."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "They want to attract attention to him."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "He doesn’t seem able to make a success, he can’t somehow strike the right note. There is an odd vagueness about his writings that sometimes verges on delirium. He has never created a single living character."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Eleven."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Are you bored, Peter? [A pause] He is asleep."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "The Councillor is taking a nap."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Seven. Ninety."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Do you think I should write if I lived in such a place as this, on the shore of this lake? Never! I should overcome my passion, and give my life up to the catching of fish."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Twenty-eight."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "And if I caught a perch or a bass, what bliss it would be!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "I have great faith in Constantine. I know there is something in him. He thinks in images; his stories are vivid and full of colour, and always affect me deeply. It is only a pity that he has no definite object in view. He creates impressions, and nothing more, and one cannot go far on impressions alone. Are you glad, madam, that you have an author for a son?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Just think, I have never read anything of his; I never have time."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Twenty-six."
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF comes in quietly and sits down at his table."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "[To TRIGORIN] We have something here that belongs to you, sir."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "What is it?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "You told me to have the sea-gull stuffed that Mr. Constantine killed some time ago."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "Did I? [Thoughtfully] I don’t remember."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Sixty-one. One."
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF throws open the window and stands listening."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "How dark the night is! I wonder what makes me so restless."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Shut the window, Constantine, there is a draught here."
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF shuts the window."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "masha",
+      "text": "Ninety-eight."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "See, my card is full."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[Gaily] Bravo! Bravo!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "Bravo!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Wherever he goes and whatever he does, that man always has good luck. [She gets up] And now, come to supper. Our renowned guest did not have any dinner to-day. We can continue our game later. [To her son] Come, Constantine, leave your writing and come to supper."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "I don’t want anything to eat, mother; I am not hungry."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "As you please. [She wakes SORIN] Come to supper, Peter. [She takes SHAMRAEFF’S arm] Let me tell you about my reception in Kharkoff."
+    },
+    {
+      "kind": "direction",
+      "text": "PAULINA blows out the candles on the table, then she and DORN roll SORIN’S chair out of the room, and all go out through the door on the left, except TREPLIEFF, who is left alone. TREPLIEFF prepares to write. He runs his eye over what he has already written."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "I have talked a great deal about new forms of art, but I feel myself gradually slipping into the beaten track. [He reads] “The placard cried it from the wall--a pale face in a frame of dusky hair”--cried--frame--that is stupid. [He scratches out what he has written] I shall begin again from the place where my hero is wakened by the noise of the rain, but what follows must go. This description of a moonlight night is long and stilted. Trigorin has worked out a process of his own, and descriptions are easy for him. He writes that the neck of a broken bottle lying on the bank glittered in the moonlight, and that the shadows lay black under the mill-wheel. There you have a moonlight night before your eyes, but I speak of the shimmering light, the twinkling stars, the distant sounds of a piano melting into the still and scented air, and the result is abominable. [A pause] The conviction is gradually forcing itself upon me that good literature is not a question of forms new or old, but of ideas that must pour freely from the author’s heart, without his bothering his head about any forms whatsoever. [A knock is heard at the window nearest the table] What was that? [He looks out of the window] I can’t see anything. [He opens the glass door and looks out into the garden] I heard some one run down the steps. [He calls] Who is there? [He goes out, and is heard walking quickly along the terrace. In a few minutes he comes back with NINA ZARIETCHNAYA] Oh, Nina, Nina!"
+    },
+    {
+      "kind": "direction",
+      "text": "NINA lays her head on TREPLIEFF’S breast and stifles her sobs."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Deeply moved] Nina, Nina! It is you--you! I felt you would come; all day my heart has been aching for you. [He takes off her hat and cloak] My darling, my beloved has come back to me! We mustn’t cry, we mustn’t cry."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "There is some one here."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "No one is here."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Lock the door, some one might come."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "No one will come in."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "I know your mother is here. Lock the door."
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF locks the door on the right and comes back to NINA."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "There is no lock on that one. I shall put a chair against it. [He puts an arm-chair against the door] Don’t be frightened, no one shall come in."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[Gazing intently into his face] Let me look at you. [She looks about her] It is warm and comfortable in here. This used to be a sitting-room. Have I changed much?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Yes, you have grown thinner, and your eyes are larger than they were. Nina, it seems so strange to see you! Why didn’t you let me go to you? Why didn’t you come sooner to me? You have been here nearly a week, I know. I have been several times each day to where you live, and have stood like a beggar beneath your window."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "I was afraid you might hate me. I dream every night that you look at me without recognising me. I have been wandering about on the shores of the lake ever since I came back. I have often been near your house, but I have never had the courage to come in. Let us sit down. [They sit down] Let us sit down and talk our hearts out. It is so quiet and warm in here. Do you hear the wind whistling outside? As Turgenieff says, “Happy is he who can sit at night under the roof of his home, who has a warm corner in which to take refuge.” I am a sea-gull--and yet--no. [She passes her hand across her forehead] What was I saying? Oh, yes, Turgenieff. He says, “and God help all houseless wanderers.” [She sobs.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Nina! You are crying again, Nina!"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "It is all right. I shall feel better after this. I have not cried for two years. I went into the garden last night to see if our old theatre were still standing. I see it is. I wept there for the first time in two years, and my heart grew lighter, and my soul saw more clearly again. See, I am not crying now. [She takes his hand in hers] So you are an author now, and I am an actress. We have both been sucked into the whirlpool. My life used to be as happy as a child’s; I used to wake singing in the morning; I loved you and dreamt of fame, and what is the reality? To-morrow morning early I must start for Eltz by train in a third-class carriage, with a lot of peasants, and at Eltz the educated trades-people will pursue me with compliments. It is a rough life."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Why are you going to Eltz?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "I have accepted an engagement there for the winter. It is time for me to go."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Nina, I have cursed you, and hated you, and torn up your photograph, and yet I have known every minute of my life that my heart and soul were yours for ever. To cease from loving you is beyond my power. I have suffered continually from the time I lost you and began to write, and my life has been almost unendurable. My youth was suddenly plucked from me then, and I seem now to have lived in this world for ninety years. I have called out to you, I have kissed the ground you walked on, wherever I looked I have seen your face before my eyes, and the smile that had illumined for me the best years of my life."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[Despairingly] Why, why does he talk to me like this?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "I am quite alone, unwarmed by any attachment. I am as cold as if I were living in a cave. Whatever I write is dry and gloomy and harsh. Stay here, Nina, I beseech you, or else let me go away with you."
+    },
+    {
+      "kind": "direction",
+      "text": "NINA quickly puts on her coat and hat."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Nina, why do you do that? For God’s sake, Nina! [He watches her as she dresses. A pause.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "My carriage is at the gate. Do not come out to see me off. I shall find the way alone. [Weeping] Let me have some water."
+    },
+    {
+      "kind": "direction",
+      "text": "TREPLIEFF hands her a glass of water."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Where are you going?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Back to the village. Is your mother here?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Yes, my uncle fell ill on Thursday, and we telegraphed for her to come."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "Why do you say that you have kissed the ground I walked on? You should kill me rather. [She bends over the table] I am so tired. If I could only rest--rest. [She raises her head] I am a sea-gull--no--no, I am an actress. [She hears ARKADINA and TRIGORIN laughing in the distance, runs to the door on the left and looks through the keyhole] He is there too. [She goes back to TREPLIEFF] Ah, well--no matter. He does not believe in the theatre; he used to laugh at my dreams, so that little by little I became down-hearted and ceased to believe in it too. Then came all the cares of love, the continual anxiety about my little one, so that I soon grew trivial and spiritless, and played my parts without meaning. I never knew what to do with my hands, and I could not walk properly or control my voice. You cannot imagine the state of mind of one who knows as he goes through a play how terribly badly he is acting. I am a sea-gull--no--no, that is not what I meant to say. Do you remember how you shot a seagull once? A man chanced to pass that way and destroyed it out of idleness. That is an idea for a short story, but it is not what I meant to say. [She passes her hand across her forehead] What was I saying? Oh, yes, the stage. I have changed now. Now I am a real actress. I act with joy, with exaltation, I am intoxicated by it, and feel that I am superb. I have been walking and walking, and thinking and thinking, ever since I have been here, and I feel the strength of my spirit growing in me every day. I know now, I understand at last, Constantine, that for us, whether we write or act, it is not the honour and glory of which I have dreamt that is important, it is the strength to endure. One must know how to bear one’s cross, and one must have faith. I believe, and so do not suffer so much, and when I think of my calling I do not fear life."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[Sadly] You have found your way, you know where you are going, but I am still groping in a chaos of phantoms and dreams, not knowing whom and what end I am serving by it all. I do not believe in anything, and I do not know what my calling is."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "[Listening] Hush! I must go. Good-bye. When I have become a famous actress you must come and see me. Will you promise to come? But now--[She takes his hand] it is late. I can hardly stand. I am fainting. I am hungry."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "Stay, and let me bring you some supper."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "nina",
+      "text": "No, no--and don’t come out, I can find the way alone. My carriage is not far away. So she brought him back with her? However, what difference can that make to me? Don’t tell Trigorin anything when you see him. I love him--I love him even more than I used to. It is an idea for a short story. I love him--I love him passionately--I love him to despair. Have you forgotten, Constantine, how pleasant the old times were? What a gay, bright, gentle, pure life we led? How a feeling as sweet and tender as a flower blossomed in our hearts? Do you remember, [She recites] “All men and beasts, lions, eagles, and quails, horned stags, geese, spiders, silent fish that inhabit the waves, starfish from the sea, and creatures invisible to the eye--in one word, life--all, all life, completing the dreary round set before it, has died out at last. A thousand years have passed since the earth last bore a living creature on its breast, and the unhappy moon now lights her lamp in vain. No longer are the cries of storks heard in the meadows, or the drone of beetles in the groves of limes----”"
+    },
+    {
+      "kind": "direction",
+      "text": "She embraces TREPLIEFF impetuously and runs out onto the terrace."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "treplieff",
+      "text": "[After a pause] It would be a pity if she were seen in the garden. My mother would be distressed."
+    },
+    {
+      "kind": "direction",
+      "text": "He stands for several minutes tearing up his manuscripts and throwing them under the table, then unlocks the door on the right and goes out."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "[Trying to force open the door on the left] Odd! This door seems to be locked. [He comes in and puts the chair back in its former place] This is like a hurdle race."
+    },
+    {
+      "kind": "direction",
+      "text": "ARKADINA and PAULINA come in, followed by JACOB carrying some bottles; then come MASHA, SHAMRAEFF, and TRIGORIN."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "Put the claret and the beer here, on the table, so that we can drink while we are playing. Sit down, friends."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "paulina",
+      "text": "And bring the tea at once."
+    },
+    {
+      "kind": "direction",
+      "text": "She lights the candles and takes her seat at the card-table. SHAMRAEFF leads TRIGORIN to the cupboard."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "shamraeff",
+      "text": "Here is the stuffed sea-gull I was telling you about. [He takes the sea-gull out of the cupboard] You told me to have it done."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "trigorin",
+      "text": "[looking at the bird] I don’t remember a thing about it, not a thing. [A shot is heard. Every one jumps.]"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[Frightened] What was that?"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "Nothing at all; probably one of my medicine bottles has blown up. Don’t worry. [He goes out through the door on the right, and comes back in a few moments] It is as I thought, a flask of ether has exploded. [He sings]"
+    },
+    {
+      "kind": "direction",
+      "text": "“Spellbound once more I stand before thee.”"
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "arkadina",
+      "text": "[Sitting down at the table] Heavens! I was really frightened. That noise reminded me of--[She covers her face with her hands] Everything is black before my eyes."
+    },
+    {
+      "kind": "dialogue",
+      "characterId": "dorn",
+      "text": "[Looking through the pages of a magazine, to TRIGORIN] There was an article from America in this magazine about two months ago that I wanted to ask you about, among other things. [He leads TRIGORIN to the front of the stage] I am very much interested in this question. [He lowers his voice and whispers] You must take Madame Arkadina away from here; what I wanted to say was, that Constantine has shot himself."
+    },
+    {
+      "kind": "direction",
+      "text": "The curtain falls."
+    }
+  ]
+}

@@ -4,3 +4,4 @@ dist/
 coverage/
 harness/models/
 harness/out/
+harness/local/
