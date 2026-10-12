@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { isSupportedBrowser } from './browser';
 import { StorageUnavailableError } from './db/repo';
 import { useRoute, type Route } from './router';
+import { ImportScreen } from './screens/ImportScreen';
 import { Library } from './screens/Library';
 import { NotFound } from './screens/NotFound';
 import { ServicesContext, type Services } from './services';
@@ -10,6 +11,10 @@ function Screen({ route }: { route: Route }) {
   switch (route.name) {
     case 'library':
       return <Library />;
+    case 'new':
+      return <ImportScreen />;
+    case 'import':
+      return <ImportScreen productionId={route.id} />;
     default:
       return <NotFound />;
   }
