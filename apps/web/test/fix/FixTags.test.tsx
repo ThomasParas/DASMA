@@ -1,19 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { sampleScript, seedProduction } from '../fixtures';
-import { makeServices, renderApp } from '../render';
-
-export async function openFix(script = sampleScript(), cast?: Record<string, string[]>) {
-  const services = makeServices();
-  const { production } = await seedProduction(services.repo, { script, cast });
-  renderApp(`#/p/${production.id}/fix`, services);
-  await screen.findByRole('listbox', { name: 'Script' });
-  const stored = async () => (await services.repo.getLiveVersion(production.id))!.script;
-  const unitEl = (id: string) => document.getElementById(`unit-${id}`)!;
-  const selectedIds = () => [...document.querySelectorAll('[aria-selected="true"]')].map((e) => e.id.replace('unit-', ''));
-  return { services, production, user: userEvent.setup(), stored, unitEl, selectedIds };
-}
+import { sampleScript } from '../fixtures';
+import { openFix } from './open-fix';
 
 describe('Fix tags', () => {
   it('lists the units to check and steps through them with j and k', async () => {

@@ -84,6 +84,15 @@ export function targetIds(ctx: FixContext): string[] {
   return [ctx.sel.anchor, ...similarUnits(ctx.script, ctx.hints, ctx.sel.anchor)];
 }
 
+/** The op a picked character applies, for each picker purpose. */
+export function pickOp(ctx: FixContext, purpose: PickPurpose, characterId: string): EditOp {
+  const ids = targetIds(ctx);
+  if (purpose === 'speechBy') return { type: 'speechBy', unitIds: ids, characterId };
+  if (purpose === 'moveSpeeches') return { type: 'moveSpeeches', unitIds: ctx.sel?.unitIds ?? [], characterId };
+  const names: EditOp[] = ids.map((unitId) => ({ type: 'setName', unitId, characterId }));
+  return names.length === 1 ? names[0] : { type: 'batch', ops: names };
+}
+
 function stepUnit(ctx: FixContext, delta: number): void {
   const { units } = ctx.script;
   if (units.length === 0) return;
@@ -118,6 +127,23 @@ export function buildFixActions(ctx: FixContext): FixAction[] {
     { id: 'down', label: 'Next unit', keys: ['ArrowDown'], group: 'nav', enabled: ctx.script.units.length > 0, run: () => stepUnit(ctx, 1) },
     { id: 'up', label: 'Previous unit', keys: ['ArrowUp'], group: 'nav', enabled: ctx.script.units.length > 0, run: () => stepUnit(ctx, -1) },
     { id: 'confirm', label: "It's right", keys: ['Enter'], group: 'tag', enabled: has, run: () => void ctx.apply({ type: 'confirm', unitIds: ids() }) },
+    { id: 'speechBy', label: 'Speech by…', keys: ['s'], group: 'tag', enabled: has, run: () => ctx.openPanel({ kind: 'picker', purpose: 'speechBy' }) },
+    {
+      id: 'setName',
+      label: 'Character name…',
+      keys: ['n'],
+      group: 'tag',
+      enabled: has,
+      run: () => ctx.openPanel({ kind: 'picker', purpose: 'setName' }),
+    },
+    {
+      id: 'moveSpeeches',
+      label: 'Move speeches to…',
+      keys: [],
+      group: 'tag',
+      enabled: has && selected.every((u) => u.kind === 'dialogue'),
+      run: () => ctx.openPanel({ kind: 'picker', purpose: 'moveSpeeches' }),
+    },
     { id: 'direction', label: 'Direction', keys: ['d'], group: 'tag', enabled: has, run: kind('direction') },
     { id: 'heading', label: 'Heading', keys: ['h'], group: 'tag', enabled: has, run: kind('heading') },
     { id: 'frontMatter', label: 'Front matter', keys: ['f'], group: 'tag', enabled: has, run: kind('frontMatter') },
