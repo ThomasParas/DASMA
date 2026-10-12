@@ -131,7 +131,7 @@ interface RawDoc { source: 'pdf' | 'docx' | 'text'; pageWidth: number; pages: nu
 
 **Estimated pages.** A docx file without page breaks, and pasted text without form feeds, gets estimated pages (`realPages: false`). Each line takes `max(1, ceil(characters / 80))` page lines, and a new page starts every 50 page lines. One pure helper, `assignEstimatedPages`, does this, and the corpus renderers use the same helper for their truth pages.
 
-- **PDF:** text items are grouped into a line when their baselines are within 2 pt of each other, then sorted by x. A space goes between two items when the gap is at least 0.2 × the font size and neither side already has whitespace. Italic and bold come from pdf.js's font flags, or else from the font name (`Italic`, `Oblique`, `Bold`, `Black`, `Semibold`). A line counts as centred when its midpoint is within 3% of the page width of the text column's midpoint, and it is at least 5% of the page width narrower than the column.
+- **PDF:** text items are grouped into a line when their baselines are within 2 pt of each other, then sorted by x. A space goes between two items when the gap is at least 0.2 × the font size and neither side already has whitespace. Italic and bold come from pdf.js's font flags, or else from the font name (`Italic`, `Oblique`, `Bold`, `Black`, `Semibold`). A line counts as centred when its midpoint is within 3% of the page width of the text column's midpoint or of the page centre (ruling R6), and it is at least 5% of the page width narrower than the column.
 - **docx:**
   - Each `w:p` paragraph becomes one line.
   - `w:jc="center"` sets `centered`.
@@ -164,6 +164,8 @@ The rules run in this order:
      - its digits differ between copies.
 
      A page number counts up, so it goes. "SERVANT 2" stays the same, so it is kept.
+
+     A digit-free running header in this input is removed by rule S1 (§6.5a).
 2. **Page numbers.** A line is removed when its whole text matches `^(page\s+)?[-–—]?\s*\d{1,4}\s*[-–—]?$` (case-insensitive) or a Roman numeral up to `xl`.
 3. **Line numbers.** A number `n` is removed when both conditions hold:
    - `n` is a multiple of 5;
@@ -213,8 +215,8 @@ interface DocProfile {
 
 - A token counts toward `cueTokens` only if it occurs in speaker position at least 2 times. Comparison ignores case and trailing punctuation.
 - `primary` is the convention with the most matches among recurring tokens.
-- A cast list is a block starting with a line that matches `^(dramatis person(ae|æ)|characters|cast( of characters)?|(the )?persons (in|of) the play|persons represented)\b` (case-insensitive). The block ends at the first heading, the first line longer than 12 words, or after 40 lines. Each name is the text before the first `,`, `:` or ` — `, uppercased, without a trailing `.`.
-- `frontMatterEnd` is the first line that is either a heading (§5.2) or the first of three consecutive speeches that use the primary convention.
+- A cast list is a block starting with a line that matches `^(dramatis person(ae|æ)|characters|cast( of characters)?|(the )?persons (in|of) the play|persons represented)\b` (case-insensitive). The block ends at the first heading, the first line longer than 12 words, or after 40 lines. A setting line (rule S5, §6.5a) neither ends the block nor adds a name. Each name is the text before the first `,`, `:` or ` — `, uppercased, without a trailing `.`.
+- `frontMatterEnd` is the first line that is either a heading (§5.2) or the first of three consecutive speeches that use the primary convention. A setting line inside or at the end of the cast list is not that heading (rule S5, §6.5a).
 
 ### 5.2 Line states and scoring (`tag.ts`, `weights.ts`)
 
@@ -284,6 +286,7 @@ Directions use two internal states, `dirIn` (inside a speech, so dialogue may fo
   - 0.8 when there is no cast list;
   - 1.0 for an exact match.
 - When a prefix fits several names, it stays its own character, with confidence 0.5, so its speeches are flagged.
+- A joint name (one containing ` AND ` or ` & `) is never a merge target (rule S2, §6.5a).
 - `ALL`, `BOTH` and similar names are ordinary characters.
 
 **Overlap marks (`applyOverlapMarks`)**

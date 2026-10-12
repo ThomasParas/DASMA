@@ -10,6 +10,7 @@ DASMA listens to a live rehearsal and compares what is said against the script, 
 |---|---|
 | `packages/align` | Pure-TypeScript script/speech aligner and line-note classifier |
 | `packages/asr` | Recognizer interface, stabilizer, sherpa-onnx Node binding |
+| `packages/script` | Script import: PDF, Word and pasted text into tagged scripts; `.dasma` files; re-import diff |
 | `harness/` | Generates labelled synthetic rehearsals (Piper TTS + room simulation), runs the engine, scores it |
 | `apps/web` | Placeholder for the browser app |
 | `docs/` | Decisions, design specs, plans and results |
@@ -28,6 +29,8 @@ The harness needs speech models (downloaded once, hashes pinned in `harness/mode
 ```bash
 npm run harness -- fetch-models
 npm run harness -- evaluate --scenes earnest-act1 --seeds 1 --rooms close-mic
+npm run harness -- script-eval --set heldout --gate
+npm run harness -- script-dump <file>
 ```
 
 ## Design documents

@@ -61,7 +61,7 @@ Mic ─► AudioSource ─► audio pipeline ──► Recognizer (Web Worker) �
 
 | Unit | Responsibility | Depends on |
 |---|---|---|
-| `script` | Import (PDF, docx, text), clean-up, auto-tagging, script model, cuts/overlaps, `.dasma` read/write, re-import diff | pdf.js, mammoth |
+| `script` | Import (PDF, docx, text), clean-up, auto-tagging, script model, cuts/overlaps, `.dasma` read/write, re-import diff | pdfjs-dist, fflate |
 | `audio` | `AudioSource` interface + `MicSource`; AudioWorklet capture; resample to 16 kHz mono; 30 s rolling buffer; clip extraction to WAV; level / audio-quality estimate | Web Audio |
 | `asr` | `Recognizer` interface; `SherpaRecognizer` (WASM in a Web Worker; Node binding for the harness); model catalog (standard + light model), download/verify/cache | sherpa-onnx |
 | `align` | Expected-stream building, normalization, phonetic keys, cursor + rolling alignment, grace window, lost/re-anchor, classification, confidence | none (pure TS) |
@@ -162,18 +162,20 @@ interface AlignOptions {
 All persisted in IndexedDB; all exportable.
 
 - **Production** — `id, title, cast: {characterId → actorName}[]` (an actor may play several characters), `settings: {noAudioClips: boolean, autoDeleteDays: number | null, defaultStrictness, defaultPatience}`.
-- **Script** — `id, productionId, version, characters[] (with aliases), units[]` where each unit is `{id, kind: 'dialogue' | 'direction' | 'characterName' | 'heading' | 'sceneBreak', characterId?, text, cut: boolean, overlap: boolean, tagConfidence}`. Previous versions retained for diffing.
+- **Script** — `id, productionId, version, characters[] (with aliases), units[]` where each unit is `{id, kind: 'dialogue' | 'direction' | 'characterName' | 'heading' | 'sceneBreak' | 'frontMatter', characterId?, text, cut: boolean, overlapRanges?: [number, number][], tagConfidence, source: {page, line}[]}`. Previous versions retained for diffing.
 - **Run** — `id, productionId, scriptVersion, mode: 'solo' | 'director', range, settings snapshot, startedAt, endedAt, status: 'running' | 'complete' | 'interrupted'`.
 - **Event** — append-only `AlignEvent` + session events (quick-mark, pause, mic status, poor-audio spans), keyed by run; written as they occur.
 - **Note** — `id, runId, lineId, characterId, category, expected, heard, confidence, status: 'note' | 'check' | 'dismissed', clipId?, manual: boolean, lineChangedSinceNote: boolean`.
 - **Clip** — `id, runId, start, end, wav Blob` (16 kHz mono; ~5 s before to ~3 s after the moment).
 - **Feedback stats** — local counters of dismissed flags by category and confidence band (for tuning; never transmitted).
 
-**`.dasma` file** — JSON (`application/vnd.dasma+json`, extension `.dasma`): `{format: 'dasma-script', formatVersion: 1, title, characters, units, cast?, exportedAt}`. Contains no audio or notes. `cast` (character → actor names) is included only if the director ticks "include cast list" on export.
+**`.dasma` file** — JSON (`application/vnd.dasma+json`, extension `.dasma`): `{format: 'dasma-script', formatVersion: 1, title, characters, units, cast?, exportedAt}`. Contains no audio or notes. `cast` (character → actor names) is included only if the director ticks "include cast list" on export. Units use the M2a shape (script-import spec §7); there is no earlier version to migrate.
 
 **Backup file** — a zip of productions, scripts, runs, notes, and (optionally) clips.
 
 ## 6. Script import & tagging (`script`)
+
+Implemented by `packages/script`; the import rules are in [`2026-10-11-script-import-design.md`](2026-10-11-script-import-design.md).
 
 1. **Extract**
    - PDF via pdf.js: text items with position and font name (italic/bold fonts hint at stage directions). If a PDF has no text layer → "scanned PDFs aren't supported yet; paste the text instead."
@@ -186,7 +188,7 @@ All persisted in IndexedDB; all exportable.
    - Scene headings: `ACT` / `SCENE` patterns.
    - Overlap marks: `/` inside dialogue marks the point where the next speaker begins → following text in that line, and the overlapping start of the next line, become `overlap` zones.
    - Character aliases merged (e.g. `HAM.` ≈ `HAMLET`) by prefix match, user-confirmable.
-4. **Tag-correction screen** — low-confidence units listed first; click to retag; range-select to mark cut / overlap; character merge/rename; scene breaks.
+4. **Tag-correction screen** — low-confidence units listed first; click to retag; edit a unit's text; range-select to mark cut / overlap; character merge/rename; scene breaks.
 5. **Re-import** — line-level diff against the previous version (by text similarity); summary "N lines changed"; notes on changed lines get `lineChangedSinceNote`.
 
 Tag accuracy target is "fast to fix," not perfect — the correction screen is the safety net.
@@ -332,6 +334,7 @@ Each milestone gets its own implementation plan.
 2. **M1 — Engine & harness (go/no-go):** `align` built test-first with the scenario DSL and property tests; sherpa-onnx in Node; synthetic scene generator + room simulation; metrics + baselines. **Checkpoint:** review numbers against §10 targets before building UI.
    - **Engine-change pass** ([pass spec](2026-10-10-engine-pass-design.md)): M3 starts only on GO in [`docs/engine-pass-results.md`](../../engine-pass-results.md). Outcome: **NO-GO**. After two rounds, `solo-close-mic` passes false alerts only (core recall 0.313 against ≥ 0.90, false notes 1.604 against ≤ 1, alert latency p50 1.035 s against < 0.5 s). The results doc lists the options for the user to decide; M3 remains blocked until that decision.
 3. **M2 — Scripts:** import (PDF, docx, paste), clean-up, auto-tag, tag-correction screen, cuts/overlaps, `.dasma` export/import, re-import diff.
+   - M2a (script engine) done — see [`docs/script-import-results.md`](../../script-import-results.md); M2b (screens) next. Held-out gate outcome: **NO-GO** after two rounds (licensed passes; word misses worst page, speaker and text accuracy on its leading-tab style; classical misses flagged share). The results doc lists the options for the user to decide.
 4. **M3 — Solo mode:** browser recognizer worker + model download/caching, mic pipeline, run setup + mic check, solo run screen, cues (local TTS + recorded), alerts, report, "lines to work on."
 5. **M4 — Director mode:** director run screen, lost/re-anchor UI, manual jump, on-book "Line!" prompting, quick-mark, clips + retention settings, cast list, per-actor PDF export.
 6. **M5 — Hardening & release:** full error-handling table (§9), persistent storage + backup, PWA offline install, Playwright E2E on Chrome/Edge, manual checklist, first public release.

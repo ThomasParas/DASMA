@@ -2,6 +2,49 @@
 
 Spec: docs/superpowers/specs/2026-10-11-script-import-design.md (§1 targets, §6.4 definitions, §6.5 rounds). Corpus: `npm run harness -- build-corpus`, deterministic. Metric notes: fixes/page is the mean over a family's documents of fixes/page; false flags/page is pooled; a unit whose boundary shifts scores a merge and a split (spec-literal).
 
+## Summary
+
+**Verdict: NO-GO.** On the last held-out run (round 2, frozen at `0d1ca20`), licensed passes every target, but word and classical each miss at least one. The spec allows two measure-and-tune rounds (§6.5), and both are used, so the options below are for the user to decide.
+
+| Family | Docs | Pages | Fixes/page (≤ 1) | Worst page (≤ 4) | Speaker acc. (≥ 98%) | Flagged share (≥ 90%) | False flags/page (≤ 2) | Text acc. (≥ 99.5%) | Gate |
+|---|---|---|---|---|---|---|---|---|---|
+| licensed | 18 | 255 | 0.01 | 2 | 100.0% | 100.0% | 0.60 | 99.99% | PASS |
+| word | 18 | 186 | 0.64 | 6 | 97.1% | 98.3% | 0.22 | 97.11% | FAIL: worstPageFixes 6 > 4; speakerAccuracy 0.971 < 0.98; textAccuracy 0.9711 < 0.995 |
+| classical | 15 | 197 | 0.14 | 3 | 99.4% | 10.3% | 0.37 | 99.93% | FAIL: flaggedShare 0.103 < 0.9 |
+
+A unit whose boundary shifts scores a merge and a split (spec-literal), so fixes/page counts one misplaced boundary twice.
+
+### Shortfalls
+
+| Id | Family | Target | Measured | Cause |
+|---|---|---|---|---|
+| H1 | word | worst page (≤ 4) | 6 | Word 3's leading tabs make a 36-pt band that the profile takes as the direction band, so a tab-indented own-line speech is tagged as a direction (114 missedSpeech, all flagged, in 8 of the 9 word 3 documents). |
+| H2 | word | speaker accuracy (≥ 98%) | 97.1% | H1. |
+| H3 | word | text accuracy (≥ 99.5%) | 97.11% | H1: the lost speeches' words are missing from the spoken text. |
+| H4 | classical | flagged share (≥ 90%) | 10.3% (3 of 29) | Three confident errors: (i) Romeo's wrapped setting line `Fifth Act, at Mantua.` matches the act-heading pattern (12 inventedHeading, 11 unflagged); (ii) `CAPULET` prefix-merges into `CAPULET'S COUSIN` at the cast-list confidence 0.95 (10 unflagged wrongSpeaker in one document); (iii) in Hamlet 3, a speaker who speaks once in a non-primary convention (`SECOND CLOWN.`, `ROSENCRANTZ AND GUILDENSTERN.`) joins the previous speech at ≈ 0.86, just above the flag line (4 unflagged). |
+
+Details are in "Round 2 — held-out" below.
+
+**Options**
+
+- **(a) Accept the named shortfalls and let the M2b correction screen carry them.** H1's lost speeches are all flagged (word flagged share 98.3%), so the screen lists every one first; the cost is about 1.3 fixes per page on word 3 style documents (about 13 per 10-page document). H4 is the dangerous one to accept: 26 classical errors are not flagged, so a user finds them only by reading.
+- **(b) Targeted rule changes, named:**
+  - **H1, leading-tab indent:** in docx, an indent made only by leading tabs is not band evidence; or, more generally, a band counts as the direction band only when most of its lines also carry a direction mark (italic, a bracket). Word 3's band 36 has no italic and 10% parentheses.
+  - **H4 (i), wrapped setting line:** extend S5 so that a heading-pattern line inside the cast list that continues the previous line (the previous line ends without `.`, `!`, `?` or `:`) stays front matter.
+  - **H4 (ii), possessive merge:** a token that is itself a cast-list name never prefix-merges, and a name never merges into a possessive (`X'S …`). The same rule should stop a cast-list line such as `CHORUS.` being read as a cue before `frontMatterEnd`.
+  - **H4 (iii), one-off cues in another convention:** let a cast-list match count as known for a cue in any convention, or flag a speech when a cue-shaped line for a cast-list name is absorbed into it.
+- **(c) More layout variety in the corpus.** H1 looks partly like a renderer artefact: word 3 puts a tab before random lines, which real typed scripts do less uniformly. A variant that tabs every speech line (or none) would show whether the rule in (b) is needed in practice. H4 (i) and (ii) are real Gutenberg text, not artefacts.
+- **(d) Score real scripts locally with `--set local` before deciding**, to see whether word 3's tabs and the classical confident errors occur in the scripts DASMA's users import.
+
+### What M2b's screen must carry
+
+These fix kinds are still common on held-out documents:
+
+- **missedSpeech (114, flagged):** a speech tagged as a direction. The screen needs a one-tap "this is speech by …" retag, ideally applied to every flagged line of the same shape.
+- **wrongSpeaker (15, 13 unflagged):** mostly a whole character merged into another (`CAPULET` → `CAPULET'S COUSIN`). The screen needs character split and alias editing ("these speeches belong to CAPULET"), not only per-unit retagging, and it should show each character's aliases so a wrong merge is visible without a flag.
+- **inventedHeading (12, 11 unflagged):** front-matter text read as a heading. A retag from heading to front matter.
+- **merge, split and inventedSpeech (7):** unit boundary edits (split a unit at a line, join two units) and text editing (spec §6, item 4).
+
 ## Round 1 — tuning baseline
 
 Constants as committed at `fc1b5f4`. Command: `npm run harness -- script-eval --set tune --verbose --out harness/out/script-eval/round1-tune-baseline`.
