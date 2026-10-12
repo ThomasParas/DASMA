@@ -61,7 +61,9 @@ export function Production({ id }: { id: string }) {
     await load();
   };
   const exportDasma = () => {
-    const cast = Object.fromEntries(Object.entries(production.cast).filter(([, names]) => names.length > 0));
+    // readDasma refuses cast keys that are not characters of the script, so stale entries stay out of the file.
+    const ids = new Set(script.characters.map((c) => c.id));
+    const cast = Object.fromEntries(Object.entries(production.cast).filter(([id, names]) => ids.has(id) && names.length > 0));
     const text = writeDasma({ ...script, title: production.title }, includeCast && Object.keys(cast).length ? { cast } : {});
     download(`${safeFileName(production.title)}${DASMA_EXTENSION}`, text, DASMA_MIME);
     setExporting(false);

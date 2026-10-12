@@ -67,7 +67,11 @@ export function ReimportReview({ productionId }: { productionId: string }) {
         await repo.addVersion(productionId, { script: review.result, pages: p.pages, unitHints: review.unitHints, importedFrom: p.importedFrom, warnings: p.warnings });
         versionAdded.current = true;
       }
-      if (dasma && p.cast) await repo.updateProduction(productionId, { cast: p.cast });
+      // A .dasma cast replaces the production's; otherwise drop entries for characters the kept script no longer has.
+      const base = dasma && p.cast ? p.cast : loaded.production.cast;
+      const ids = new Set(review.result.characters.map((c) => c.id));
+      const cast = Object.fromEntries(Object.entries(base).filter(([id]) => ids.has(id)));
+      if (base !== loaded.production.cast || Object.keys(cast).length !== Object.keys(base).length) await repo.updateProduction(productionId, { cast });
       pending.delete(productionId);
       navigate({ name: 'fix', id: productionId });
     } catch (err) {

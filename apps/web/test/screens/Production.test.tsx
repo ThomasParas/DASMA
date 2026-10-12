@@ -51,6 +51,14 @@ describe('Production page', () => {
     expect(readDasma(services.downloads[1].text).cast).toEqual({ lane: ['Ann'] });
   });
 
+  it('leaves cast entries for characters no longer in the script out of the export', async () => {
+    const { services, user } = await open({ cast: { lane: ['Ann'], ghost: ['Old Actor'] } });
+    await user.click(screen.getByRole('button', { name: 'Export .dasma' }));
+    await user.click(screen.getByLabelText('Include cast list'));
+    await user.click(screen.getByRole('button', { name: 'Download' }));
+    expect(readDasma(services.downloads[0].text).cast).toEqual({ lane: ['Ann'] });
+  });
+
   it('exports an answer key named after the source file, only with developer tools on', async () => {
     const { services, user } = await open({ names: ['earnest.pdf'], kind: 'pdf' }, true);
     await user.click(screen.getByRole('button', { name: 'Export answer key' }));

@@ -89,6 +89,19 @@ describe('Re-import review', () => {
     await waitFor(async () => expect((await services.repo.getProduction(production.id))!.cast).toEqual({ lane: ['Ann'] }));
   });
 
+  it('drops cast entries for characters a .dasma update without a cast removed', async () => {
+    const services = makeServices();
+    const { production } = await seedProduction(services.repo, { cast: { okay: ['Sam'], lane: ['Ann'] } });
+    const next = sampleScript();
+    next.units = next.units.filter((u) => u.id !== 'u7' && u.id !== 'u8');
+    next.characters = next.characters.filter((c) => c.id !== 'okay');
+    services.pending.set(production.id, { mode: 'dasma', script: next, pages: 1, unitHints: {}, importedFrom: { kind: 'dasma', names: ['v2.dasma'] }, warnings: [] });
+    renderApp(`#/p/${production.id}/reimport`, services);
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Keep as version 2' }));
+    await waitFor(() => expect(window.location.hash).toBe(`#/p/${production.id}/fix`));
+    expect((await services.repo.getProduction(production.id))!.cast).toEqual({ lane: ['Ann'] });
+  });
+
   it('explains when there is nothing to review', async () => {
     const services = makeServices();
     const { production } = await seedProduction(services.repo);
