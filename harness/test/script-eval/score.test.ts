@@ -122,6 +122,44 @@ describe('scoreDocument', () => {
   });
 });
 
+describe('speaker rule', () => {
+  it('never counts a spoken truth unit without a characterId as speaker-right', () => {
+    const truth = truthOf([
+      { kind: 'characterName', text: 'HAMLET', page: 1 },
+      { kind: 'dialogue', text: 'To be or not to be', page: 1 },
+    ]);
+    const s = scoreDocument(truth, scriptOf([pu('characterName', 'HAMLET'), pu('dialogue', 'To be or not to be', 1, { characterId: 'nobody' })], [{ id: 'nobody', name: 'NOBODY', aliases: [] }]));
+    expect(s.speakerRight).toBe(0);
+    expect(kinds(s)).toEqual(['wrongSpeaker']);
+  });
+});
+
+describe('split and merge word threshold', () => {
+  const twoSpeeches = (second: string): TruthFile =>
+    truthOf([
+      { kind: 'characterName', text: 'HAMLET', page: 1 },
+      { kind: 'dialogue', characterId: 'hamlet', text: 'To be or not to be', page: 1 },
+      { kind: 'dialogue', characterId: 'hamlet', text: second, page: 1 },
+    ]);
+  const joined = (text: string) => scriptOf([pu('characterName', 'HAMLET'), pu('dialogue', text, 1, { characterId: 'hamlet' })]);
+
+  it('does not split on 1 aligned word of a unit with 3 or more words', () => {
+    const s = scoreDocument(twoSpeeches('that is the question'), joined('To be or not to be that'));
+    expect(kinds(s)).not.toContain('split');
+    expect(kinds(s)).toEqual(['missedSpeech']);
+  });
+
+  it('splits on 2 aligned words of a unit with 3 or more words', () => {
+    const s = scoreDocument(twoSpeeches('that is the question'), joined('To be or not to be that is'));
+    expect(kinds(s)).toEqual(['split']);
+  });
+
+  it('splits on 1 aligned word of a unit with at most 2 words', () => {
+    const s = scoreDocument(twoSpeeches('Aye sir'), joined('To be or not to be Aye'));
+    expect(kinds(s)).toEqual(['split']);
+  });
+});
+
 describe('helpers', () => {
   it('resolveCast maps by name or alias', () => {
     expect([...resolveCast([{ id: 'x', name: 'Ham.', aliases: [] }, { id: 'y', name: 'NOBODY', aliases: [] }], CAST)]).toEqual([['x', 'hamlet']]);

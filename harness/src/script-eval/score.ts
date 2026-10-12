@@ -161,7 +161,7 @@ export function scoreDocument(truth: TruthFile, script: Script): DocScore {
       }
       const m = mainOf(land[k], spokenP)!;
       const predicted = P[m].characterId;
-      if (predicted !== undefined && castMap.get(predicted) === t.characterId) speakerRight++;
+      if (t.characterId !== undefined && predicted !== undefined && castMap.get(predicted) === t.characterId) speakerRight++;
       else add('wrongSpeaker', m, k);
       const parts = [...land[k]]
         .filter(([p, c]) => spokenP(p) && enough(c, pSize[p]))

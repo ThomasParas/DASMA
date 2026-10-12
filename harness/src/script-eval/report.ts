@@ -10,6 +10,7 @@ export const SCRIPT_GATE = {
   textAccuracy: 0.995,
 } as const;
 
+/** fixesPerPage is the mean over the family's documents of fixes per page (spec §1); falseFlagsPerPage is pooled. */
 export interface FamilyMetrics {
   family: string;
   docs: number;
@@ -37,7 +38,7 @@ export function familyMetrics(scores: readonly DocScore[]): FamilyMetrics[] {
       docs: xs.length,
       pages,
       errors,
-      fixesPerPage: pages ? errors / pages : 0,
+      fixesPerPage: xs.reduce((n, s) => n + (s.pages ? s.fixes.length / s.pages : 0), 0) / xs.length,
       worstPageFixes: Math.max(0, ...xs.flatMap((s) => s.fixesByPage)),
       speakerAccuracy: spoken ? sum((s) => s.speakerRight) / spoken : 1,
       flaggedShare: errors ? flagged / errors : 1,
