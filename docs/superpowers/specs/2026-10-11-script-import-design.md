@@ -157,7 +157,7 @@ interface RawDoc { source: 'pdf' | 'docx' | 'text'; pageWidth: number; pages: nu
 The rules run in this order:
 
 1. **Running headers and footers.**
-   - **PDF and docx with real pages:** a line in the first or last 3 lines of a page is removed when, with digits masked, its text recurs in that same edge zone on at least 40% of pages, and on at least 3 pages.
+   - **PDF and docx with real pages:** a line in the first or last 3 lines of a page is removed when, with digits masked, its text recurs in that same edge zone on at least 40% of pages, and on at least 3 pages, and it appears away from the edge zone at most 0.25 times per edge appearance (so a speaker name that also speaks mid-page is kept). A heading (§5.2) is exempt from this rule unless its exact, unmasked text itself appears (anywhere on the page) on at least 40% of pages and at least 3 pages: `SCENE 2` / `SCENE 3` starting pages are kept, an `ACT ONE` running head on every page is removed. Speaker cues are not exempt here, because an all-capitals running title is cue-shaped.
    - **Text, and docx with estimated pages:** a line is removed when all three hold:
      - with digits masked, it recurs at least 3 times;
      - it contains a digit;
@@ -167,7 +167,12 @@ The rules run in this order:
 
      A digit-free running header in this input is removed by rule S1 (§6.5a).
 
-     Lines that are headings (§5.2) or speaker cues (§5.1) are never removed by the running-line rules, so `Scene 1` … `Scene 4` and numbered speakers such as `GUARD 1` / `GUARD 2` are kept even though their digits differ (this restores the "SERVANT 2 is kept" intent above, and matches §6.5a). A page counter never repeats a value, so a masked line whose digit values repeat across copies is a speaker, not a page number. In real-page input, only headings are exempt from the edge-zone rule: an all-capitals running title is cue-shaped, and a cue that also speaks away from the edge zone is already kept because it recurs inside the page.
+     In this input the digits rule treats lines in three ways:
+     - **Exempt:** headings (§5.2), and speaker cues (§5.1) whose token contains no digit. `Scene 1` … `Scene 4` and an inline speech such as `ANNA: I counted 3 apples.` are never removed by it.
+     - **Numbered cues:** a cue-shaped line whose token contains a digit is either a numbered speaker (`GUARD 1`) or a page-numbered running title (`HAMLET 12`). A masked group that contains one is removed only when, in addition to the three conditions above, no digit value repeats across its copies. A page counter counts up, so `HAMLET 12`, `HAMLET 13`, `HAMLET 14` go; `GUARD 1` and `GUARD 2` cueing again and again repeat their values, so they are kept.
+     - **Everything else** follows the three conditions alone, so a restarting counter (`The Seagull 1` … `4`, then `1` … `4` again) and a header and footer carrying the same number are removed.
+
+     A cue-shaped line whose speech is a page number (`Hamlet: page 3`, matched by rule 2's pattern) is not a speaker cue, so it falls in the last group and is removed.
 2. **Page numbers.** A line is removed when its whole text matches `^(page\s+)?[-–—]?\s*\d{1,4}\s*[-–—]?$` (case-insensitive) or a Roman numeral up to `xl`.
 3. **Line numbers.** A number `n` is removed when both conditions hold:
    - `n` is a multiple of 5;
