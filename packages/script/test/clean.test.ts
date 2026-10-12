@@ -73,6 +73,55 @@ describe('running-line rules never remove headings or speaker cues (ruling R22)'
   });
 });
 
+describe('page-numbered running titles in estimated pages (R26)', () => {
+  /** An 8-page paste: an optional header and footer around 22 NORA / HELMER speeches per page. */
+  const paste = (header: (p: number) => string | null, footer: (p: number) => string | null = () => null): string => {
+    const out: string[] = [];
+    for (let p = 1; p <= 8; p++) {
+      const h = header(p);
+      if (h) out.push(h);
+      for (let k = 0; k < 22; k++) out.push(k % 2 ? 'HELMER' : 'NORA', `Speech ${String.fromCharCode(97 + p)} ${String.fromCharCode(97 + k)} goes on here.`);
+      const f = footer(p);
+      if (f) out.push(f);
+    }
+    return out.join('\n');
+  };
+  const cues = (texts: string[]): number => texts.filter((t) => t === 'NORA' || t === 'HELMER').length;
+
+  it.each([
+    ['HAMLET n header', paste((p) => `HAMLET ${p}`), /^HAMLET \d+$/],
+    ["A DOLL'S HOUSE n header", paste((p) => `A DOLL'S HOUSE ${p}`), /^A DOLL'S HOUSE \d+$/],
+    ['THE SEAGULL n footer', paste(() => null, (p) => `THE SEAGULL ${p}`), /^THE SEAGULL \d+$/],
+    ['Hamlet: page n header', paste((p) => `Hamlet: page ${p}`), /^Hamlet: page \d+$/],
+    ['restarting The Seagull n header', paste((p) => `The Seagull ${p > 4 ? p - 4 : p}`), /^The Seagull \d+$/],
+    ['The Seagull n header and footer', paste((p) => `The Seagull ${p}`, (p) => `The Seagull ${p}`), /^The Seagull \d+$/],
+  ])('removes a %s and keeps every speaker cue', (_, text, title) => {
+    const texts = textDoc(text).lines.map((l) => l.text);
+    expect(texts.filter((t) => title.test(t))).toHaveLength(0);
+    expect(cues(texts)).toBe(8 * 22);
+  });
+
+  it('keeps an inline speech whose number appears once', () => {
+    const texts = textDoc(paste((p) => (p === 3 ? "NORA: I'm 3 years older." : null))).lines.map((l) => l.text);
+    expect(texts).toContain("NORA: I'm 3 years older.");
+  });
+});
+
+describe('real-page edge zone: a heading is exempt only when its exact text does not recur (R26)', () => {
+  it('removes an ACT ONE running head but keeps SCENE 2 / SCENE 3 headings at page tops', () => {
+    const lines: RawLine[] = [];
+    for (let p = 1; p <= 6; p++) {
+      const scene = p === 3 ? ['SCENE 2'] : p === 5 ? ['SCENE 3'] : [];
+      ['ACT ONE', ...scene, 'NINA', `Line ${p} a.`, 'KOSTYA', `Line ${p} b.`, 'NINA', `Line ${p} c.`, 'KOSTYA', `Line ${p} d.`, `${p}`].forEach((text) =>
+        lines.push(line(text, { page: p })),
+      );
+    }
+    const texts = cleanDoc(rawDoc(lines)).lines.map((l) => l.text);
+    expect(texts.filter((t) => t === 'ACT ONE')).toHaveLength(0);
+    expect(texts.filter((t) => /^SCENE \d$/.test(t))).toEqual(['SCENE 2', 'SCENE 3']);
+  });
+});
+
 describe('pasted-text running header (rule S1)', () => {
   /** A digit-free label, so the digits rule for running lines leaves the speech lines alone. */
   const tag = (n: number): string => String.fromCharCode(97 + Math.floor(n / 26)) + String.fromCharCode(97 + (n % 26));

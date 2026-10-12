@@ -89,17 +89,33 @@ function textRunningHeaders(lines: CleanLine[]): Set<number> {
 
 const mask = (t: string): string => t.toLowerCase().replace(/\d+/g, '#').replace(/\s+/g, ' ').trim();
 
-/** Spec §4.2: the running-line rules never remove a heading or a speaker cue. */
-const isStructural = (text: string): boolean => isHeading(text) || matchCue(text) !== null;
+/**
+ * Spec §4.2, estimated pages: how the changing-digits rule treats a line with a digit. Headings, and speaker cues whose
+ * token has no digit, are exempt. A cue whose token has a digit is a numbered speaker (`GUARD 1`) or a page-numbered
+ * running title (`HAMLET 12`). A cue-shaped line whose speech is a page number (`Hamlet: page 3`) is not a speaker cue.
+ */
+function digitRole(text: string): 'exempt' | 'numberedCue' | 'plain' {
+  if (isHeading(text)) return 'exempt';
+  const cue = matchCue(text);
+  if (!cue || isPageNumber(cue.rest)) return 'plain';
+  return /\d/.test(cue.token) ? 'numberedCue' : 'exempt';
+}
 
 function removeRunningLines(lines: CleanLine[], raw: RawDoc): CleanLine[] {
   if (raw.realPages) {
     if (raw.pages < HEADER_MIN_PAGES) return lines;
+    const minPages = Math.max(HEADER_MIN_PAGES, Math.ceil(HEADER_PAGE_SHARE * raw.pages));
     const byPage = new Map<number, number[]>();
-    lines.forEach((l, i) => byPage.set(l.page, [...(byPage.get(l.page) ?? []), i]));
-    // Only headings are exempt here: an all-capitals running title is cue-shaped, and a cue that also speaks mid-page
-    // is already kept by the inner-count test below.
-    const keep = lines.map((l) => isHeading(l.text));
+    const textPages = new Map<string, Set<number>>();
+    const exact = (t: string): string => t.replace(/\s+/g, ' ').trim();
+    lines.forEach((l, i) => {
+      byPage.set(l.page, [...(byPage.get(l.page) ?? []), i]);
+      textPages.set(exact(l.text), (textPages.get(exact(l.text)) ?? new Set()).add(l.page));
+    });
+    // Only headings are exempt here (an all-capitals running title is cue-shaped, and a cue that also speaks mid-page
+    // is already kept by the inner-count test below), and only while their exact text does not itself recur on
+    // minPages pages: `SCENE 2` / `SCENE 3` starting pages stay, an `ACT ONE` running head goes.
+    const keep = lines.map((l) => isHeading(l.text) && (textPages.get(exact(l.text))?.size ?? 0) < minPages);
     const edge = new Set<number>();
     const edgePages = new Map<string, Set<number>>();
     const edgeCount = new Map<string, number>();
@@ -117,7 +133,6 @@ function removeRunningLines(lines: CleanLine[], raw: RawDoc): CleanLine[] {
         }
       });
     }
-    const minPages = Math.max(HEADER_MIN_PAGES, Math.ceil(HEADER_PAGE_SHARE * raw.pages));
     const drop = new Set(
       [...edgePages]
         .filter(([key, pages]) => pages.size >= minPages && (innerCount.get(key) ?? 0) <= HEADER_INNER_MAX * (edgeCount.get(key) ?? 0))
@@ -125,18 +140,29 @@ function removeRunningLines(lines: CleanLine[], raw: RawDoc): CleanLine[] {
     );
     return lines.filter((l, i) => !(edge.has(i) && drop.has(mask(l.text))));
   }
-  const digits = new Map<string, string[]>();
-  for (const l of lines) {
-    if (!/\d/.test(l.text) || isStructural(l.text)) continue;
+  const role = lines.map((l) => (/\d/.test(l.text) ? digitRole(l.text) : 'exempt'));
+  const groups = new Map<string, { values: string[]; numberedCue: boolean }>();
+  lines.forEach((l, i) => {
+    if (role[i] === 'exempt') return;
     const key = mask(l.text);
-    digits.set(key, [...(digits.get(key) ?? []), (l.text.match(/\d+/g) ?? []).join(',')]);
-  }
-  // A page counter never repeats a value; "GUARD 1" / "GUARD 2" cueing again and again does, so it is a speaker.
+    const g = groups.get(key) ?? { values: [], numberedCue: false };
+    g.values.push((l.text.match(/\d+/g) ?? []).join(','));
+    g.numberedCue ||= role[i] === 'numberedCue';
+    groups.set(key, g);
+  });
+  // A group with a numbered cue in it goes only when no digit value repeats: page counters count up (`HAMLET 12`,
+  // `HAMLET 13`), while `GUARD 1` / `GUARD 2` cueing again and again repeat theirs. Other lines need only differ, so a
+  // restarting counter or a header and footer carrying the same number still go.
   const drop = new Set(
-    [...digits].filter(([, ds]) => ds.length >= 3 && new Set(ds).size >= 2 && new Set(ds).size === ds.length).map(([key]) => key),
+    [...groups]
+      .filter(([, g]) => {
+        const distinct = new Set(g.values).size;
+        return g.values.length >= 3 && distinct >= 2 && (!g.numberedCue || distinct === g.values.length);
+      })
+      .map(([key]) => key),
   );
   const headers = textRunningHeaders(lines);
-  return lines.filter((l, i) => !(drop.has(mask(l.text)) && !isStructural(l.text)) && !headers.has(i));
+  return lines.filter((l, i) => !(role[i] !== 'exempt' && drop.has(mask(l.text))) && !headers.has(i));
 }
 
 const isNumberSpan = (s: RawSpan): boolean => /^\d{1,4}$/.test(s.text.trim());
