@@ -175,4 +175,20 @@ describe('running-line rules keep headings and numbered speakers (ruling R22)', 
     expect(speeches('guard-1')).toHaveLength(3);
     expect(speeches('guard-2')).toHaveLength(3);
   });
+
+  it('gives one-off numbered speakers in a multi-page paste their own characters (R28)', async () => {
+    const out: string[] = [];
+    for (let p = 1; p <= 8; p++) {
+      for (let k = 0; k < 22; k++) out.push(k % 2 ? 'HELMER' : 'NORA', `Speech ${String.fromCharCode(97 + p)} ${String.fromCharCode(97 + k)} goes on here.`);
+      if (p === 2) out.push('SOLDIER 1', 'Halt there!');
+      if (p === 4) out.push('SOLDIER 2', 'Who goes?');
+      if (p === 6) out.push('SOLDIER 3', 'Only me.');
+    }
+    const r = await importScript({ kind: 'text', text: out.join('\n') });
+    expect(r.script.characters.map((c) => c.id).sort()).toEqual(['helmer', 'nora', 'soldier-1', 'soldier-2', 'soldier-3']);
+    const speech = (id: string) => r.script.units.filter((u) => u.kind === 'dialogue' && u.characterId === id).map((u) => u.text);
+    expect(speech('soldier-1')).toEqual(['Halt there!']);
+    expect(speech('soldier-2')).toEqual(['Who goes?']);
+    expect(speech('soldier-3')).toEqual(['Only me.']);
+  });
 });

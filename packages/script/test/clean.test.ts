@@ -90,6 +90,7 @@ describe('page-numbered running titles in estimated pages (R26)', () => {
 
   it.each([
     ['HAMLET n header', paste((p) => `HAMLET ${p}`), /^HAMLET \d+$/],
+    ['HAMLET 12..19 header', paste((p) => `HAMLET ${p + 11}`), /^HAMLET \d+$/],
     ["A DOLL'S HOUSE n header", paste((p) => `A DOLL'S HOUSE ${p}`), /^A DOLL'S HOUSE \d+$/],
     ['THE SEAGULL n footer', paste(() => null, (p) => `THE SEAGULL ${p}`), /^THE SEAGULL \d+$/],
     ['Hamlet: page n header', paste((p) => `Hamlet: page ${p}`), /^Hamlet: page \d+$/],
@@ -99,6 +100,12 @@ describe('page-numbered running titles in estimated pages (R26)', () => {
     const texts = textDoc(text).lines.map((l) => l.text);
     expect(texts.filter((t) => title.test(t))).toHaveLength(0);
     expect(cues(texts)).toBe(8 * 22);
+  });
+
+  it('keeps one-off numbered speakers: three copies on eight pages are too few for a page counter (R28)', () => {
+    const text = paste((p) => (p === 2 ? 'SOLDIER 1\nHalt there!' : p === 4 ? 'SOLDIER 2\nWho goes?' : p === 6 ? 'SOLDIER 3\nOnly me.' : null));
+    const texts = textDoc(text).lines.map((l) => l.text);
+    expect(texts.filter((t) => /^SOLDIER \d$/.test(t))).toEqual(['SOLDIER 1', 'SOLDIER 2', 'SOLDIER 3']);
   });
 
   it('keeps an inline speech whose number appears once', () => {

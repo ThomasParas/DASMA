@@ -150,14 +150,17 @@ function removeRunningLines(lines: CleanLine[], raw: RawDoc): CleanLine[] {
     g.numberedCue ||= role[i] === 'numberedCue';
     groups.set(key, g);
   });
-  // A group with a numbered cue in it goes only when no digit value repeats: page counters count up (`HAMLET 12`,
-  // `HAMLET 13`), while `GUARD 1` / `GUARD 2` cueing again and again repeat theirs. Other lines need only differ, so a
-  // restarting counter or a header and footer carrying the same number still go.
+  // A group with a numbered cue in it is a page counter only when no digit value repeats and it appears about once a
+  // page: page counters count up (`HAMLET 12`, `HAMLET 13`) on every page, while `GUARD 1` / `GUARD 2` cueing again
+  // and again repeat theirs, and a handful of one-off `SOLDIER 1` / `SOLDIER 2` / `SOLDIER 3` are too few. Other lines
+  // need only differ, so a restarting counter or a header and footer carrying the same number still go.
+  const counterCopies = Math.max(HEADER_MIN_PAGES, Math.ceil(HEADER_PAGE_SHARE * raw.pages));
   const drop = new Set(
     [...groups]
       .filter(([, g]) => {
         const distinct = new Set(g.values).size;
-        return g.values.length >= 3 && distinct >= 2 && (!g.numberedCue || distinct === g.values.length);
+        if (g.values.length < 3 || distinct < 2) return false;
+        return !g.numberedCue || (distinct === g.values.length && g.values.length >= counterCopies);
       })
       .map(([key]) => key),
   );
