@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { cleanDoc, isPageNumber, normalizeText } from '../src/clean';
-import { isHeading } from '../src/patterns';
+import { CAST_LIST_HEADER, isHeading } from '../src/patterns';
 import { line, rawDoc, textDoc } from './helpers';
 
 describe('running headers and footers', () => {
@@ -136,5 +136,13 @@ describe('isHeading', () => {
       expect(isHeading(t)).toBe(true);
     for (const t of ['ACT DROP', 'Acting is hard', 'Scene of the crime, I said, and then I went home again to sleep it off'])
       expect(isHeading(t)).toBe(false);
+  });
+});
+
+describe('CAST_LIST_HEADER', () => {
+  it('matches cast-list headers, including Dramatis Personæ, and not words that merely start with one', () => {
+    for (const t of ['Dramatis Personæ', 'DRAMATIS PERSONAE', 'Persons Represented', 'THE PERSONS IN THE PLAY', 'Characters'])
+      expect(CAST_LIST_HEADER.test(t)).toBe(true);
+    for (const t of ['Characterisation of the lead', 'Castle']) expect(CAST_LIST_HEADER.test(t)).toBe(false);
   });
 });

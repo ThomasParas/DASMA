@@ -12,9 +12,12 @@ export function isHeading(text: string): boolean {
   return t.split(/\s+/).length <= HEADING_MAX_WORDS && HEADINGS.some((re) => re.test(t));
 }
 
-/** The line that opens a cast list (spec §5.1). */
+/**
+ * The line that opens a cast list (spec §5.1). The end-of-word check is a Unicode lookahead
+ * because `\b` stays ASCII-only even under the `u` flag, so it never matches after "æ".
+ */
 export const CAST_LIST_HEADER =
-  /^(dramatis person(ae|æ)|characters|cast( of characters)?|(the )?persons (in|of) the play|persons represented)\b/i;
+  /^(dramatis person(ae|æ)|characters|cast( of characters)?|(the )?persons (in|of) the play|persons represented)(?![\p{L}\p{N}_])/iu;
 
 /** A line made only of `*`, `#` or `~` marks: a scene break. */
 export const SCENE_BREAK = /^[*#~](\s*[*#~])*$/;
