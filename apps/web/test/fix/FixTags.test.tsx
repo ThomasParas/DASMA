@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { sampleScript, seedProduction } from '../fixtures';
 import { makeServices, renderApp } from '../render';
 
@@ -138,5 +138,15 @@ describe('Fix tags', () => {
     await user.click(screen.getByRole('button', { name: /^Done/ }));
     await waitFor(() => expect(window.location.hash).toBe(`#/p/${production.id}`));
     expect((await stored()).units[0].kind).toBe('frontMatter');
+  });
+
+  it('stays on the screen with the error shown when Done cannot save', async () => {
+    const { user, services, production } = await openFix();
+    vi.spyOn(services.repo, 'saveScript').mockRejectedValue(new Error('QuotaExceededError'));
+    await user.keyboard('jf');
+    await user.click(screen.getByRole('button', { name: /^Done/ }));
+    expect((await screen.findByRole('alert')).textContent).toMatch(/^Not saved/);
+    expect(window.location.hash).toBe(`#/p/${production.id}/fix`);
+    expect(document.getElementById('unit-u1')!.dataset.kind).toBe('frontMatter');
   });
 });

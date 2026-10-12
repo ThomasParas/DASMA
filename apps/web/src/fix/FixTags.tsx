@@ -113,7 +113,7 @@ export function FixWorkspace({ editor, script, production }: WorkspaceProps) {
   useShortcuts([{ keys: ['Escape'], run: () => setPanel({ kind: 'none' }), allowInFields: true }], panel.kind !== 'none');
 
   const done = async () => {
-    await flush();
+    if (!(await flush())) return;
     navigate({ name: 'production', id: production.id });
   };
 

@@ -20,7 +20,8 @@ export interface ScriptEditor {
   canRedo: boolean;
   saveState: SaveState;
   saveError: string | null;
-  flush(): Promise<void>;
+  /** Saves pending edits; resolves true only when everything is saved (false after a failed save or a conflict). */
+  flush(): Promise<boolean>;
 }
 
 /** Spec §7.1: the live version in memory, whole-script undo, saves debounced and serialised, flushed on leave. */
@@ -93,10 +94,11 @@ export function useScriptEditor(productionId: string, keep: () => readonly strin
     }
   }, [repo]);
 
-  const flush = useCallback((): Promise<void> => {
+  const flush = useCallback(async (): Promise<boolean> => {
     clearTimeout(timer.current);
     chain.current = chain.current.then(saveNow);
-    return chain.current;
+    await chain.current;
+    return !dirty.current && !stopped.current;
   }, [saveNow]);
 
   const schedule = useCallback(() => {

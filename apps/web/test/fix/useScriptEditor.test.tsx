@@ -108,6 +108,32 @@ describe('useScriptEditor', () => {
     expect([saved.units[0].tagConfidence, saved.units[6].tagConfidence]).toEqual([1, 1]);
   });
 
+  it('resolves flush with true after a clean save and false after a conflict or a failed save', async () => {
+    const clean = await setup();
+    act(() => void clean.hook.result.current.apply({ type: 'confirm', unitIds: ['u1'] }));
+    let ok: boolean | undefined;
+    await act(async () => {
+      ok = await clean.hook.result.current.flush();
+    });
+    expect(ok).toBe(true);
+
+    const conflicted = await setup();
+    await conflicted.services.repo.saveScript(conflicted.version.id, { ...sampleScript(), title: 'Other tab' }, 0);
+    act(() => void conflicted.hook.result.current.apply({ type: 'confirm', unitIds: ['u1'] }));
+    await act(async () => {
+      ok = await conflicted.hook.result.current.flush();
+    });
+    expect(ok).toBe(false);
+
+    const failing = await setup();
+    vi.spyOn(failing.services.repo, 'saveScript').mockRejectedValue(new Error('QuotaExceededError'));
+    act(() => void failing.hook.result.current.apply({ type: 'confirm', unitIds: ['u1'] }));
+    await act(async () => {
+      ok = await failing.hook.result.current.flush();
+    });
+    expect(ok).toBe(false);
+  });
+
   it('flushes a pending save when unmounted', async () => {
     const { hook, stored } = await setup({ saveDebounceMs: 60_000 });
     act(() => void hook.result.current.apply({ type: 'confirm', unitIds: ['u1'] }));
