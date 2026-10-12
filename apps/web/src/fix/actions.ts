@@ -88,7 +88,10 @@ export function targetIds(ctx: FixContext): string[] {
 export function pickOp(ctx: FixContext, purpose: PickPurpose, characterId: string): EditOp {
   const ids = targetIds(ctx);
   if (purpose === 'speechBy') return { type: 'speechBy', unitIds: ids, characterId };
-  if (purpose === 'moveSpeeches') return { type: 'moveSpeeches', unitIds: ctx.sel?.unitIds ?? [], characterId };
+  if (purpose === 'moveSpeeches') {
+    const dialogue = new Set(ctx.script.units.filter((u) => u.kind === 'dialogue').map((u) => u.id));
+    return { type: 'moveSpeeches', unitIds: ids.filter((id) => dialogue.has(id)), characterId };
+  }
   const names: EditOp[] = ids.map((unitId) => ({ type: 'setName', unitId, characterId }));
   return names.length === 1 ? names[0] : { type: 'batch', ops: names };
 }

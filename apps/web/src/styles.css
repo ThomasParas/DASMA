@@ -47,7 +47,7 @@ table.grid td, table.grid th { border-bottom: 1px solid var(--line); padding: 6p
 .fix-left, .fix-right { overflow: auto; padding: 12px; background: var(--panel); border-right: 1px solid var(--line); }
 .fix-right { border-right: 0; border-left: 1px solid var(--line); }
 .script { overflow: auto; padding: 16px 24px; font-family: Georgia, serif; font-size: 15px; line-height: 1.5; }
-.unit { padding: 2px 8px; border-left: 3px solid transparent; border-radius: 3px; margin: 1px 0; white-space: pre-wrap; content-visibility: auto; contain-intrinsic-size: auto 1.6em; cursor: pointer; }
+.unit { -webkit-user-select: none; user-select: none; padding: 2px 8px; border-left: 3px solid transparent; border-radius: 3px; margin: 1px 0; white-space: pre-wrap; content-visibility: auto; contain-intrinsic-size: auto 1.6em; cursor: pointer; }
 .unit-characterName { font-weight: bold; letter-spacing: 0.04em; margin-top: 8px; }
 .unit-direction { font-style: italic; color: var(--muted); }
 .unit-heading { font-weight: bold; text-transform: uppercase; text-align: center; border-top: 1px solid var(--line); margin-top: 12px; }

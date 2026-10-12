@@ -130,6 +130,20 @@ describe('Fix tags', () => {
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
+  it('ignores edit shortcuts while the shortcut sheet is open', async () => {
+    const { user, unitEl } = await openFix();
+    await user.keyboard('j?');
+    await user.keyboard('fx{Delete}j');
+    expect(unitEl('u1').dataset.kind).toBe('heading');
+    expect(unitEl('u1').classList.contains('cut')).toBe(false);
+    expect(screen.getByRole('heading', { name: 'To check (3)' })).toBeTruthy();
+    expect(screen.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeTruthy();
+    await user.keyboard('?');
+    expect(screen.queryByRole('dialog')).toBeNull();
+    await user.keyboard('f');
+    expect(unitEl('u1').dataset.kind).toBe('frontMatter');
+  });
+
   it('saves and returns to the production page on Done', async () => {
     const { user, production, stored } = await openFix();
     await user.keyboard('jf');

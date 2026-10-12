@@ -72,6 +72,31 @@ describe('Fix tags: text, split, join, overlap', () => {
     expect((await stored()).units[3].text).toBe('Did you hear what I was playing, Lane?');
   });
 
+  it('keeps the editor and its draft when the selected unit or one of its words is clicked again', async () => {
+    const { user, unitEl } = await openFix();
+    await user.click(unitEl('u4'));
+    await user.keyboard('e');
+    await user.type(screen.getByLabelText('Unit text'), ' extra');
+    await user.click(unitEl('u4'));
+    expect((screen.getByLabelText('Unit text') as HTMLTextAreaElement).value).toBe('Did you hear what I was playing, Lane? extra');
+    await user.click(unitEl('u4').querySelector('[data-word="2"]')!);
+    expect((screen.getByLabelText('Unit text') as HTMLTextAreaElement).value).toBe('Did you hear what I was playing, Lane? extra');
+  });
+
+  it('closes the editor on Undo so shortcuts work again when its unit is gone', async () => {
+    const { user, unitEl, selectedIds } = await openFix();
+    await user.click(unitEl('u4'));
+    await user.click(unitEl('u4').querySelector('[data-word="3"]')!);
+    await user.keyboard('/');
+    await user.click(unitEl('u11'));
+    await user.keyboard('e');
+    await user.click(screen.getByRole('button', { name: /^Undo/ }));
+    expect(document.getElementById('unit-u11')).toBeNull();
+    expect(screen.queryByLabelText('Unit text')).toBeNull();
+    await user.keyboard('j');
+    expect(selectedIds()).toEqual(['u1']);
+  });
+
   it('closes the editor on a range selection so shortcuts work again', async () => {
     const { user, unitEl, stored } = await openFix();
     await user.click(unitEl('u4'));

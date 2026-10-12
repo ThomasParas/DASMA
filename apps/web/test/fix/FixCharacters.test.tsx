@@ -75,6 +75,32 @@ describe('Fix tags: speakers and characters', () => {
     await waitFor(async () => expect((await stored()).units[9].characterId).toBe('lane'));
   });
 
+  it('moves the other lines like this too when ticked', async () => {
+    const script: Script = sampleScript();
+    for (const [id, text] of [
+      ['u11', 'I told you so.'],
+      ['u12', 'You never did.'],
+      ['u13', 'Yes I did.'],
+    ]) script.units.push({ id, kind: 'dialogue', characterId: 'algernon', text, cut: false, tagConfidence: 0.5, source: [{ page: 1, line: 11 }] });
+    const { user, unitEl, stored } = await openFix(script);
+    await user.click(unitEl('u11'));
+    await user.click(screen.getByLabelText('Also apply to the 2 other lines like this'));
+    await user.click(screen.getByRole('button', { name: 'Move selected speeches to…' }));
+    await user.click(within(screen.getByRole('region', { name: 'Move selected speeches to' })).getByRole('button', { name: /^LANE/ }));
+    await waitFor(async () => expect((await stored()).units.slice(10).map((u) => u.characterId)).toEqual(['lane', 'lane', 'lane']));
+    expect((await stored()).units[9].characterId).toBe('algernon');
+  });
+
+  it('starts each picker with an empty filter', async () => {
+    const { user, unitEl } = await openFix();
+    await user.click(unitEl('u2'));
+    await user.keyboard('s');
+    await user.keyboard('alg');
+    await user.click(screen.getByRole('button', { name: /^Character name/ }));
+    expect(screen.getByRole('region', { name: 'Character name' })).toBeTruthy();
+    expect((screen.getByLabelText('Find a character') as HTMLInputElement).value).toBe('');
+  });
+
   it('renames, edits aliases and highlights a character', async () => {
     const { user, stored, unitEl } = await openFix();
     const panel = screen.getByRole('region', { name: 'Characters' });

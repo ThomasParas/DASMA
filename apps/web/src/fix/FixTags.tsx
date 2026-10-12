@@ -46,6 +46,9 @@ interface WorkspaceProps {
 /** The edit-text panel belongs to one unit, so a selection change closes it (a draft is dropped, never moved to another unit). */
 const closeEditText = (p: Panel): Panel => (p.kind === 'editText' ? { kind: 'none' } : p);
 
+const sameSelection = (a: Selection | null, b: Selection): boolean =>
+  !!a && a.anchor === b.anchor && a.unitIds.length === b.unitIds.length && a.unitIds.every((id, i) => id === b.unitIds[i]);
+
 export function FixWorkspace({ editor, script, production, onProductionChange }: WorkspaceProps) {
   const { repo } = useServices();
   const hints = editor.version!.unitHints;
@@ -63,9 +66,17 @@ export function FixWorkspace({ editor, script, production, onProductionChange }:
   const similarIds = useMemo(() => (sel && sel.unitIds.length === 1 ? similarUnits(script, hints, sel.anchor) : []), [script, hints, sel]);
 
   const scriptRef = useRef(script);
+  const selRef = useRef(sel);
   useLayoutEffect(() => {
     scriptRef.current = script;
+    selRef.current = sel;
   });
+
+  /** Closes the edit-text panel only when the selection actually changes, so clicking the selected unit keeps a draft. */
+  const changeSelection = useCallback((next: Selection) => {
+    if (!sameSelection(selRef.current, next)) setPanel(closeEditText);
+    setSel(next);
+  }, []);
 
   const { apply: editorApply, undo, redo, flush } = editor;
   const apply = useCallback(
@@ -81,30 +92,37 @@ export function FixWorkspace({ editor, script, production, onProductionChange }:
     [editorApply],
   );
 
-  const select = useCallback((unitId: string) => {
-    setSel({ unitIds: [unitId], anchor: unitId });
-    setWords(null);
-    setMessage(null);
-    setSimilar(false);
-    setPanel(closeEditText);
-    document.getElementById(`unit-${unitId}`)?.scrollIntoView?.({ block: 'nearest' });
-  }, []);
+  const select = useCallback(
+    (unitId: string) => {
+      changeSelection({ unitIds: [unitId], anchor: unitId });
+      setWords(null);
+      setMessage(null);
+      setSimilar(false);
+      document.getElementById(`unit-${unitId}`)?.scrollIntoView?.({ block: 'nearest' });
+    },
+    [changeSelection],
+  );
 
-  const onUnitClick = useCallback((unitId: string, shift: boolean) => {
-    setWords(null);
-    setMessage(null);
-    setSimilar(false);
-    setPanel(closeEditText);
-    setSel((prev) => {
-      if (!shift || !prev) return { unitIds: [unitId], anchor: unitId };
-      const units = scriptRef.current.units;
-      const a = units.findIndex((u) => u.id === prev.anchor);
-      const b = units.findIndex((u) => u.id === unitId);
-      if (a < 0 || b < 0) return { unitIds: [unitId], anchor: unitId };
-      const [lo, hi] = a < b ? [a, b] : [b, a];
-      return { unitIds: units.slice(lo, hi + 1).map((u) => u.id), anchor: prev.anchor };
-    });
-  }, []);
+  const onUnitClick = useCallback(
+    (unitId: string, shift: boolean) => {
+      setWords(null);
+      setMessage(null);
+      setSimilar(false);
+      const prev = selRef.current;
+      const range = (): Selection => {
+        const one = { unitIds: [unitId], anchor: unitId };
+        if (!shift || !prev) return one;
+        const units = scriptRef.current.units;
+        const a = units.findIndex((u) => u.id === prev.anchor);
+        const b = units.findIndex((u) => u.id === unitId);
+        if (a < 0 || b < 0) return one;
+        const [lo, hi] = a < b ? [a, b] : [b, a];
+        return { unitIds: units.slice(lo, hi + 1).map((u) => u.id), anchor: prev.anchor };
+      };
+      changeSelection(range());
+    },
+    [changeSelection],
+  );
 
   const onWordClick = useCallback((unitId: string, k: number, shift: boolean) => {
     setWords((prev) =>
@@ -114,7 +132,30 @@ export function FixWorkspace({ editor, script, production, onProductionChange }:
     );
   }, []);
 
-  const ctx: FixContext = { script, hints, queue, sel, words, similar, panel, apply, select, openPanel: setPanel, undo, redo, canUndo: editor.canUndo, canRedo: editor.canRedo };
+  // Undo and redo can remove the unit a panel works on, which would leave the panel open with every shortcut off.
+  const closePanel = () => setPanel((p) => (p.kind === 'help' ? p : { kind: 'none' }));
+  const ctx: FixContext = {
+    script,
+    hints,
+    queue,
+    sel,
+    words,
+    similar,
+    panel,
+    apply,
+    select,
+    openPanel: setPanel,
+    undo: () => {
+      closePanel();
+      undo();
+    },
+    redo: () => {
+      closePanel();
+      redo();
+    },
+    canUndo: editor.canUndo,
+    canRedo: editor.canRedo,
+  };
   const actions = buildFixActions(ctx);
   const onPick = (characterId: string) => {
     if (panel.kind === 'picker') apply(pickOp(ctx, panel.purpose, characterId));
@@ -136,8 +177,9 @@ export function FixWorkspace({ editor, script, production, onProductionChange }:
     }
   };
   const PICKER_TITLES = { speechBy: 'Speech by', setName: 'Character name', moveSpeeches: 'Move selected speeches to' } as const;
+  // While the shortcut sheet is open only its toggle (and Escape, below) act, so no key changes the script under it.
   useShortcuts(
-    actions.map((a) => ({ keys: a.keys, run: a.run, enabled: a.enabled })),
+    actions.filter((a) => panel.kind !== 'help' || a.id === 'help').map((a) => ({ keys: a.keys, run: a.run, enabled: a.enabled })),
     panel.kind === 'none' || panel.kind === 'help',
   );
   useShortcuts([{ keys: ['Escape'], run: () => setPanel({ kind: 'none' }), allowInFields: true }], panel.kind !== 'none');
@@ -175,7 +217,7 @@ export function FixWorkspace({ editor, script, production, onProductionChange }:
           onSimilar={setSimilar}
         >
           {panel.kind === 'picker' && sel && (
-            <CharacterPicker script={script} anchorId={sel.anchor} title={PICKER_TITLES[panel.purpose]} onPick={onPick} onCreate={onCreate} onClose={() => setPanel({ kind: 'none' })} />
+            <CharacterPicker key={panel.purpose} script={script} anchorId={sel.anchor} title={PICKER_TITLES[panel.purpose]} onPick={onPick} onCreate={onCreate} onClose={() => setPanel({ kind: 'none' })} />
           )}
           {panel.kind === 'editText' &&
             sel?.unitIds.length === 1 &&
