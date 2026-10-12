@@ -34,6 +34,6 @@ export function extractText(text: string): RawDoc {
     });
   }
   let pages = 0;
-  if (lines.length) pages = sawFormFeed ? page : assignEstimatedPages(lines);
+  if (lines.length) pages = sawFormFeed ? lines[lines.length - 1].page : assignEstimatedPages(lines);
   return { source: 'text', pageWidth: 80 * TEXT_COLUMN, pages, realPages: sawFormFeed, lines };
 }

@@ -27,6 +27,13 @@ describe('extractText', () => {
     expect(doc.pages).toBe(4);
   });
 
+  it('counts no empty page after a trailing form feed', () => {
+    const doc = extractText('A\n\f');
+    expect(doc.pages).toBe(1);
+    expect(doc.realPages).toBe(true);
+    expect(extractText('One\fTwo\n\f\n').pages).toBe(2);
+  });
+
   it('estimates pages when there are no form feeds', () => {
     const doc = extractText(Array.from({ length: 51 }, (_, i) => `Line ${i}`).join('\n'));
     expect(doc.realPages).toBe(false);
