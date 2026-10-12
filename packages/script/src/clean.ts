@@ -12,6 +12,16 @@ export const HEADER_MIN_PAGES = 3;
 export const HEADER_INNER_MAX = 0.25;
 /** A PDF line number sits further than this (points) outside the text column. */
 export const LINE_NUMBER_OUTSIDE = 24;
+/** Rule S1, estimated pages: an identical line is a running header when at least this many copies sit in a header position… */
+export const TEXT_HEADER_MIN_COPIES = 5;
+/** …a header position being within this many lines of a page-number line… */
+export const TEXT_HEADER_NEAR_LINES = 2;
+/** …or, when page numbers place too few copies, at least this many lines after the previous copy… */
+export const TEXT_HEADER_MIN_SPACING = 20;
+/** …and within this share of the median spacing between copies. */
+export const TEXT_HEADER_SPACING_TOLERANCE = 0.2;
+/** A line with more copies than this away from header positions after the first header recurs as content (a speaker name) and is kept. */
+export const TEXT_HEADER_MAX_STRAY = 1;
 
 const LIGATURES: Record<string, string> = { 'ﬀ': 'ff', 'ﬁ': 'fi', 'ﬂ': 'fl', 'ﬃ': 'ffi', 'ﬄ': 'ffl', 'ﬅ': 'st', 'ﬆ': 'st' };
 
@@ -33,6 +43,46 @@ const ROMAN_PAGE = /^[-–—]?\s*[ivxl]{1,6}\s*[-–—]?$/;
 export function isPageNumber(text: string): boolean {
   const t = text.trim();
   return PAGE_NUMBER.test(t) || ROMAN_PAGE.test(t);
+}
+
+/** Copies regularly spaced after their previous copy: each gap within the tolerance of the median gap. */
+function onSpacing(idxs: number[]): number[] {
+  const gaps = idxs.slice(1).map((i, k) => i - idxs[k]);
+  const median = [...gaps].sort((a, b) => a - b)[Math.floor(gaps.length / 2)];
+  if (median < TEXT_HEADER_MIN_SPACING) return [];
+  return idxs.filter((_, k) => k > 0 && Math.abs(gaps[k - 1] - median) <= TEXT_HEADER_SPACING_TOLERANCE * median);
+}
+
+/**
+ * Rule S1 (spec §6.5a), estimated pages: indices of running-header copies. A line recurring with identical text is a
+ * header when enough copies sit next to a page-number line (or, failing that, at a regular spacing) and it is not a
+ * recurring cue token: a speaker name also recurs away from page boundaries, so it is never removed. Copies before
+ * the first header position (a title page) stay.
+ */
+function textRunningHeaders(lines: CleanLine[]): Set<number> {
+  const pageNumber = lines.map((l) => isPageNumber(l.text));
+  const nearPage = (i: number): boolean =>
+    pageNumber.slice(Math.max(0, i - TEXT_HEADER_NEAR_LINES), i + TEXT_HEADER_NEAR_LINES + 1).some(Boolean);
+  const copies = new Map<string, number[]>();
+  lines.forEach((l, i) => {
+    if (pageNumber[i]) return;
+    const key = l.text.replace(/\s+/g, ' ').trim();
+    const idxs = copies.get(key);
+    if (idxs) idxs.push(i);
+    else copies.set(key, [i]);
+  });
+  const drop = new Set<number>();
+  for (const idxs of copies.values()) {
+    if (idxs.length < TEXT_HEADER_MIN_COPIES) continue;
+    let placed = idxs.filter(nearPage);
+    if (placed.length < TEXT_HEADER_MIN_COPIES) placed = onSpacing(idxs);
+    if (placed.length < TEXT_HEADER_MIN_COPIES) continue;
+    const at = new Set(placed);
+    const stray = idxs.filter((i) => i > placed[0] && !at.has(i)).length;
+    if (stray > TEXT_HEADER_MAX_STRAY) continue;
+    for (const i of placed) drop.add(i);
+  }
+  return drop;
 }
 
 const mask = (t: string): string => t.toLowerCase().replace(/\d+/g, '#').replace(/\s+/g, ' ').trim();
@@ -73,7 +123,8 @@ function removeRunningLines(lines: CleanLine[], raw: RawDoc): CleanLine[] {
     digits.set(key, [...(digits.get(key) ?? []), (l.text.match(/\d+/g) ?? []).join(',')]);
   }
   const drop = new Set([...digits].filter(([, ds]) => ds.length >= 3 && new Set(ds).size >= 2).map(([key]) => key));
-  return lines.filter((l) => !drop.has(mask(l.text)));
+  const headers = textRunningHeaders(lines);
+  return lines.filter((l, i) => !drop.has(mask(l.text)) && !headers.has(i));
 }
 
 const isNumberSpan = (s: RawSpan): boolean => /^\d{1,4}$/.test(s.text.trim());

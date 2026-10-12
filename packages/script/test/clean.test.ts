@@ -24,6 +24,50 @@ describe('running headers and footers', () => {
   });
 });
 
+describe('pasted-text running header (rule S1)', () => {
+  /** A digit-free label, so the digits rule for running lines leaves the speech lines alone. */
+  const tag = (n: number): string => String.fromCharCode(97 + Math.floor(n / 26)) + String.fromCharCode(97 + (n % 26));
+  /** Six pages of own-line dialogue; each page ends with its number and the next opens with `header`. */
+  function pastedPages(header: string, opts: { pageNumbers: boolean }): string {
+    const out = [header, 'by Henrik Ibsen'];
+    for (let p = 1; p <= 6; p++) {
+      out.push('NORA', `Line ${tag(p)} a.`, 'HELMER', `Line ${tag(p)} b.`, 'NORA', `Line ${tag(p)} c.`);
+      for (let k = 0; k < 20; k++) out.push(`Speech line ${tag(p)} ${tag(k)}.`);
+      out.push('HELMER', `Line ${tag(p)} d.`);
+      if (opts.pageNumbers) out.push(`${' '.repeat(40)}${p}`);
+      out.push(header);
+    }
+    return out.join('\n');
+  }
+
+  it('removes a digit-free title that recurs next to page numbers, keeping the title page', () => {
+    const doc = textDoc(pastedPages("A DOLL'S HOUSE", { pageNumbers: true }));
+    const texts = doc.lines.map((l) => l.text);
+    expect(texts.filter((t) => t === "A DOLL'S HOUSE")).toHaveLength(1);
+    expect(texts[0]).toBe("A DOLL'S HOUSE");
+    expect(texts.filter((t) => t === 'NORA')).toHaveLength(12);
+    expect(texts.filter((t) => t === 'HELMER')).toHaveLength(12);
+  });
+
+  it('removes a header that recurs at a regular spacing when there are no page numbers', () => {
+    const doc = textDoc(pastedPages('THE IMPORTANCE OF BEING EARNEST', { pageNumbers: false }));
+    const texts = doc.lines.map((l) => l.text);
+    expect(texts.filter((t) => t === 'THE IMPORTANCE OF BEING EARNEST')).toHaveLength(1);
+    expect(texts.filter((t) => t === 'NORA')).toHaveLength(12);
+  });
+
+  it('never removes a speaker name that recurs next to page numbers but also speaks elsewhere', () => {
+    const out: string[] = [];
+    for (let p = 1; p <= 6; p++) {
+      out.push('HELMER', `Line ${tag(p)} a.`, 'NINA', `Line ${tag(p)} b.`);
+      for (let k = 0; k < 20; k++) out.push(`Speech line ${tag(p)} ${tag(k)}.`);
+      out.push('NINA', `${p}`, `Line ${tag(p)} c.`);
+    }
+    const texts = textDoc(out.join('\n')).lines.map((l) => l.text);
+    expect(texts.filter((t) => t === 'NINA')).toHaveLength(12);
+  });
+});
+
 describe('isPageNumber', () => {
   it('matches page-number lines only', () => {
     for (const t of ['12', '- 12 -', 'Page 3', 'page 14', 'iv', '— 7 —']) expect(isPageNumber(t)).toBe(true);
