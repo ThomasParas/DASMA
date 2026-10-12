@@ -23,3 +23,9 @@ export { DASMA_EXTENSION, DASMA_FORMAT, DASMA_FORMAT_VERSION, DASMA_MIME, readDa
 export { SAME_UNIT_SIMILARITY, carryOver, diffScripts, similarity } from './diff';
 export type { ScriptDiff } from './diff';
 export { wordSpans } from './words';
+export { EditError } from './edit/ops';
+export type { EditOp } from './edit/ops';
+export { applyEdit, pruneCharacters } from './edit/apply';
+export type { EditOptions } from './edit/apply';
+export { maxUnitNumber, nextUnitId, uniqueCharacterId } from './edit/ids';
+export { SCENE_BREAK_TEXT } from './edit/unit-ops';
