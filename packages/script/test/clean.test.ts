@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { cleanDoc, isPageNumber, normalizeText } from '../src/clean';
 import { CAST_LIST_HEADER, isHeading, isSettingLine } from '../src/patterns';
+import type { RawLine } from '../src/types';
 import { line, rawDoc, textDoc } from './helpers';
 
 describe('running headers and footers', () => {
@@ -21,6 +22,54 @@ describe('running headers and footers', () => {
       ['The Seagull 12', 'SERVANT 2', 'Yes.', 'The Seagull 13', 'SERVANT 2', 'No.', 'The Seagull 14', 'SERVANT 2', 'Maybe.'].join('\n'),
     );
     expect(doc.lines.map((l) => l.text)).toEqual(['SERVANT 2', 'Yes.', 'SERVANT 2', 'No.', 'SERVANT 2', 'Maybe.']);
+  });
+});
+
+describe('running-line rules never remove headings or speaker cues (ruling R22)', () => {
+  it('in pasted text keeps numbered scene headings whose digits change', () => {
+    const doc = textDoc(['Scene 1', 'NINA', 'Yes.', 'Scene 2', 'NINA', 'No.', 'Scene 3', 'NINA', 'Maybe.', 'Scene 4', 'NINA', 'Go.'].join('\n'));
+    expect(doc.lines.filter((l) => /^Scene \d$/.test(l.text)).map((l) => l.text)).toEqual(['Scene 1', 'Scene 2', 'Scene 3', 'Scene 4']);
+  });
+
+  it('in pasted text keeps numbered own-line speakers that cue again and again', () => {
+    const out: string[] = [];
+    for (let k = 0; k < 3; k++) out.push('GUARD 1', `Halt ${'x'.repeat(k)}.`, 'GUARD 2', `Pass ${'y'.repeat(k)}.`);
+    const texts = textDoc(out.join('\n')).lines.map((l) => l.text);
+    expect(texts.filter((t) => t === 'GUARD 1')).toHaveLength(3);
+    expect(texts.filter((t) => t === 'GUARD 2')).toHaveLength(3);
+  });
+
+  it('in pasted text keeps an inline speech whose only varying part is a number, but still removes a numbered title', () => {
+    const doc = textDoc(
+      ['ANNA: I counted 3 apples.', 'x', 'ANNA: I counted 4 apples.', 'y', 'ANNA: I counted 5 apples.', 'The Seagull 12', 'The Seagull 13', 'The Seagull 14'].join('\n'),
+    );
+    expect(doc.lines.filter((l) => l.text.startsWith('ANNA:'))).toHaveLength(3);
+    expect(doc.lines.filter((l) => l.text.startsWith('The Seagull'))).toHaveLength(0);
+  });
+
+  const pagedPlay = (headingAtTop: boolean) => {
+    const lines: RawLine[] = [];
+    for (let p = 1; p <= 5; p++) {
+      const page = [headingAtTop ? `SCENE ${p}` : 'Speech', 'NINA', `Line ${p} a.`, 'KOSTYA', `Line ${p} b.`, 'NINA', `Line ${p} c.`, 'KOSTYA', `Line ${p} d.`];
+      page.forEach((text) => lines.push(line(text, { page: p })));
+    }
+    return lines;
+  };
+
+  it('with real pages keeps scene headings that sit at the top of every page', () => {
+    const texts = cleanDoc(rawDoc(pagedPlay(true))).lines.map((l) => l.text);
+    expect(texts.filter((t) => /^SCENE \d$/.test(t))).toHaveLength(5);
+  });
+
+  it('with real pages still removes an all-capitals running title, which is cue-shaped', () => {
+    const lines: RawLine[] = [];
+    for (let p = 1; p <= 5; p++) {
+      ["A DOLL'S HOUSE", 'NINA', `Line ${p} a.`, 'KOSTYA', `Line ${p} b.`, 'NINA', `Line ${p} c.`, 'KOSTYA', `Line ${p} d.`, `${p}`].forEach((text) =>
+        lines.push(line(text, { page: p })),
+      );
+    }
+    const texts = cleanDoc(rawDoc(lines)).lines.map((l) => l.text);
+    expect(texts.filter((t) => t === "A DOLL'S HOUSE")).toHaveLength(0);
   });
 });
 

@@ -34,6 +34,15 @@ describe('matchCue', () => {
   );
 });
 
+describe('numbered own-line cues', () => {
+  it('accepts a 1–2 digit number after the name and keeps it in the token', () => {
+    expect(matchCue('GUARD 1')).toEqual({ convention: 'ownLine', token: 'GUARD 1', rest: '' });
+    expect(matchCue('FIRST GUARD 12')).toMatchObject({ convention: 'ownLine', token: 'FIRST GUARD 12' });
+    expect(matchCue('GUARD 123')).toBeNull();
+    expect(matchCue('SCENE 1')).toBeNull();
+  });
+});
+
 describe('normalizeCueToken', () => {
   it('uppercases, straightens apostrophes and strips trailing punctuation', () => {
     expect(normalizeCueToken(' Ham. ')).toBe('HAM');

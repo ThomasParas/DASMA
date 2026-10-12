@@ -89,17 +89,24 @@ function textRunningHeaders(lines: CleanLine[]): Set<number> {
 
 const mask = (t: string): string => t.toLowerCase().replace(/\d+/g, '#').replace(/\s+/g, ' ').trim();
 
+/** Spec §4.2: the running-line rules never remove a heading or a speaker cue. */
+const isStructural = (text: string): boolean => isHeading(text) || matchCue(text) !== null;
+
 function removeRunningLines(lines: CleanLine[], raw: RawDoc): CleanLine[] {
   if (raw.realPages) {
     if (raw.pages < HEADER_MIN_PAGES) return lines;
     const byPage = new Map<number, number[]>();
     lines.forEach((l, i) => byPage.set(l.page, [...(byPage.get(l.page) ?? []), i]));
+    // Only headings are exempt here: an all-capitals running title is cue-shaped, and a cue that also speaks mid-page
+    // is already kept by the inner-count test below.
+    const keep = lines.map((l) => isHeading(l.text));
     const edge = new Set<number>();
     const edgePages = new Map<string, Set<number>>();
     const edgeCount = new Map<string, number>();
     const innerCount = new Map<string, number>();
     for (const [page, idxs] of byPage) {
       idxs.forEach((idx, k) => {
+        if (keep[idx]) return;
         const key = mask(lines[idx].text);
         if (k < EDGE_LINES || k >= idxs.length - EDGE_LINES) {
           edge.add(idx);
@@ -120,13 +127,16 @@ function removeRunningLines(lines: CleanLine[], raw: RawDoc): CleanLine[] {
   }
   const digits = new Map<string, string[]>();
   for (const l of lines) {
-    if (!/\d/.test(l.text)) continue;
+    if (!/\d/.test(l.text) || isStructural(l.text)) continue;
     const key = mask(l.text);
     digits.set(key, [...(digits.get(key) ?? []), (l.text.match(/\d+/g) ?? []).join(',')]);
   }
-  const drop = new Set([...digits].filter(([, ds]) => ds.length >= 3 && new Set(ds).size >= 2).map(([key]) => key));
+  // A page counter never repeats a value; "GUARD 1" / "GUARD 2" cueing again and again does, so it is a speaker.
+  const drop = new Set(
+    [...digits].filter(([, ds]) => ds.length >= 3 && new Set(ds).size >= 2 && new Set(ds).size === ds.length).map(([key]) => key),
+  );
   const headers = textRunningHeaders(lines);
-  return lines.filter((l, i) => !drop.has(mask(l.text)) && !headers.has(i));
+  return lines.filter((l, i) => !(drop.has(mask(l.text)) && !isStructural(l.text)) && !headers.has(i));
 }
 
 const isNumberSpan = (s: RawSpan): boolean => /^\d{1,4}$/.test(s.text.trim());

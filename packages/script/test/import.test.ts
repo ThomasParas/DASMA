@@ -150,3 +150,29 @@ describe('sniffUnsupported', () => {
     expect(sniffUnsupported(new TextEncoder().encode('%PDF-1.7'))).toBe(false);
   });
 });
+
+describe('running-line rules keep headings and numbered speakers (ruling R22)', () => {
+  it('imports Scene 1..Scene 4 as four headings', async () => {
+    const parts: string[] = ['MY PLAY', ''];
+    const words = ['apples', 'rivers', 'clocks', 'lamps', 'doors', 'birds', 'coats', 'ships', 'roads', 'bells', 'cards', 'trees'];
+    let w = 0;
+    for (let s = 1; s <= 4; s++) {
+      parts.push(`Scene ${s}`, '');
+      for (let i = 0; i < 3; i++) parts.push('ANNA', `Anna talks about ${words[w++ % 12]} today.`, 'BEN', `Ben answers about ${words[w++ % 12]} again.`);
+    }
+    const r = await importScript({ kind: 'text', text: parts.join('\n') });
+    expect(r.script.units.filter((u) => u.kind === 'heading').map((u) => u.text)).toEqual(['Scene 1', 'Scene 2', 'Scene 3', 'Scene 4']);
+  });
+
+  it('gives GUARD 1 and GUARD 2 their own characters', async () => {
+    const text = [
+      'SCENE ONE',
+      ...['one', 'two', 'three'].flatMap((n) => ['GUARD 1', `Halt, number ${n}.`, 'GUARD 2', `Pass, number ${n}.`, 'ANNA', `Thank you, number ${n}.`]),
+    ].join('\n');
+    const r = await importScript({ kind: 'text', text });
+    expect(r.script.characters.map((c) => c.id).sort()).toEqual(['anna', 'guard-1', 'guard-2']);
+    const speeches = (id: string) => r.script.units.filter((u) => u.kind === 'dialogue' && u.characterId === id);
+    expect(speeches('guard-1')).toHaveLength(3);
+    expect(speeches('guard-2')).toHaveLength(3);
+  });
+});

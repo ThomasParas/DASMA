@@ -12,8 +12,8 @@ export interface CueMatch {
 
 const CAPS_WORD = "\\p{Lu}[\\p{Lu}'’-]*";
 const ANY_WORD = "\\p{L}[\\p{L}'’-]*";
-/** 1–4 all-capital words, an optional "." or ":", an optional parenthetical. */
-const OWN_LINE = new RegExp(`^(${CAPS_WORD}(?:\\.?\\s+${CAPS_WORD}){0,3})\\s*[.:]?\\s*(\\([^)]*\\))?$`, 'u');
+/** 1–4 all-capital words, an optional 1–2 digit number ("GUARD 1"), an optional "." or ":", an optional parenthetical. */
+const OWN_LINE = new RegExp(`^(${CAPS_WORD}(?:\\.?\\s+${CAPS_WORD}){0,3}(?:\\s+\\d{1,2})?)\\s*[.:]?\\s*(\\([^)]*\\))?$`, 'u');
 const INLINE_PERIOD = new RegExp(`^(${CAPS_WORD}(?:\\.?\\s+${CAPS_WORD}){0,3})\\.\\s+(\\S.*)$`, 'su');
 const INLINE_COLON = new RegExp(`^(${ANY_WORD}(?:\\.?\\s+${ANY_WORD}){0,3}):\\s*(\\S.*)$`, 'su');
 const CLASSICAL = /^(\p{Lu}\p{Ll}{1,5})\.\s+(\S.*)$/su;
