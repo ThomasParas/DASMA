@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { isSupportedBrowser } from './browser';
 import { StorageUnavailableError } from './db/repo';
+import { FixTags } from './fix/FixTags';
 import { useRoute, type Route } from './router';
 import { ImportScreen } from './screens/ImportScreen';
 import { Library } from './screens/Library';
@@ -18,6 +19,8 @@ function Screen({ route }: { route: Route }) {
       return <ImportScreen productionId={route.id} />;
     case 'production':
       return <Production id={route.id} />;
+    case 'fix':
+      return <FixTags key={route.id} productionId={route.id} />;
     default:
       return <NotFound />;
   }
