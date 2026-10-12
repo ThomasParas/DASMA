@@ -169,7 +169,7 @@ The rules run in this order:
 
      In this input the digits rule treats lines in three ways:
      - **Exempt:** headings (§5.2), and speaker cues (§5.1) whose token contains no digit. `Scene 1` … `Scene 4` and an inline speech such as `ANNA: I counted 3 apples.` are never removed by it.
-     - **Numbered cues:** a cue-shaped line whose token contains a digit is either a numbered speaker (`GUARD 1`) or a page-numbered running title (`HAMLET 12`). A masked group that contains one is removed only when, in addition to the three conditions above, no digit value repeats across its copies. A page counter counts up, so `HAMLET 12`, `HAMLET 13`, `HAMLET 14` go; `GUARD 1` and `GUARD 2` cueing again and again repeat their values, so they are kept.
+     - **Numbered cues:** a cue-shaped line whose token contains a digit is either a numbered speaker (`GUARD 1`) or a page-numbered running title (`HAMLET 12`). A masked group that contains one is removed only when, in addition to the three conditions above, no digit value repeats across its copies and it has at least max(3, ⌈0.4 × estimated pages⌉) copies. A page counter counts up and appears about once a page, so `HAMLET 12` … `HAMLET 19` on 8 estimated pages go; `GUARD 1` and `GUARD 2` cueing again and again repeat their values, and one-off `SOLDIER 1`, `SOLDIER 2`, `SOLDIER 3` in a longer script are too few, so both are kept.
      - **Everything else** follows the three conditions alone, so a restarting counter (`The Seagull 1` … `4`, then `1` … `4` again) and a header and footer carrying the same number are removed.
 
      A cue-shaped line whose speech is a page number (`Hamlet: page 3`, matched by rule 2's pattern) is not a speaker cue, so it falls in the last group and is removed.
