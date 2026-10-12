@@ -30,3 +30,7 @@ export type { EditOptions } from './edit/apply';
 export { maxUnitNumber, nextUnitId, uniqueCharacterId } from './edit/ids';
 export { SCENE_BREAK_TEXT } from './edit/unit-ops';
 export { aliasSpeeches, speechReach } from './edit/speaker-ops';
+export { checkQueue, speechCounts } from './edit/check';
+export type { CheckItem, CheckReason } from './edit/check';
+export { effectiveHints, similarUnits } from './edit/similar';
+export { appendScripts } from './edit/append';
