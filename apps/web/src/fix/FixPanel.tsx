@@ -5,7 +5,7 @@ import type { FixAction, Selection, WordSel } from './actions';
 import { KIND_LABEL } from './CheckList';
 
 const renderAction = (a: FixAction) => (
-  <Button key={a.id} shortcut={a.keys[0]} disabled={!a.enabled} onClick={a.run}>
+  <Button key={a.id} shortcut={a.keys[0]} keepFocus={false} disabled={!a.enabled} onClick={a.run}>
     {a.label}
   </Button>
 );

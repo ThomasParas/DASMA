@@ -22,7 +22,7 @@ function CharacterRow({ c, script, hints, count, highlighted, onHighlight, apply
 
   return (
     <div className="char-row">
-      <Button aria-pressed={highlighted} onClick={() => onHighlight(highlighted ? null : c.id)}>
+      <Button aria-pressed={highlighted} keepFocus={false} onClick={() => onHighlight(highlighted ? null : c.id)}>
         {c.name}
       </Button>{' '}
       <span className="muted">

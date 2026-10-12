@@ -54,6 +54,16 @@ describe('Fix tags', () => {
     expect((screen.getByRole('button', { name: /^Undo/ }) as HTMLButtonElement).disabled).toBe(true);
   });
 
+  it("confirms the newly selected unit with Enter after a button was clicked, not the clicked button again", async () => {
+    const { user, unitEl } = await openFix();
+    await user.click(unitEl('u2'));
+    await user.click(screen.getByRole('button', { name: /^Direction/ }));
+    await user.keyboard('j');
+    await user.keyboard('{Enter}');
+    expect(screen.getByRole('heading', { name: 'To check (2)' })).toBeTruthy();
+    expect(unitEl('u7').dataset.kind).toBe('characterName');
+  });
+
   it('selects a range with shift-click and cuts it', async () => {
     const { user, unitEl, selectedIds } = await openFix();
     await user.click(unitEl('u2'));

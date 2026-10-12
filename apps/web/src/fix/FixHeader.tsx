@@ -21,7 +21,7 @@ export function FixHeader(props: { title: string; version: number; toCheck: numb
       <span>{toCheck} to check</span>
       <span className="grow" />
       {history.map((a) => (
-        <Button key={a.id} shortcut={a.keys[0]} disabled={!a.enabled} onClick={a.run}>
+        <Button key={a.id} shortcut={a.keys[0]} keepFocus={false} disabled={!a.enabled} onClick={a.run}>
           {a.label}
         </Button>
       ))}

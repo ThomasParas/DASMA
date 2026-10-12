@@ -1,5 +1,6 @@
 import type { CheckItem, CheckReason, Script, UnitKind } from '@dasma/script';
 import { useMemo } from 'react';
+import { keepFocusOff } from '../ui/Button';
 
 export const KIND_LABEL: Record<UnitKind, string> = {
   dialogue: 'dialogue',
@@ -25,7 +26,7 @@ export function CheckList({ script, queue, current, onSelect }: { script: Script
         <p className="muted">Nothing left to check.</p>
       ) : (
         queue.map((q) => (
-          <button key={q.unitId} type="button" className="qitem" aria-current={q.unitId === current} onClick={() => onSelect(q.unitId)}>
+          <button key={q.unitId} type="button" className="qitem" aria-current={q.unitId === current} onMouseDown={keepFocusOff} onClick={() => onSelect(q.unitId)}>
             <span className="reason">{reasonLabel(q)}</span>
             {preview(text.get(q.unitId) ?? '')}
           </button>

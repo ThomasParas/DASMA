@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { matchesShortcut, useShortcuts } from '../../src/ui/shortcuts';
@@ -59,6 +59,15 @@ describe('useShortcuts', () => {
     await user.click(screen.getByLabelText('box'));
     await user.keyboard('j');
     expect(log.slice(6)).toEqual(['j']);
+  });
+
+  it('ignores auto-repeated keydowns', () => {
+    const log: string[] = [];
+    render(<Harness log={log} />);
+    fireEvent.keyDown(document.body, { key: 'j' });
+    fireEvent.keyDown(document.body, { key: 'j', repeat: true });
+    fireEvent.keyDown(document.body, { key: 'j', repeat: true });
+    expect(log).toEqual(['j']);
   });
 
   it('leaves Enter on a focused button to the browser', async () => {
