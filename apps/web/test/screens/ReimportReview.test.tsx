@@ -26,6 +26,17 @@ describe('Re-import review', () => {
     expect(services.pending.has(production.id)).toBe(false);
   });
 
+  it.each(['file', 'dasma'] as const)("stores a %s update under the production's title, not the imported one", async (mode) => {
+    const services = makeServices();
+    const { production } = await seedProduction(services.repo);
+    const next = { ...sampleScript(), title: 'Untitled' };
+    services.pending.set(production.id, { mode, script: next, pages: 1, unitHints: {}, importedFrom: { kind: mode === 'dasma' ? 'dasma' : 'text', names: ['v2'] }, warnings: [] });
+    renderApp(`#/p/${production.id}/reimport`, services);
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Keep as version 2' }));
+    await waitFor(() => expect(window.location.hash).toBe(`#/p/${production.id}/fix`));
+    expect((await services.repo.getLiveVersion(production.id))!.script.title).toBe('Earnest');
+  });
+
   it('shows a save failure, re-enables the button and saves on retry', async () => {
     const { services, production, user } = await reviewWith('file');
     const addVersion = services.repo.addVersion.bind(services.repo);

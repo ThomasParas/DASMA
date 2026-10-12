@@ -1,5 +1,5 @@
 import { readDasma, toAnswerKey } from '@dasma/script';
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { sampleScript, seedProduction } from '../fixtures';
@@ -30,11 +30,41 @@ describe('Production page', () => {
     await waitFor(async () => expect((await services.repo.getProduction(production.id))!.title).toBe('The Importance'));
   });
 
+  it('puts the stored title back when a blank title is refused', async () => {
+    const { services, production, user } = await open();
+    const title = screen.getByLabelText('Production title') as HTMLInputElement;
+    await user.clear(title);
+    await user.tab();
+    expect(title.value).toBe('Earnest');
+    expect((await services.repo.getProduction(production.id))!.title).toBe('Earnest');
+  });
+
   it('saves actor names for a character', async () => {
     const { services, production, user } = await open();
     await user.type(screen.getByLabelText('Actors for LANE'), 'Ann Lee, Bo Diaz');
     await user.tab();
     await waitFor(async () => expect((await services.repo.getProduction(production.id))!.cast).toEqual({ lane: ['Ann Lee', 'Bo Diaz'] }));
+  });
+
+  it('keeps both actor edits when two fields are left in quick succession', async () => {
+    const { services, production } = await open();
+    const lane = screen.getByLabelText('Actors for LANE') as HTMLInputElement;
+    const algernon = screen.getByLabelText('Actors for ALGERNON') as HTMLInputElement;
+    lane.value = 'Ann Lee';
+    fireEvent.blur(lane);
+    algernon.value = 'Bo Diaz';
+    fireEvent.blur(algernon);
+    await waitFor(async () => expect((await services.repo.getProduction(production.id))!.cast).toEqual({ lane: ['Ann Lee'], algernon: ['Bo Diaz'] }));
+  });
+
+  it('does not write when the actor names did not change', async () => {
+    const { services, production, user } = await open({ cast: { lane: ['Ann'] } });
+    const before = (await services.repo.getProduction(production.id))!.updatedAt;
+    await user.click(screen.getByLabelText('Actors for LANE'));
+    await user.tab();
+    await user.click(screen.getByLabelText('Actors for ALGERNON'));
+    await user.tab();
+    expect((await services.repo.getProduction(production.id))!.updatedAt).toBe(before);
   });
 
   it('exports .dasma without the cast unless it is ticked', async () => {
@@ -49,6 +79,15 @@ describe('Production page', () => {
     await user.click(screen.getByLabelText('Include cast list'));
     await user.click(screen.getByRole('button', { name: 'Download' }));
     expect(readDasma(services.downloads[1].text).cast).toEqual({ lane: ['Ann'] });
+  });
+
+  it('unticks Include cast list when the export is cancelled', async () => {
+    const { user } = await open({ cast: { lane: ['Ann'] } });
+    await user.click(screen.getByRole('button', { name: 'Export .dasma' }));
+    await user.click(screen.getByLabelText('Include cast list'));
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+    await user.click(screen.getByRole('button', { name: 'Export .dasma' }));
+    expect((screen.getByLabelText('Include cast list') as HTMLInputElement).checked).toBe(false);
   });
 
   it('leaves cast entries for characters no longer in the script out of the export', async () => {

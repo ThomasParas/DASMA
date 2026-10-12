@@ -77,6 +77,22 @@ export class Repo {
     return next;
   }
 
+  /** Sets one character's actors (none removes the entry) inside a transaction, so quick successive edits are all kept. */
+  async updateCast(id: string, characterId: string, names: string[]): Promise<ProductionRow> {
+    return this.db.transaction('rw', this.db.productions, async () => {
+      const current = await this.db.productions.get(id);
+      if (!current) throw new Error(`There is no production ${id}.`);
+      const before = current.cast[characterId] ?? [];
+      if (before.length === names.length && before.every((n, i) => n === names[i])) return current;
+      const cast = { ...current.cast };
+      if (names.length) cast[characterId] = names;
+      else delete cast[characterId];
+      const next = { ...current, cast, updatedAt: this.now() };
+      await this.db.productions.put(next);
+      return next;
+    });
+  }
+
   async deleteProduction(id: string): Promise<void> {
     await this.db.transaction('rw', this.db.productions, this.db.scripts, async () => {
       await this.db.scripts.where('productionId').equals(id).delete();
@@ -92,11 +108,12 @@ export class Repo {
     return this.db.scripts.where('productionId').equals(productionId).sortBy('version');
   }
 
-  /** Writes only if the stored rev is `expectedRev`; returns the new rev. */
+  /** Writes only if the version is still live (no later version kept, e.g. in another tab) and its stored rev is `expectedRev`; returns the new rev. */
   async saveScript(versionId: string, script: Script, expectedRev: number): Promise<number> {
     return this.db.transaction('rw', this.db.scripts, this.db.productions, async () => {
       const row = await this.db.scripts.get(versionId);
       if (!row || row.rev !== expectedRev) throw new RevConflictError();
+      if ((await this.getLiveVersion(row.productionId))?.id !== versionId) throw new RevConflictError();
       const rev = expectedRev + 1;
       await this.db.scripts.update(versionId, { script, rev });
       await this.db.productions.update(row.productionId, { updatedAt: this.now() });

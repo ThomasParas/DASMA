@@ -46,18 +46,16 @@ export function Production({ id }: { id: string }) {
   const characters = [...script.characters].sort((a, b) => Number(!lines.get(a.id)) - Number(!lines.get(b.id)));
   const keyAllowed = live.importedFrom.names.length === 1 && live.importedFrom.kind !== 'dasma';
 
-  const saveTitle = async (value: string) => {
-    const t = value.trim();
+  const saveTitle = async (input: HTMLInputElement) => {
+    const t = input.value.trim();
+    if (!t) input.value = production.title;
     if (!t || t === production.title) return;
     await repo.updateProduction(id, { title: t });
     await load();
   };
   const saveActors = async (characterId: string, value: string) => {
     const names = value.split(',').map((s) => s.trim()).filter(Boolean);
-    const cast = { ...production.cast };
-    if (names.length) cast[characterId] = names;
-    else delete cast[characterId];
-    await repo.updateProduction(id, { cast });
+    await repo.updateCast(id, characterId, names);
     await load();
   };
   const exportDasma = () => {
@@ -86,7 +84,7 @@ export function Production({ id }: { id: string }) {
           aria-label="Production title"
           className="title-input"
           defaultValue={production.title}
-          onBlur={(e) => void saveTitle(e.target.value)}
+          onBlur={(e) => void saveTitle(e.target)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') e.currentTarget.blur();
           }}
@@ -115,7 +113,14 @@ export function Production({ id }: { id: string }) {
             <Button variant="primary" onClick={exportDasma}>
               Download
             </Button>{' '}
-            <Button onClick={() => setExporting(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                setExporting(false);
+                setIncludeCast(false);
+              }}
+            >
+              Cancel
+            </Button>
           </div>
         )}
       </section>

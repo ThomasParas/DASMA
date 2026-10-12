@@ -42,6 +42,23 @@ describe('Repo', () => {
     expect((await repo.getLiveVersion(version.productionId))!).toMatchObject({ rev: 1, script: { title: 'Edited' } });
   });
 
+  it('refuses to save a version that is no longer live', async () => {
+    const { version } = await seedProduction(repo);
+    await repo.addVersion(version.productionId, { script: sampleScript(), pages: 1, unitHints: {}, importedFrom: { kind: 'text', names: ['x'] }, warnings: [] });
+    await expect(repo.saveScript(version.id, { ...sampleScript(), title: 'Edited' }, 0)).rejects.toBeInstanceOf(RevConflictError);
+    expect((await repo.listVersions(version.productionId))[0]).toMatchObject({ rev: 0, script: { title: 'Earnest' } });
+  });
+
+  it('updates one cast entry, keeping the others, and skips an unchanged one', async () => {
+    const { production } = await seedProduction(repo, { cast: { lane: ['Ann'] } });
+    const first = await repo.updateCast(production.id, 'algernon', ['Bo']);
+    expect(first.cast).toEqual({ lane: ['Ann'], algernon: ['Bo'] });
+    const same = await repo.updateCast(production.id, 'lane', ['Ann']);
+    expect(same.updatedAt).toBe(first.updatedAt);
+    expect((await repo.updateCast(production.id, 'lane', [])).cast).toEqual({ algernon: ['Bo'] });
+    expect((await repo.getProduction(production.id))!.cast).toEqual({ algernon: ['Bo'] });
+  });
+
   it('deletes a production with all its versions', async () => {
     const { production } = await seedProduction(repo);
     await repo.addVersion(production.id, { script: sampleScript(), pages: 1, unitHints: {}, importedFrom: { kind: 'text', names: ['x'] }, warnings: [] });

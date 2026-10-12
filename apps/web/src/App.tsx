@@ -19,11 +19,11 @@ function Screen({ route }: { route: Route }) {
     case 'import':
       return <ImportScreen productionId={route.id} />;
     case 'production':
-      return <Production id={route.id} />;
+      return <Production key={route.id} id={route.id} />;
     case 'fix':
       return <FixTags key={route.id} productionId={route.id} />;
     case 'reimport':
-      return <ReimportReview productionId={route.id} />;
+      return <ReimportReview key={route.id} productionId={route.id} />;
     default:
       return <NotFound />;
   }

@@ -64,7 +64,8 @@ export function ReimportReview({ productionId }: { productionId: string }) {
     try {
       // Skip the version write on a retry after the cast update failed, so a retry cannot add a duplicate version.
       if (!versionAdded.current) {
-        await repo.addVersion(productionId, { script: review.result, pages: p.pages, unitHints: review.unitHints, importedFrom: p.importedFrom, warnings: p.warnings });
+        // The production's title is the script's title; an import names the script after its file or "Untitled".
+        await repo.addVersion(productionId, { script: { ...review.result, title: loaded.production.title }, pages: p.pages, unitHints: review.unitHints, importedFrom: p.importedFrom, warnings: p.warnings });
         versionAdded.current = true;
       }
       // A .dasma cast replaces the production's; otherwise drop entries for characters the kept script no longer has.
