@@ -15,7 +15,7 @@ export interface TruthUnit {
   kind: UnitKind;
   characterId?: string;
   text: string;
-  /** Page the unit starts on. */
+  /** Page the unit's paragraph starts on (a unit that starts mid-paragraph after a wrap can begin a page later). */
   page: number;
 }
 

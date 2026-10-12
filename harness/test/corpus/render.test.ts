@@ -1,4 +1,4 @@
-import { extractDocx, extractPdf } from '@dasma/script';
+import { extractDocx, extractPdf, extractText } from '@dasma/script';
 import { strFromU8, unzipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
 import { parseFamilies } from '../../src/corpus/manifest';
@@ -65,9 +65,21 @@ describe('renderDocument', () => {
   });
 });
 
+describe('renderDocument truth pages', () => {
+  it('match the page count each extractor reads back from the rendered document', async () => {
+    const pdf = await renderDocument({ family: 'licensed', play: 'earnest', variant: '1', seed: 1 });
+    const docx = await renderDocument({ family: 'word', play: 'dolls-house', variant: '3', seed: 11 });
+    const text = await renderDocument({ family: 'classical', play: 'hamlet', variant: '3', seed: 11 });
+    const read = [(await extractPdf(pdf.bytes!)).pages, extractDocx(docx.bytes!).pages, extractText(text.text!).pages];
+    expect(read).toEqual([pdf.truth.pages, docx.truth.pages, text.truth.pages]);
+    expect(Math.min(...read)).toBeGreaterThan(8);
+  });
+});
+
 describe('parseFamilies', () => {
   it('accepts known families and rejects others', () => {
     expect(parseFamilies('word,classical')).toEqual(['word', 'classical']);
     expect(() => parseFamilies('word,poetry')).toThrow(/poetry/);
+    expect(() => parseFamilies('')).toThrow(/at least one/);
   });
 });
