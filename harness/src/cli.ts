@@ -15,6 +15,7 @@ import { BASELINE_FILE, CORPUS_OUT_DIR, DUMP_DIR, LOCAL_DIR, MODELS_DIR, OUT_DIR
 import { renderDumpHtml } from './script-eval/dump';
 import { evaluateLocal, evaluateScripts, loadLocalDocs } from './script-eval/evaluate-scripts';
 import { familyMetrics, formatScriptReport, gateVerdict } from './script-eval/report';
+import { draftTruth, writeDraftTruth } from './script-eval/truth-draft';
 import type { DocScore } from './script-eval/score';
 import { createSherpaTts, TTS_MODEL_ID } from './tts';
 import { cachedTts } from './tts-cache';
@@ -48,7 +49,10 @@ const USAGE = `Usage: npm run harness -- <command> [options]
                                               Render the synthetic script corpus and its truth into harness/out/corpus
   script-eval [--set tune|heldout|local] [--families a,b] [--gate] [--verbose] [--out <dir>]
                                               Import the script corpus (or harness/local) and score it; --gate exits 1 on a missed target
-  script-dump <file> [--out <dir>]            Import one PDF, Word or text script and write an HTML view of its tags to harness/out/dump`;
+  script-dump <file> [--out <dir>]            Import one PDF, Word or text script and write an HTML view of its tags to harness/out/dump
+  script-truth-draft <file> [--out <path>] [--force]
+                                              Draft a local answer key (harness/local/<name>.truth.json) from the importer's tags;
+                                              unsure units are marked "check". Refuses to overwrite without --force`;
 
 const fromCwd = (p: string) => resolve(process.env.INIT_CWD ?? process.cwd(), p);
 
@@ -123,19 +127,20 @@ async function runScriptEval(args: string[]): Promise<void> {
   }
 }
 
+/** A script file as importer input: .pdf, plain-text extensions, otherwise Word bytes (unsupported formats are refused by the importer). */
+function readScriptInput(path: string): ImportInput {
+  const ext = extname(path).toLowerCase();
+  if (ext === '.pdf') return { kind: 'pdf', bytes: new Uint8Array(readFileSync(path)) };
+  if (['.txt', '.text', '.md', '.fountain'].includes(ext)) return { kind: 'text', text: readFileSync(path, 'utf8') };
+  return { kind: 'docx', bytes: new Uint8Array(readFileSync(path)) };
+}
+
 async function runScriptDump(args: string[]): Promise<void> {
   const { values, positionals } = parseArgs({ args, allowPositionals: true, options: { out: { type: 'string' } } });
   const file = positionals[0];
   if (!file) throw new Error('script-dump needs a file: npm run harness -- script-dump <script.pdf|.docx|.txt>');
   const path = fromCwd(file);
-  const ext = extname(path).toLowerCase();
-  const input: ImportInput =
-    ext === '.pdf'
-      ? { kind: 'pdf', bytes: new Uint8Array(readFileSync(path)) }
-      : ['.txt', '.text', '.md', '.fountain'].includes(ext)
-        ? { kind: 'text', text: readFileSync(path, 'utf8') }
-        : { kind: 'docx', bytes: new Uint8Array(readFileSync(path)) };
-  const result = await importScript(input);
+  const result = await importScript(readScriptInput(path));
   const outDir = values.out ? fromCwd(values.out) : DUMP_DIR;
   mkdirSync(outDir, { recursive: true });
   const outFile = join(outDir, `${basename(path, extname(path))}.html`);
@@ -237,6 +242,32 @@ function runBaseline(args: string[]): void {
   console.log(`Baseline set from ${values.report}`);
 }
 
+const CHECKS_LISTED = 30;
+
+async function runScriptTruthDraft(args: string[]): Promise<void> {
+  const { values, positionals } = parseArgs({
+    args,
+    allowPositionals: true,
+    options: { out: { type: 'string' }, force: { type: 'boolean', default: false } },
+  });
+  const file = positionals[0];
+  if (!file) throw new Error('script-truth-draft needs a file: npm run harness -- script-truth-draft <script.pdf|.docx|.txt>');
+  const path = fromCwd(file);
+  const draft = draftTruth(await importScript(readScriptInput(path)));
+  const outFile = values.out ? fromCwd(values.out) : join(LOCAL_DIR, `${basename(path, extname(path))}.truth.json`);
+  writeDraftTruth(outFile, draft, values.force);
+  const checks = draft.units.flatMap((u, i) => (u.check ? [{ i, u }] : []));
+  console.log(`${draft.units.length} units, ${checks.length} marked "check" (the importer was unsure). Wrote ${outFile}`);
+  for (const { i, u } of checks.slice(0, CHECKS_LISTED)) {
+    console.log(`  #${i} p${u.page} ${u.kind}${u.characterId ? ` ${u.characterId}` : ''}: ${u.text.split('\n')[0].slice(0, 70)}`);
+  }
+  if (checks.length > CHECKS_LISTED) console.log(`  … and ${checks.length - CHECKS_LISTED} more`);
+  if (resolve(dirname(path)) !== resolve(dirname(outFile))) {
+    console.log(`Copy ${basename(path)} next to the answer key (as .pdf, .docx or .txt) so script-eval --set local pairs them.`);
+  }
+  console.log('Correct kinds, speakers and text against the real script, removing each "check" mark as you go; then run: npm run harness -- script-eval --set local');
+}
+
 async function main(): Promise<void> {
   const [command, ...args] = process.argv.slice(2);
   switch (command) {
@@ -259,6 +290,8 @@ async function main(): Promise<void> {
       return runScriptEval(args);
     case 'script-dump':
       return runScriptDump(args);
+    case 'script-truth-draft':
+      return runScriptTruthDraft(args);
     default:
       console.log(USAGE);
       if (command && command !== '--help') process.exitCode = 1;

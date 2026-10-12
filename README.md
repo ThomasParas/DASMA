@@ -33,6 +33,13 @@ npm run harness -- script-eval --set heldout --gate
 npm run harness -- script-dump <file>
 ```
 
+To score your own scripts (kept out of git in `harness/local/`), draft an answer key from the importer's guess, correct it by hand, then score:
+
+```bash
+npm run harness -- script-truth-draft <file>
+npm run harness -- script-eval --set local
+```
+
 ## Design documents
 
 - [docs/preflight-decisions.md](docs/preflight-decisions.md) — product decisions and research
