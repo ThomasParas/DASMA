@@ -46,7 +46,7 @@ npm run harness -- script-eval --set local
 npm run dev -w apps/web
 ```
 
-Open the printed address in Chrome or Edge. Scripts are stored in the browser (IndexedDB) and never leave the machine. To score the importer on one of your own scripts, turn on **Show developer tools** in the library, open the production, and use **Export answer key**; save the file in `harness/local/` beside the script and run `npm run harness -- script-eval --set local`.
+Open the printed address in Chrome or Edge. Scripts are stored in the browser (IndexedDB) and never leave the machine. To score the importer on one of your own scripts, turn on **Show developer tools** in the library, open the production, and use **Export answer key**; save the file in `harness/local/` (create it if missing) beside the script and run `npm run harness -- script-eval --set local`.
 
 ## Design documents
 
