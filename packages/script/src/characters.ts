@@ -30,14 +30,20 @@ export function inCastList(token: string, castList: readonly string[]): boolean 
 
 const MIN_PREFIX_LETTERS = 3;
 
-/** Spec §5.4: one character per distinct speaker token; a unique prefix (≥ 3 letters) merges into its longest extension. */
+/** A joint speaker name such as "MARCELLUS AND BARNARDO" or "HORATIO & MARCELLUS". */
+const JOINT_NAME = / (AND|&) /;
+
+/**
+ * Spec §5.4: one character per distinct speaker token; a unique prefix (≥ 3 letters) merges into its longest extension.
+ * Rule S2 (spec §6.5a): a joint name is never a merge target, so it stays its own character.
+ */
 export function buildCast(tokens: Iterable<string>, castList: readonly string[] = []): Cast {
   const names = [...new Set([...tokens].map(normalizeCueToken).filter(Boolean))].sort();
   const mergedInto = new Map<string, { target: string; confidence: number }>();
   const ambiguous: Cast['ambiguous'] = [];
   for (const a of names) {
     if (a.replace(/[^\p{L}]/gu, '').length < MIN_PREFIX_LETTERS) continue;
-    const longer = names.filter((b) => b !== a && b.startsWith(a));
+    const longer = names.filter((b) => b !== a && b.startsWith(a) && !JOINT_NAME.test(b));
     if (!longer.length) continue;
     const maximal = longer.filter((b) => !longer.some((c) => c !== b && c.startsWith(b)));
     if (maximal.length === 1) {

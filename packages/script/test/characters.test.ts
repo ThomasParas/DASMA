@@ -29,6 +29,25 @@ describe('buildCast', () => {
     expect(cast.ambiguous).toEqual([{ token: 'LADY', candidates: ['LADY BRACKNELL', 'LADY MACBETH'] }]);
   });
 
+  it('never merges a name into a joint name; the joint name stays its own character (rule S2)', () => {
+    const cast = buildCast(['MARCELLUS', 'MARCELLUS AND BARNARDO', 'BARNARDO', 'HORATIO', 'HORATIO & MARCELLUS']);
+    expect(cast.characters).toEqual([
+      { id: 'barnardo', name: 'BARNARDO', aliases: [] },
+      { id: 'horatio', name: 'HORATIO', aliases: [] },
+      { id: 'horatio-marcellus', name: 'HORATIO & MARCELLUS', aliases: [] },
+      { id: 'marcellus', name: 'MARCELLUS', aliases: [] },
+      { id: 'marcellus-and-barnardo', name: 'MARCELLUS AND BARNARDO', aliases: [] },
+    ]);
+    expect(cast.resolve('MARCELLUS')).toEqual({ characterId: 'marcellus', confidence: 1 });
+    expect(cast.ambiguous).toEqual([]);
+  });
+
+  it('merges an abbreviation into the single name, ignoring the joint name it also prefixes (rule S2)', () => {
+    const cast = buildCast(['ROS', 'ROSENCRANTZ', 'ROSENCRANTZ AND GUILDENSTERN'], ['ROSENCRANTZ', 'GUILDENSTERN']);
+    expect(cast.resolve('ROS')).toEqual({ characterId: 'rosencrantz', confidence: 0.95 });
+    expect(cast.resolve('ROSENCRANTZ AND GUILDENSTERN')).toEqual({ characterId: 'rosencrantz-and-guildenstern', confidence: 1 });
+  });
+
   it('does not merge prefixes shorter than three letters', () => {
     expect(buildCast(['HA', 'HAMLET']).characters.map((c) => c.id)).toEqual(['ha', 'hamlet']);
   });
