@@ -1,6 +1,6 @@
 import { matchCue, normalizeCueToken, type CueMatch } from './cues';
 import { TEXT_COLUMN } from './extract/text';
-import { CAST_LIST_HEADER, isHeading } from './patterns';
+import { CAST_LIST_HEADER, isHeading, isSettingLine } from './patterns';
 import type { CleanDoc, CleanLine, DocProfile, SourceKind, SpeakerConvention } from './types';
 
 /** A speaker token must appear at least this often in speaker position. */
@@ -52,21 +52,38 @@ export function validCues(doc: CleanDoc): Array<CueMatch | null> {
   return raw.map((m, i) => (m && m.convention === 'ownLine' && raw[i + 1]?.convention === 'ownLine' ? null : m));
 }
 
-function readCastList(lines: CleanLine[]): string[] {
+interface CastListBlock {
+  /** Index of the header line. */
+  start: number;
+  /** Index of the line that ended the block: a heading, a long line, or the first line past the 40-line limit. */
+  end: number;
+  names: string[];
+}
+
+/** Spec §5.1. Rule S5 (§6.5a): a setting line ("SCENE. Elsinore.") neither ends the block nor adds a name. */
+function readCastList(lines: CleanLine[]): CastListBlock | null {
   const start = lines.findIndex((l) => CAST_LIST_HEADER.test(l.text));
-  if (start < 0) return [];
+  if (start < 0) return null;
   const names: string[] = [];
-  for (let i = start + 1; i < Math.min(lines.length, start + 1 + CAST_LIST_MAX_LINES); i++) {
+  let i = start + 1;
+  for (; i < Math.min(lines.length, start + 1 + CAST_LIST_MAX_LINES); i++) {
     const t = lines[i].text;
+    if (isSettingLine(t)) continue;
     if (isHeading(t) || t.split(/\s+/).length > 12) break;
     const name = normalizeCueToken(t.split(/,|:| — | – /)[0].replace(/\.$/, ''));
     if (name && name.split(' ').length <= CAST_NAME_MAX_WORDS) names.push(name);
   }
-  return names;
+  return { start, end: i, names };
+}
+
+/** Rule S5: a setting line inside or at the end of the cast list stays front matter rather than ending it. */
+function inCastListSetting(lines: CleanLine[], i: number, cast: CastListBlock | null): boolean {
+  return cast !== null && i > cast.start && i <= cast.end && isSettingLine(lines[i].text);
 }
 
 export function profileDoc(doc: CleanDoc): DocProfile {
   const lines = doc.lines;
+  const cast = readCastList(lines);
   const bands = clusterBands(lines.filter((l) => !l.centered).map((l) => l.left), bandTolerance(doc.source));
   const band = (l: CleanLine): number => nearestBand(bands, l.left);
   const cues = validCues(doc);
@@ -102,7 +119,7 @@ export function profileDoc(doc: CleanDoc): DocProfile {
   }
   const dialogueBand = mode([...new Set(speechLines)].map((j) => band(lines[j])));
 
-  const firstHeading = lines.findIndex((l) => isHeading(l.text));
+  const firstHeading = lines.findIndex((l, i) => isHeading(l.text) && !inCastListSetting(lines, i, cast));
   let firstRun = -1;
   for (let k = 0; k + 2 < cueIdx.length; k++) {
     if (cueIdx[k + 2] - cueIdx[k] <= SPEECH_RUN_WINDOW) {
@@ -135,7 +152,7 @@ export function profileDoc(doc: CleanDoc): DocProfile {
     primary,
     secondary,
     directionMarks,
-    castList: readCastList(lines),
+    castList: cast?.names ?? [],
     cueTokens,
     frontMatterEnd,
   };

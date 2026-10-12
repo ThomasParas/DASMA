@@ -1,7 +1,7 @@
 import { inCastList } from './characters';
 import type { CueMatch } from './cues';
 import { decode } from './decode';
-import { SCENE_BREAK, isHeading } from './patterns';
+import { SCENE_BREAK, isHeading, isSettingLine } from './patterns';
 import { nearestBand, validCues } from './profile';
 import type { CleanDoc, DocProfile } from './types';
 import { EMISSION, START, TRANSITIONS } from './weights';
@@ -95,7 +95,8 @@ function lineFeatures(doc: CleanDoc, profile: DocProfile): Features[] {
       atDialogueBand: !l.centered && band === profile.dialogueBand,
       atDirectionBand: !l.centered && profile.directionBand !== null && profile.directionBand !== profile.dialogueBand && band === profile.directionBand,
       bracketBlock: blocks[i],
-      heading: isHeading(l.text),
+      // Rule S5: a setting line before frontMatterEnd is one the profile kept in the cast list's front matter.
+      heading: isHeading(l.text) && !(i < profile.frontMatterEnd && isSettingLine(l.text)),
       beforeFront: i < profile.frontMatterEnd,
       nextCueShaped: shapes[i + 1] ?? false,
       sceneBreak: SCENE_BREAK.test(l.text),

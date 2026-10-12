@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { cleanDoc, isPageNumber, normalizeText } from '../src/clean';
-import { CAST_LIST_HEADER, isHeading } from '../src/patterns';
+import { CAST_LIST_HEADER, isHeading, isSettingLine } from '../src/patterns';
 import { line, rawDoc, textDoc } from './helpers';
 
 describe('running headers and footers', () => {
@@ -136,6 +136,15 @@ describe('isHeading', () => {
       expect(isHeading(t)).toBe(true);
     for (const t of ['ACT DROP', 'Acting is hard', 'Scene of the crime, I said, and then I went home again to sleep it off'])
       expect(isHeading(t)).toBe(false);
+  });
+});
+
+describe('isSettingLine', () => {
+  it('matches a SCENE line that names a place with no number or ordinal (rule S5)', () => {
+    for (const t of ['SCENE. Elsinore.', 'Scene: a garden', 'SCENE.—Verona.', 'SCENE: In a castle', 'Scene. Civil war in Rome'])
+      expect(isSettingLine(t)).toBe(true);
+    for (const t of ['SCENE III. A room in the Castle.', 'Scene 2', 'SCENE I', 'Scene iv', 'SCENE THE FIRST', 'Scene One.', 'SCENE', 'ACT I', 'Scenery'])
+      expect(isSettingLine(t)).toBe(false);
   });
 });
 

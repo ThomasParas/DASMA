@@ -65,6 +65,30 @@ describe('profileDoc', () => {
     const p = profileDoc(textDoc(['A DOLL’S HOUSE', 'by Henrik Ibsen', 'NORA. Hello.', 'HELMER. Hi.', 'NORA. Bye.', 'HELMER. Bye.'].join('\n')));
     expect(p.frontMatterEnd).toBe(2);
   });
+
+  it('keeps a SCENE setting line at the end of the cast list in the front matter (rule S5)', () => {
+    const p = profileDoc(
+      textDoc(
+        [
+          'Dramatis Personæ',
+          'HAMLET, Prince of Denmark',
+          'HORATIO, Friend to Hamlet',
+          'SCENE. Elsinore.',
+          'SCENE III. A room in the Castle.',
+          'HAMLET. To be.',
+          'HORATIO. My lord.',
+          'HAMLET. Go on.',
+        ].join('\n'),
+      ),
+    );
+    expect(p.castList).toEqual(['HAMLET', 'HORATIO']);
+    expect(p.frontMatterEnd).toBe(4);
+  });
+
+  it('still ends front matter at a SCENE setting line that is not in a cast list (rule S5)', () => {
+    const p = profileDoc(textDoc(['HAMLET', 'by William Shakespeare', 'SCENE. Elsinore.', 'HAMLET. To be.', 'HORATIO. My lord.'].join('\n')));
+    expect(p.frontMatterEnd).toBe(2);
+  });
 });
 
 describe('clusterBands', () => {

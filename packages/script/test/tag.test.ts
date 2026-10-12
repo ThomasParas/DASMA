@@ -40,6 +40,23 @@ describe('tagLines', () => {
     ).toEqual(['front', 'front', 'heading', 'cue', 'dialogue', 'cue', 'dialogue', 'cue', 'dialogue']);
   });
 
+  it('tags a SCENE setting line at the end of the cast list as front matter, and the numbered scene as a heading (rule S5)', () => {
+    const cats = categories(
+      [
+        'THE TRAGEDY OF HAMLET',
+        'Dramatis Personæ',
+        'HAMLET, Prince of Denmark',
+        'HORATIO, Friend to Hamlet',
+        'SCENE. Elsinore.',
+        'SCENE III. A room in the Castle.',
+        'HAMLET. To be.',
+        'HORATIO. My lord.',
+        'HAMLET. Go on.',
+      ].join('\n'),
+    );
+    expect(cats).toEqual(['front', 'front', 'front', 'front', 'front', 'heading', 'cueInline', 'cueInline', 'cueInline']);
+  });
+
   it('is less sure about an unknown one-word capital line than about a known cue', () => {
     const doc = textDoc(['HAMLET', 'Speak.', 'HORATIO', 'Yes.', 'STOP', 'Go.', 'HAMLET', 'Good.', 'HORATIO', 'Fine.'].join('\n'));
     const tagged = tagLines(doc, profileDoc(doc));
