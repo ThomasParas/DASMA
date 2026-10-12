@@ -29,3 +29,9 @@ export function corpusDocs(set: 'tune' | 'heldout', families: readonly Family[] 
   }
   return out;
 }
+
+export function parseFamilies(raw: string): Family[] {
+  const out = raw.split(',').map((f) => f.trim()).filter(Boolean);
+  for (const f of out) if (!(FAMILIES as readonly string[]).includes(f)) throw new Error(`Unknown family "${f}". Known: ${FAMILIES.join(', ')}`);
+  return out as Family[];
+}

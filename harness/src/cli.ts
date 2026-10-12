@@ -5,10 +5,12 @@ import { dirname, join, resolve, sep } from 'node:path';
 import { parseArgs } from 'node:util';
 import { ALIGN_FLAG_OPTIONS, ENGINE_FLAG_DEFAULTS, STABLE_SEC_OPTION, parseEvaluateOptions } from './cli-args';
 import { PLAY_CONFIGS, convertGutenberg } from './corpus/convert-gutenberg';
+import { FAMILIES, corpusDocs, parseFamilies } from './corpus/manifest';
+import { renderDocument } from './corpus/render';
 import { evaluate } from './evaluate';
 import { compareToBaseline, formatReport, type EvalReport } from './metrics';
 import { fetchModels } from './models';
-import { BASELINE_FILE, MODELS_DIR, OUT_DIR, PLAYS_DIR, TTS_CACHE_DIR } from './paths';
+import { BASELINE_FILE, CORPUS_OUT_DIR, MODELS_DIR, OUT_DIR, PLAYS_DIR, TTS_CACHE_DIR } from './paths';
 import { createSherpaTts, TTS_MODEL_ID } from './tts';
 import { cachedTts } from './tts-cache';
 
@@ -36,7 +38,9 @@ const USAGE = `Usage: npm run harness -- <command> [options]
       --save-audio              also write each rehearsal as WAV
   gate --report <path> [--baseline <path>]    Exit 1 if results regressed vs the baseline
   baseline --report <path>                    Make a report the new baseline
-  convert-plays --from <dir>                  One-off: convert downloaded Gutenberg texts (pg<id>.txt) into harness/corpus/plays`;
+  convert-plays --from <dir>                  One-off: convert downloaded Gutenberg texts (pg<id>.txt) into harness/corpus/plays
+  build-corpus [--set tune|heldout|all] [--families licensed,word,classical]
+                                              Render the synthetic script corpus and its truth into harness/out/corpus`;
 
 const fromCwd = (p: string) => resolve(process.env.INIT_CWD ?? process.cwd(), p);
 
@@ -50,6 +54,29 @@ function runConvertPlays(args: string[]): void {
     const count = (k: string) => play.units.filter((u) => u.kind === k).length;
     console.log(`${cfg.id}: ${play.cast.length} speakers, ${count('dialogue')} speeches, ${count('direction')} directions, ${count('heading')} headings, ${count('frontMatter')} front-matter lines`);
   }
+}
+
+async function runBuildCorpus(args: string[]): Promise<void> {
+  const { values } = parseArgs({
+    args,
+    options: { set: { type: 'string', default: 'all' }, families: { type: 'string', default: FAMILIES.join(',') } },
+  });
+  if (!['tune', 'heldout', 'all'].includes(values.set)) throw new Error(`--set must be tune, heldout or all, got "${values.set}"`);
+  const families = parseFamilies(values.families);
+  const sets = values.set === 'all' ? (['tune', 'heldout'] as const) : ([values.set] as Array<'tune' | 'heldout'>);
+  let n = 0;
+  for (const set of sets) {
+    for (const spec of corpusDocs(set, families)) {
+      const doc = await renderDocument(spec);
+      const dir = join(CORPUS_OUT_DIR, spec.family);
+      mkdirSync(dir, { recursive: true });
+      const ext = doc.format === 'text' ? 'txt' : doc.format;
+      writeFileSync(join(dir, `${doc.truth.docId}.${ext}`), doc.bytes ?? doc.text ?? '');
+      writeFileSync(join(dir, `${doc.truth.docId}.truth.json`), `${JSON.stringify(doc.truth, null, 2)}\n`);
+      n++;
+    }
+  }
+  console.log(`Wrote ${n} documents and their truth files to ${CORPUS_OUT_DIR}`);
 }
 
 async function runEvaluate(args: string[]): Promise<void> {
@@ -161,6 +188,8 @@ async function main(): Promise<void> {
       return runBaseline(args);
     case 'convert-plays':
       return runConvertPlays(args);
+    case 'build-corpus':
+      return runBuildCorpus(args);
     default:
       console.log(USAGE);
       if (command && command !== '--help') process.exitCode = 1;
