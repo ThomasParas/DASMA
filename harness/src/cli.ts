@@ -1,7 +1,8 @@
 import { findModel } from '@dasma/asr';
 import { NodeSherpaRecognizer, loadSherpa, resolveAsrModel } from '@dasma/asr/node';
+import { FLAG_BELOW, importScript, type ImportInput } from '@dasma/script';
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve, sep } from 'node:path';
+import { basename, dirname, extname, join, resolve, sep } from 'node:path';
 import { parseArgs } from 'node:util';
 import { ALIGN_FLAG_OPTIONS, ENGINE_FLAG_DEFAULTS, STABLE_SEC_OPTION, parseEvaluateOptions } from './cli-args';
 import { PLAY_CONFIGS, convertGutenberg } from './corpus/convert-gutenberg';
@@ -10,7 +11,11 @@ import { renderDocument } from './corpus/render';
 import { evaluate } from './evaluate';
 import { compareToBaseline, formatReport, type EvalReport } from './metrics';
 import { fetchModels } from './models';
-import { BASELINE_FILE, CORPUS_OUT_DIR, MODELS_DIR, OUT_DIR, PLAYS_DIR, TTS_CACHE_DIR } from './paths';
+import { BASELINE_FILE, CORPUS_OUT_DIR, DUMP_DIR, LOCAL_DIR, MODELS_DIR, OUT_DIR, PLAYS_DIR, SCRIPT_EVAL_DIR, TTS_CACHE_DIR } from './paths';
+import { renderDumpHtml } from './script-eval/dump';
+import { evaluateLocal, evaluateScripts, loadLocalDocs } from './script-eval/evaluate-scripts';
+import { familyMetrics, formatScriptReport, gateFailures } from './script-eval/report';
+import type { DocScore } from './script-eval/score';
 import { createSherpaTts, TTS_MODEL_ID } from './tts';
 import { cachedTts } from './tts-cache';
 
@@ -40,7 +45,10 @@ const USAGE = `Usage: npm run harness -- <command> [options]
   baseline --report <path>                    Make a report the new baseline
   convert-plays --from <dir>                  One-off: convert downloaded Gutenberg texts (pg<id>.txt) into harness/corpus/plays
   build-corpus [--set tune|heldout|all] [--families licensed,word,classical]
-                                              Render the synthetic script corpus and its truth into harness/out/corpus`;
+                                              Render the synthetic script corpus and its truth into harness/out/corpus
+  script-eval [--set tune|heldout|local] [--families a,b] [--gate] [--verbose] [--out <dir>]
+                                              Import the script corpus (or harness/local) and score it; --gate exits 1 on a missed target
+  script-dump <file> [--out <dir>]            Import one PDF, Word or text script and write an HTML view of its tags to harness/out/dump`;
 
 const fromCwd = (p: string) => resolve(process.env.INIT_CWD ?? process.cwd(), p);
 
@@ -77,6 +85,63 @@ async function runBuildCorpus(args: string[]): Promise<void> {
     }
   }
   console.log(`Wrote ${n} documents and their truth files to ${CORPUS_OUT_DIR}`);
+}
+
+async function runScriptEval(args: string[]): Promise<void> {
+  const { values } = parseArgs({
+    args,
+    options: {
+      set: { type: 'string', default: 'heldout' },
+      families: { type: 'string', default: FAMILIES.join(',') },
+      gate: { type: 'boolean', default: false },
+      verbose: { type: 'boolean', default: false },
+      out: { type: 'string' },
+    },
+  });
+  let scores: DocScore[];
+  if (values.set === 'local') {
+    const { docs, skipped } = loadLocalDocs(LOCAL_DIR);
+    for (const s of skipped) console.log(`skipped ${s}: no matching .truth.json`);
+    if (!docs.length) console.log(`No local scripts with truth files in ${LOCAL_DIR}`);
+    scores = await evaluateLocal(docs);
+  } else if (values.set === 'tune' || values.set === 'heldout') {
+    scores = await evaluateScripts(corpusDocs(values.set, parseFamilies(values.families)), (s) =>
+      console.log(`${s.docId}: ${s.fixes.length} fixes on ${s.pages} pages, ${s.speakerRight}/${s.spokenUnits} speakers, ${s.textErrors} text errors`),
+    );
+  } else throw new Error(`--set must be tune, heldout or local, got "${values.set}"`);
+  const metrics = familyMetrics(scores);
+  const md = formatScriptReport(`script-eval — ${values.set}`, metrics, scores, values.verbose);
+  const out = values.out ? fromCwd(values.out) : join(SCRIPT_EVAL_DIR, `${values.set}-${new Date().toISOString().replace(/[:.]/g, '-')}`);
+  mkdirSync(out, { recursive: true });
+  writeFileSync(join(out, 'report.md'), md);
+  writeFileSync(join(out, 'scores.json'), `${JSON.stringify({ metrics, scores }, null, 2)}\n`);
+  console.log(`\n${md}\nWrote ${out}`);
+  if (values.gate) {
+    const failing = metrics.filter((m) => gateFailures(m).length > 0);
+    console.log(failing.length ? 'SCRIPT GATE FAIL' : 'SCRIPT GATE PASS');
+    if (failing.length) process.exitCode = 1;
+  }
+}
+
+async function runScriptDump(args: string[]): Promise<void> {
+  const { values, positionals } = parseArgs({ args, allowPositionals: true, options: { out: { type: 'string' } } });
+  const file = positionals[0];
+  if (!file) throw new Error('script-dump needs a file: npm run harness -- script-dump <script.pdf|.docx|.txt>');
+  const path = fromCwd(file);
+  const ext = extname(path).toLowerCase();
+  const input: ImportInput =
+    ext === '.pdf'
+      ? { kind: 'pdf', bytes: new Uint8Array(readFileSync(path)) }
+      : ['.txt', '.text', '.md', '.fountain'].includes(ext)
+        ? { kind: 'text', text: readFileSync(path, 'utf8') }
+        : { kind: 'docx', bytes: new Uint8Array(readFileSync(path)) };
+  const result = await importScript(input);
+  const outDir = values.out ? fromCwd(values.out) : DUMP_DIR;
+  mkdirSync(outDir, { recursive: true });
+  const outFile = join(outDir, `${basename(path, extname(path))}.html`);
+  writeFileSync(outFile, renderDumpHtml(result, basename(path)));
+  const flagged = result.script.units.filter((u) => u.tagConfidence < FLAG_BELOW).length;
+  console.log(`${result.script.units.length} units, ${flagged} flagged, ${result.warnings.length} warnings. Wrote ${outFile}`);
 }
 
 async function runEvaluate(args: string[]): Promise<void> {
@@ -190,6 +255,10 @@ async function main(): Promise<void> {
       return runConvertPlays(args);
     case 'build-corpus':
       return runBuildCorpus(args);
+    case 'script-eval':
+      return runScriptEval(args);
+    case 'script-dump':
+      return runScriptDump(args);
     default:
       console.log(USAGE);
       if (command && command !== '--help') process.exitCode = 1;
