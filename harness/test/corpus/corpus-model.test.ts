@@ -84,6 +84,36 @@ describe('buildParas', () => {
     expect(truth).toContainEqual({ kind: 'direction', text: '(Aside .)' });
   });
 
+  it.each([
+    ['licensed 1 (own-line cues)', STYLES.licensed['1']],
+    ['word 1 (inline cues)', STYLES.word['1']],
+  ])('renders a speech resumed after a direction without a cue: %s', (_, style) => {
+    const play = {
+      ...MINI_PLAY,
+      units: [
+        { kind: 'heading' as const, text: 'ACT I' },
+        { kind: 'dialogue' as const, characterId: 'hamlet', text: 'Speak to me.' },
+        { kind: 'direction' as const, text: 'Re-enter Ghost.' },
+        { kind: 'dialogue' as const, characterId: 'hamlet', text: 'But, soft, behold!', continues: true },
+        { kind: 'dialogue' as const, characterId: 'horatio', text: 'My lord.', continues: true },
+      ],
+    };
+    const { paras, truth } = buildParas(play, play.units, style, mulberry32(1));
+    expect(truth.filter((t) => t.kind !== 'heading' && t.kind !== 'characterName').map((t) => [t.kind, t.characterId ?? '', t.text.replace(/[()]/g, '')])).toEqual([
+      ['dialogue', 'hamlet', 'Speak to me.'],
+      ['direction', '', 'Re-enter Ghost.'],
+      ['dialogue', 'hamlet', 'But, soft, behold!'],
+      ['dialogue', 'horatio', 'My lord.'],
+    ]);
+    // Own-line styles give each cue a characterName truth unit; the resumed speech has none.
+    expect(truth.filter((t) => t.kind === 'characterName').map((t) => t.text)).toEqual(style.cue === 'ownCentered' ? ['HAMLET', 'HORATIO'] : []);
+    const text = paras.filter((p) => p.kind !== 'heading').map(runs);
+    expect(text).toContain('But, soft, behold!');
+    expect(text.filter((t) => /HAMLET/i.test(t))).toHaveLength(1);
+    // A continuation after another speaker's speech keeps its cue.
+    expect(text.filter((t) => /HORATIO/i.test(t))).toHaveLength(1);
+  });
+
   it('puts a direction that opens a speech between the cue and the dialogue', () => {
     const { truth } = buildParas(MINI_PLAY, MINI_PLAY.units, STYLES.licensed['1'], mulberry32(1));
     const clown = truth.findIndex((t) => t.kind === 'characterName' && t.text === 'FIRST CLOWN');

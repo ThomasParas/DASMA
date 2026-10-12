@@ -10,6 +10,8 @@ export interface SourceUnit {
   kind: SourceKind;
   characterId?: string;
   text: string;
+  /** Dialogue only: speech the source printed without a cue, resuming the current speaker after a direction or paragraph break. */
+  continues?: boolean;
 }
 
 export interface SourcePlay {

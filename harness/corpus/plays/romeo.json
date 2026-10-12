@@ -979,12 +979,14 @@
     {
       "kind": "dialogue",
       "characterId": "romeo",
-      "text": "_Signior Martino and his wife and daughters;\nCounty Anselmo and his beauteous sisters;\nThe lady widow of Utruvio;\nSignior Placentio and his lovely nieces;\nMercutio and his brother Valentine;\nMine uncle Capulet, his wife, and daughters;\nMy fair niece Rosaline and Livia;\nSignior Valentio and his cousin Tybalt;\nLucio and the lively Helena. _"
+      "text": "_Signior Martino and his wife and daughters;\nCounty Anselmo and his beauteous sisters;\nThe lady widow of Utruvio;\nSignior Placentio and his lovely nieces;\nMercutio and his brother Valentine;\nMine uncle Capulet, his wife, and daughters;\nMy fair niece Rosaline and Livia;\nSignior Valentio and his cousin Tybalt;\nLucio and the lively Helena. _",
+      "continues": true
     },
     {
       "kind": "dialogue",
       "characterId": "romeo",
-      "text": "A fair assembly. [Gives back the paper] Whither should they come?"
+      "text": "A fair assembly. [Gives back the paper] Whither should they come?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -1212,7 +1214,8 @@
     {
       "kind": "dialogue",
       "characterId": "lady-capulet",
-      "text": "Juliet, the County stays."
+      "text": "Juliet, the County stays.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -1433,7 +1436,8 @@
     {
       "kind": "dialogue",
       "characterId": "capulet",
-      "text": "More light, you knaves; and turn the tables up,\nAnd quench the fire, the room is grown too hot.\nAh sirrah, this unlook’d-for sport comes well.\nNay sit, nay sit, good cousin Capulet,\nFor you and I are past our dancing days;\nHow long is’t now since last yourself and I\nWere in a mask?"
+      "text": "More light, you knaves; and turn the tables up,\nAnd quench the fire, the room is grown too hot.\nAh sirrah, this unlook’d-for sport comes well.\nNay sit, nay sit, good cousin Capulet,\nFor you and I are past our dancing days;\nHow long is’t now since last yourself and I\nWere in a mask?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -1793,7 +1797,8 @@
     {
       "kind": "dialogue",
       "characterId": "romeo",
-      "text": "But soft, what light through yonder window breaks?\nIt is the east, and Juliet is the sun!\nArise fair sun and kill the envious moon,\nWho is already sick and pale with grief,\nThat thou her maid art far more fair than she.\nBe not her maid since she is envious;\nHer vestal livery is but sick and green,\nAnd none but fools do wear it; cast it off.\nIt is my lady, O it is my love!\nO, that she knew she were!\nShe speaks, yet she says nothing. What of that?\nHer eye discourses, I will answer it.\nI am too bold, ’tis not to me she speaks.\nTwo of the fairest stars in all the heaven,\nHaving some business, do entreat her eyes\nTo twinkle in their spheres till they return.\nWhat if her eyes were there, they in her head?\nThe brightness of her cheek would shame those stars,\nAs daylight doth a lamp; her eyes in heaven\nWould through the airy region stream so bright\nThat birds would sing and think it were not night.\nSee how she leans her cheek upon her hand.\nO that I were a glove upon that hand,\nThat I might touch that cheek."
+      "text": "But soft, what light through yonder window breaks?\nIt is the east, and Juliet is the sun!\nArise fair sun and kill the envious moon,\nWho is already sick and pale with grief,\nThat thou her maid art far more fair than she.\nBe not her maid since she is envious;\nHer vestal livery is but sick and green,\nAnd none but fools do wear it; cast it off.\nIt is my lady, O it is my love!\nO, that she knew she were!\nShe speaks, yet she says nothing. What of that?\nHer eye discourses, I will answer it.\nI am too bold, ’tis not to me she speaks.\nTwo of the fairest stars in all the heaven,\nHaving some business, do entreat her eyes\nTo twinkle in their spheres till they return.\nWhat if her eyes were there, they in her head?\nThe brightness of her cheek would shame those stars,\nAs daylight doth a lamp; her eyes in heaven\nWould through the airy region stream so bright\nThat birds would sing and think it were not night.\nSee how she leans her cheek upon her hand.\nO that I were a glove upon that hand,\nThat I might touch that cheek.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -2113,7 +2118,8 @@
     {
       "kind": "dialogue",
       "characterId": "friar-lawrence",
-      "text": "Within the infant rind of this weak flower\nPoison hath residence, and medicine power:\nFor this, being smelt, with that part cheers each part;\nBeing tasted, slays all senses with the heart.\nTwo such opposed kings encamp them still\nIn man as well as herbs,—grace and rude will;\nAnd where the worser is predominant,\nFull soon the canker death eats up that plant."
+      "text": "Within the infant rind of this weak flower\nPoison hath residence, and medicine power:\nFor this, being smelt, with that part cheers each part;\nBeing tasted, slays all senses with the heart.\nTwo such opposed kings encamp them still\nIn man as well as herbs,—grace and rude will;\nAnd where the worser is predominant,\nFull soon the canker death eats up that plant.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -2712,7 +2718,8 @@
     {
       "kind": "dialogue",
       "characterId": "juliet",
-      "text": "O God, she comes. O honey Nurse, what news?\nHast thou met with him? Send thy man away."
+      "text": "O God, she comes. O honey Nurse, what news?\nHast thou met with him? Send thy man away.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -2842,7 +2849,8 @@
     {
       "kind": "dialogue",
       "characterId": "friar-lawrence",
-      "text": "Here comes the lady. O, so light a foot\nWill ne’er wear out the everlasting flint.\nA lover may bestride the gossamers\nThat idles in the wanton summer air\nAnd yet not fall; so light is vanity."
+      "text": "Here comes the lady. O, so light a foot\nWill ne’er wear out the everlasting flint.\nA lover may bestride the gossamers\nThat idles in the wanton summer air\nAnd yet not fall; so light is vanity.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -3262,7 +3270,8 @@
     {
       "kind": "dialogue",
       "characterId": "juliet",
-      "text": "Now, Nurse, what news? What hast thou there?\nThe cords that Romeo bid thee fetch?"
+      "text": "Now, Nurse, what news? What hast thou there?\nThe cords that Romeo bid thee fetch?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -3514,7 +3523,8 @@
     {
       "kind": "dialogue",
       "characterId": "friar-lawrence",
-      "text": "Run to my study.—By-and-by.—God’s will,\nWhat simpleness is this.—I come, I come."
+      "text": "Run to my study.—By-and-by.—God’s will,\nWhat simpleness is this.—I come, I come.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -3523,7 +3533,8 @@
     {
       "kind": "dialogue",
       "characterId": "friar-lawrence",
-      "text": "Who knocks so hard? Whence come you, what’s your will?"
+      "text": "Who knocks so hard? Whence come you, what’s your will?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -4275,7 +4286,8 @@
     {
       "kind": "dialogue",
       "characterId": "capulet",
-      "text": "Sirrah, go hire me twenty cunning cooks."
+      "text": "Sirrah, go hire me twenty cunning cooks.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -4304,7 +4316,8 @@
     {
       "kind": "dialogue",
       "characterId": "capulet",
-      "text": "We shall be much unfurnish’d for this time.\nWhat, is my daughter gone to Friar Lawrence?"
+      "text": "We shall be much unfurnish’d for this time.\nWhat, is my daughter gone to Friar Lawrence?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -4431,7 +4444,8 @@
     {
       "kind": "dialogue",
       "characterId": "juliet",
-      "text": "What if it be a poison, which the Friar\nSubtly hath minister’d to have me dead,\nLest in this marriage he should be dishonour’d,\nBecause he married me before to Romeo?\nI fear it is. And yet methinks it should not,\nFor he hath still been tried a holy man.\nHow if, when I am laid into the tomb,\nI wake before the time that Romeo\nCome to redeem me? There’s a fearful point!\nShall I not then be stifled in the vault,\nTo whose foul mouth no healthsome air breathes in,\nAnd there die strangled ere my Romeo comes?\nOr, if I live, is it not very like,\nThe horrible conceit of death and night,\nTogether with the terror of the place,\nAs in a vault, an ancient receptacle,\nWhere for this many hundred years the bones\nOf all my buried ancestors are pack’d,\nWhere bloody Tybalt, yet but green in earth,\nLies festering in his shroud; where, as they say,\nAt some hours in the night spirits resort—\nAlack, alack, is it not like that I,\nSo early waking, what with loathsome smells,\nAnd shrieks like mandrakes torn out of the earth,\nThat living mortals, hearing them, run mad.\nO, if I wake, shall I not be distraught,\nEnvironed with all these hideous fears,\nAnd madly play with my forefathers’ joints?\nAnd pluck the mangled Tybalt from his shroud?\nAnd, in this rage, with some great kinsman’s bone,\nAs with a club, dash out my desperate brains?\nO look, methinks I see my cousin’s ghost\nSeeking out Romeo that did spit his body\nUpon a rapier’s point. Stay, Tybalt, stay!\nRomeo, Romeo, Romeo, here’s drink! I drink to thee."
+      "text": "What if it be a poison, which the Friar\nSubtly hath minister’d to have me dead,\nLest in this marriage he should be dishonour’d,\nBecause he married me before to Romeo?\nI fear it is. And yet methinks it should not,\nFor he hath still been tried a holy man.\nHow if, when I am laid into the tomb,\nI wake before the time that Romeo\nCome to redeem me? There’s a fearful point!\nShall I not then be stifled in the vault,\nTo whose foul mouth no healthsome air breathes in,\nAnd there die strangled ere my Romeo comes?\nOr, if I live, is it not very like,\nThe horrible conceit of death and night,\nTogether with the terror of the place,\nAs in a vault, an ancient receptacle,\nWhere for this many hundred years the bones\nOf all my buried ancestors are pack’d,\nWhere bloody Tybalt, yet but green in earth,\nLies festering in his shroud; where, as they say,\nAt some hours in the night spirits resort—\nAlack, alack, is it not like that I,\nSo early waking, what with loathsome smells,\nAnd shrieks like mandrakes torn out of the earth,\nThat living mortals, hearing them, run mad.\nO, if I wake, shall I not be distraught,\nEnvironed with all these hideous fears,\nAnd madly play with my forefathers’ joints?\nAnd pluck the mangled Tybalt from his shroud?\nAnd, in this rage, with some great kinsman’s bone,\nAs with a club, dash out my desperate brains?\nO look, methinks I see my cousin’s ghost\nSeeking out Romeo that did spit his body\nUpon a rapier’s point. Stay, Tybalt, stay!\nRomeo, Romeo, Romeo, here’s drink! I drink to thee.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -4495,7 +4509,8 @@
     {
       "kind": "dialogue",
       "characterId": "capulet",
-      "text": "Now, fellow, what’s there?"
+      "text": "Now, fellow, what’s there?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -4514,7 +4529,8 @@
     {
       "kind": "dialogue",
       "characterId": "capulet",
-      "text": "—Sirrah, fetch drier logs.\nCall Peter, he will show thee where they are."
+      "text": "—Sirrah, fetch drier logs.\nCall Peter, he will show thee where they are.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -4537,7 +4553,8 @@
     {
       "kind": "dialogue",
       "characterId": "capulet",
-      "text": "Nurse! Wife! What, ho! What, Nurse, I say!"
+      "text": "Nurse! Wife! What, ho! What, Nurse, I say!",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -4546,7 +4563,8 @@
     {
       "kind": "dialogue",
       "characterId": "capulet",
-      "text": "Go waken Juliet, go and trim her up.\nI’ll go and chat with Paris. Hie, make haste,\nMake haste; the bridegroom he is come already.\nMake haste I say."
+      "text": "Go waken Juliet, go and trim her up.\nI’ll go and chat with Paris. Hie, make haste,\nMake haste; the bridegroom he is come already.\nMake haste I say.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -4856,7 +4874,8 @@
     {
       "kind": "dialogue",
       "characterId": "romeo",
-      "text": "News from Verona! How now, Balthasar?\nDost thou not bring me letters from the Friar?\nHow doth my lady? Is my father well?\nHow fares my Juliet? That I ask again;\nFor nothing can be ill if she be well."
+      "text": "News from Verona! How now, Balthasar?\nDost thou not bring me letters from the Friar?\nHow doth my lady? Is my father well?\nHow fares my Juliet? That I ask again;\nFor nothing can be ill if she be well.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -4895,7 +4914,8 @@
     {
       "kind": "dialogue",
       "characterId": "romeo",
-      "text": "Well, Juliet, I will lie with thee tonight.\nLet’s see for means. O mischief thou art swift\nTo enter in the thoughts of desperate men.\nI do remember an apothecary,—\nAnd hereabouts he dwells,—which late I noted\nIn tatter’d weeds, with overwhelming brows,\nCulling of simples, meagre were his looks,\nSharp misery had worn him to the bones;\nAnd in his needy shop a tortoise hung,\nAn alligator stuff’d, and other skins\nOf ill-shaped fishes; and about his shelves\nA beggarly account of empty boxes,\nGreen earthen pots, bladders, and musty seeds,\nRemnants of packthread, and old cakes of roses\nWere thinly scatter’d, to make up a show.\nNoting this penury, to myself I said,\nAnd if a man did need a poison now,\nWhose sale is present death in Mantua,\nHere lives a caitiff wretch would sell it him.\nO, this same thought did but forerun my need,\nAnd this same needy man must sell it me.\nAs I remember, this should be the house.\nBeing holiday, the beggar’s shop is shut.\nWhat, ho! Apothecary!"
+      "text": "Well, Juliet, I will lie with thee tonight.\nLet’s see for means. O mischief thou art swift\nTo enter in the thoughts of desperate men.\nI do remember an apothecary,—\nAnd hereabouts he dwells,—which late I noted\nIn tatter’d weeds, with overwhelming brows,\nCulling of simples, meagre were his looks,\nSharp misery had worn him to the bones;\nAnd in his needy shop a tortoise hung,\nAn alligator stuff’d, and other skins\nOf ill-shaped fishes; and about his shelves\nA beggarly account of empty boxes,\nGreen earthen pots, bladders, and musty seeds,\nRemnants of packthread, and old cakes of roses\nWere thinly scatter’d, to make up a show.\nNoting this penury, to myself I said,\nAnd if a man did need a poison now,\nWhose sale is present death in Mantua,\nHere lives a caitiff wretch would sell it him.\nO, this same thought did but forerun my need,\nAnd this same needy man must sell it me.\nAs I remember, this should be the house.\nBeing holiday, the beggar’s shop is shut.\nWhat, ho! Apothecary!",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -5039,7 +5059,8 @@
     {
       "kind": "dialogue",
       "characterId": "paris",
-      "text": "The boy gives warning something doth approach.\nWhat cursed foot wanders this way tonight,\nTo cross my obsequies and true love’s rite?\nWhat, with a torch! Muffle me, night, awhile."
+      "text": "The boy gives warning something doth approach.\nWhat cursed foot wanders this way tonight,\nTo cross my obsequies and true love’s rite?\nWhat, with a torch! Muffle me, night, awhile.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -5085,7 +5106,8 @@
     {
       "kind": "dialogue",
       "characterId": "romeo",
-      "text": "And in despite, I’ll cram thee with more food."
+      "text": "And in despite, I’ll cram thee with more food.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -5099,7 +5121,8 @@
     {
       "kind": "dialogue",
       "characterId": "paris",
-      "text": "Stop thy unhallow’d toil, vile Montague.\nCan vengeance be pursu’d further than death?\nCondemned villain, I do apprehend thee.\nObey, and go with me, for thou must die."
+      "text": "Stop thy unhallow’d toil, vile Montague.\nCan vengeance be pursu’d further than death?\nCondemned villain, I do apprehend thee.\nObey, and go with me, for thou must die.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -5150,7 +5173,8 @@
     {
       "kind": "dialogue",
       "characterId": "romeo",
-      "text": "How oft when men are at the point of death\nHave they been merry! Which their keepers call\nA lightning before death. O, how may I\nCall this a lightning? O my love, my wife,\nDeath that hath suck’d the honey of thy breath,\nHath had no power yet upon thy beauty.\nThou art not conquer’d. Beauty’s ensign yet\nIs crimson in thy lips and in thy cheeks,\nAnd death’s pale flag is not advanced there.\nTybalt, liest thou there in thy bloody sheet?\nO, what more favour can I do to thee\nThan with that hand that cut thy youth in twain\nTo sunder his that was thine enemy?\nForgive me, cousin. Ah, dear Juliet,\nWhy art thou yet so fair? Shall I believe\nThat unsubstantial death is amorous;\nAnd that the lean abhorred monster keeps\nThee here in dark to be his paramour?\nFor fear of that I still will stay with thee,\nAnd never from this palace of dim night\nDepart again. Here, here will I remain\nWith worms that are thy chambermaids. O, here\nWill I set up my everlasting rest;\nAnd shake the yoke of inauspicious stars\nFrom this world-wearied flesh. Eyes, look your last.\nArms, take your last embrace! And, lips, O you\nThe doors of breath, seal with a righteous kiss\nA dateless bargain to engrossing death.\nCome, bitter conduct, come, unsavoury guide.\nThou desperate pilot, now at once run on\nThe dashing rocks thy sea-sick weary bark.\nHere’s to my love! [Drinks.] O true apothecary!\nThy drugs are quick. Thus with a kiss I die."
+      "text": "How oft when men are at the point of death\nHave they been merry! Which their keepers call\nA lightning before death. O, how may I\nCall this a lightning? O my love, my wife,\nDeath that hath suck’d the honey of thy breath,\nHath had no power yet upon thy beauty.\nThou art not conquer’d. Beauty’s ensign yet\nIs crimson in thy lips and in thy cheeks,\nAnd death’s pale flag is not advanced there.\nTybalt, liest thou there in thy bloody sheet?\nO, what more favour can I do to thee\nThan with that hand that cut thy youth in twain\nTo sunder his that was thine enemy?\nForgive me, cousin. Ah, dear Juliet,\nWhy art thou yet so fair? Shall I believe\nThat unsubstantial death is amorous;\nAnd that the lean abhorred monster keeps\nThee here in dark to be his paramour?\nFor fear of that I still will stay with thee,\nAnd never from this palace of dim night\nDepart again. Here, here will I remain\nWith worms that are thy chambermaids. O, here\nWill I set up my everlasting rest;\nAnd shake the yoke of inauspicious stars\nFrom this world-wearied flesh. Eyes, look your last.\nArms, take your last embrace! And, lips, O you\nThe doors of breath, seal with a righteous kiss\nA dateless bargain to engrossing death.\nCome, bitter conduct, come, unsavoury guide.\nThou desperate pilot, now at once run on\nThe dashing rocks thy sea-sick weary bark.\nHere’s to my love! [Drinks.] O true apothecary!\nThy drugs are quick. Thus with a kiss I die.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -5232,7 +5256,8 @@
     {
       "kind": "dialogue",
       "characterId": "friar-lawrence",
-      "text": "Romeo! O, pale! Who else? What, Paris too?\nAnd steep’d in blood? Ah what an unkind hour\nIs guilty of this lamentable chance?\nThe lady stirs."
+      "text": "Romeo! O, pale! Who else? What, Paris too?\nAnd steep’d in blood? Ah what an unkind hour\nIs guilty of this lamentable chance?\nThe lady stirs.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -5264,7 +5289,8 @@
     {
       "kind": "dialogue",
       "characterId": "juliet",
-      "text": "What’s here? A cup clos’d in my true love’s hand?\nPoison, I see, hath been his timeless end.\nO churl. Drink all, and left no friendly drop\nTo help me after? I will kiss thy lips.\nHaply some poison yet doth hang on them,\nTo make me die with a restorative."
+      "text": "What’s here? A cup clos’d in my true love’s hand?\nPoison, I see, hath been his timeless end.\nO churl. Drink all, and left no friendly drop\nTo help me after? I will kiss thy lips.\nHaply some poison yet doth hang on them,\nTo make me die with a restorative.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -5273,7 +5299,8 @@
     {
       "kind": "dialogue",
       "characterId": "juliet",
-      "text": "Thy lips are warm!"
+      "text": "Thy lips are warm!",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -5292,7 +5319,8 @@
     {
       "kind": "dialogue",
       "characterId": "juliet",
-      "text": "This is thy sheath. [stabs herself] There rest, and let me die."
+      "text": "This is thy sheath. [stabs herself] There rest, and let me die.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -5319,7 +5347,8 @@
     {
       "kind": "dialogue",
       "characterId": "first-watch",
-      "text": "Pitiful sight! Here lies the County slain,\nAnd Juliet bleeding, warm, and newly dead,\nWho here hath lain this two days buried.\nGo tell the Prince; run to the Capulets.\nRaise up the Montagues, some others search."
+      "text": "Pitiful sight! Here lies the County slain,\nAnd Juliet bleeding, warm, and newly dead,\nWho here hath lain this two days buried.\nGo tell the Prince; run to the Capulets.\nRaise up the Montagues, some others search.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -5328,7 +5357,8 @@
     {
       "kind": "dialogue",
       "characterId": "first-watch",
-      "text": "We see the ground whereon these woes do lie,\nBut the true ground of all these piteous woes\nWe cannot without circumstance descry."
+      "text": "We see the ground whereon these woes do lie,\nBut the true ground of all these piteous woes\nWe cannot without circumstance descry.",
+      "continues": true
     },
     {
       "kind": "direction",

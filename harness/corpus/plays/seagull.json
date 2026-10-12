@@ -519,7 +519,8 @@
     {
       "kind": "dialogue",
       "characterId": "dorn",
-      "text": "“Oh, tell me not that youth is wasted.”"
+      "text": "“Oh, tell me not that youth is wasted.”",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -554,12 +555,14 @@
     {
       "kind": "dialogue",
       "characterId": "dorn",
-      "text": "“Once more I stand before thee.”"
+      "text": "“Once more I stand before thee.”",
+      "continues": true
     },
     {
       "kind": "dialogue",
       "characterId": "dorn",
-      "text": "It is only right that artists should be made much of by society and treated differently from, let us say, merchants. It is a kind of idealism."
+      "text": "It is only right that artists should be made much of by society and treated differently from, let us say, merchants. It is a kind of idealism.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -632,7 +635,8 @@
     {
       "kind": "dialogue",
       "characterId": "arkadina",
-      "text": "“Thou turn’st mine eyes into my very soul; And there I see such black grained spots As will not leave their tinct.”"
+      "text": "“Thou turn’st mine eyes into my very soul; And there I see such black grained spots As will not leave their tinct.”",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -1220,7 +1224,8 @@
     {
       "kind": "dialogue",
       "characterId": "dorn",
-      "text": "“Tell her, oh flowers--”"
+      "text": "“Tell her, oh flowers--”",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -1438,7 +1443,8 @@
     {
       "kind": "dialogue",
       "characterId": "dorn",
-      "text": "“Tell her, oh flowers---”"
+      "text": "“Tell her, oh flowers---”",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -3600,7 +3606,8 @@
     {
       "kind": "dialogue",
       "characterId": "dorn",
-      "text": "“Spellbound once more I stand before thee.”"
+      "text": "“Spellbound once more I stand before thee.”",
+      "continues": true
     },
     {
       "kind": "dialogue",

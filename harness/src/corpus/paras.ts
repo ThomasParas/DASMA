@@ -71,13 +71,16 @@ export function buildParas(play: SourcePlay, units: readonly SourceUnit[], style
     return form;
   };
 
-  const speech = (u: SourceUnit): void => {
+  const speech = (u: SourceUnit, prev: SourceUnit | undefined): void => {
     const id = u.characterId!;
+    // The rng draws happen for every speech, cued or not, so the stream doesn't depend on which cues are skipped.
     const mode: CueMode = style.cue === 'mixed' ? (rng() < OWN_LINE_RATE ? 'ownLeft' : 'inlineColon') : style.cue;
     const shout = style.shout && rng() < SHOUT_RATE;
     const tab = style.tabs && rng() < TAB_RATE;
-    const cue = cueText(id, mode);
-    const own = mode === 'ownCentered' || mode === 'ownLeft' || mode === 'ownIndented';
+    // Speech resumed after a direction (or a paragraph break) of the same speaker is printed without a cue, as real scripts do.
+    const cueless = u.continues === true && (prev?.kind === 'direction' || (prev?.kind === 'dialogue' && prev.characterId === id));
+    const cue = cueless ? '' : cueText(id, mode);
+    const own = !cueless && (mode === 'ownCentered' || mode === 'ownLeft' || mode === 'ownIndented');
     if (own) {
       para([{ text: cue.toUpperCase(), bold: style.cueBold }], 'cue', [addTruth({ kind: 'characterName', text: cue.toUpperCase() })], {
         align: mode === 'ownCentered' ? 'center' : 'left',
@@ -119,7 +122,7 @@ export function buildParas(play: SourcePlay, units: readonly SourceUnit[], style
       c.runs.push(run);
       if (!c.truth.includes(t)) c.truth.push(t);
     };
-    if (!own) {
+    if (!own && !cueless) {
       const prefix = mode === 'inlineColon' ? `${cue}: ` : mode === 'classicalAbbrev' && !/\s/.test(cue) ? `${cue}. ` : `${cue.toUpperCase()}. `;
       current().runs.push({ text: prefix, bold: style.cueBold });
     }
@@ -144,7 +147,7 @@ export function buildParas(play: SourcePlay, units: readonly SourceUnit[], style
   };
 
   let frontIndex = 0;
-  for (const u of units) {
+  for (const [i, u] of units.entries()) {
     if (u.kind === 'frontMatter') {
       const t = stripMarks(u.text);
       para([{ text: t, bold: frontIndex === 0 }], 'front', [addTruth({ kind: 'frontMatter', text: t })], { align: frontIndex === 0 ? 'center' : 'left' });
@@ -157,7 +160,7 @@ export function buildParas(play: SourcePlay, units: readonly SourceUnit[], style
         indent: style.direction.indent,
         gapBefore: true,
       });
-    } else speech(u);
+    } else speech(u, units[i - 1]);
   }
   const cast = play.cast.map((c) => ({ ...c, aliases: [...aliases.get(c.id)!].sort() }));
   return { paras, truth, cast };

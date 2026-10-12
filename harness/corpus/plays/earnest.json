@@ -1940,7 +1940,8 @@
     {
       "kind": "dialogue",
       "characterId": "cecily",
-      "text": "[Enter Algernon, very gay and debonnair.] He does!"
+      "text": "[Enter Algernon, very gay and debonnair.] He does!",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -2689,7 +2690,8 @@
     {
       "kind": "dialogue",
       "characterId": "algernon",
-      "text": "[Enter Cecily at the back of the garden. She picks up the can and begins to water the flowers.] But I must see her before I go, and make arrangements for another Bunbury. Ah, there she is."
+      "text": "[Enter Cecily at the back of the garden. She picks up the can and begins to water the flowers.] But I must see her before I go, and make arrangements for another Bunbury. Ah, there she is.",
+      "continues": true
     },
     {
       "kind": "dialogue",

@@ -161,9 +161,9 @@ export function convertGutenberg(text: string, cfg: PlayConfig): SourcePlay {
 
   const units: SourceUnit[] = [...cfg.title, ...front].map((t) => ({ kind: 'frontMatter' as const, text: t }));
   const speakers = new Map<string, number>();
-  const speech = (speaker: string, said: string): void => {
+  const speech = (speaker: string, said: string, continues = false): void => {
     speakers.set(speaker, (speakers.get(speaker) ?? 0) + 1);
-    units.push({ kind: 'dialogue', characterId: speaker, text: normalizeDirections(said) });
+    units.push({ kind: 'dialogue', characterId: speaker, text: normalizeDirections(said), ...(continues && { continues }) });
   };
   const paras = lines
     .slice(body, end)
@@ -222,7 +222,7 @@ export function convertGutenberg(text: string, cfg: PlayConfig): SourcePlay {
     const spoken = /[\p{L}\p{N}]/u.test(flat.replace(/\[[^\]]*\]/g, '').replace(/_/g, ''));
     // Speech of the current speaker: around an inline direction, or (continuations) after a direction or paragraph break.
     if (current !== null && spoken && !cfg.directionStart.test(flat.replace(/^_/, '')) && (cfg.continuations || flat.includes('['))) {
-      speech(current, para.join(sep));
+      speech(current, para.join(sep), true);
       continue;
     }
     units.push({ kind: 'direction', text: flat.replace(/^\[([^\]]*)\]\.?$/, '$1').replace(/_/g, '') });

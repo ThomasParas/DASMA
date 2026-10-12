@@ -78,15 +78,16 @@ describe('convertGutenberg', () => {
       { kind: 'direction', text: 'Can you hear me?' },
       { kind: 'dialogue', characterId: 'horatio', text: 'Speak to me.' },
       { kind: 'direction', text: 'Re-enter Ghost.' },
-      { kind: 'dialogue', characterId: 'horatio', text: 'But, soft, behold! Lo, where it comes again!\nStay, illusion!' },
+      { kind: 'dialogue', characterId: 'horatio', text: 'But, soft, behold! Lo, where it comes again!\nStay, illusion!', continues: true },
       { kind: 'direction', text: 'The cock crows.' },
-      { kind: 'dialogue', characterId: 'horatio', text: 'Stop it, Marcellus!' },
-      { kind: 'dialogue', characterId: 'horatio', text: 'Then up he rose.' },
+      { kind: 'dialogue', characterId: 'horatio', text: 'Stop it, Marcellus!', continues: true },
+      { kind: 'dialogue', characterId: 'horatio', text: 'Then up he rose.', continues: true },
       { kind: 'dialogue', characterId: 'marcellus', text: 'Shall I strike?' },
       { kind: 'direction', text: 'Exeunt.' },
       { kind: 'heading', text: 'SCENE II. A room.' },
       { kind: 'direction', text: 'Going.' },
     ]);
+    expect(body(convertGutenberg(text, VERSE)).filter((u) => 'continues' in u)).toHaveLength(3);
     expect(body(convertGutenberg(text, OWN)).filter((u) => u.kind === 'dialogue')).toHaveLength(2);
   });
 
@@ -161,9 +162,9 @@ describe('convertGutenberg', () => {
       { kind: 'heading', text: 'ACT I' },
       { kind: 'direction', text: '[Enter Algernon.] He does!' },
       { kind: 'dialogue', characterId: 'cecily', text: 'I am so afraid.' },
-      { kind: 'dialogue', characterId: 'cecily', text: '[Enter Algernon, very gay and debonnair.] He does!' },
+      { kind: 'dialogue', characterId: 'cecily', text: '[Enter Algernon, very gay and debonnair.] He does!', continues: true },
       { kind: 'dialogue', characterId: 'romeo', text: 'Stay, fellow; I can read.' },
-      { kind: 'dialogue', characterId: 'romeo', text: 'A fair assembly. [Gives back the paper] Whither should they come?' },
+      { kind: 'dialogue', characterId: 'romeo', text: 'A fair assembly. [Gives back the paper] Whither should they come?', continues: true },
       { kind: 'direction', text: '[Exit.] [Enter Nurse.]' },
     ]);
   });
@@ -186,8 +187,8 @@ describe('convertGutenberg', () => {
       { kind: 'direction', text: 'MASHA and MEDVIEDENKO go out.' },
       { kind: 'direction', text: 'SORIN leaning on a cane, and TREPLIEFF come in.' },
       { kind: 'dialogue', characterId: 'dorn', text: '[Sings]' },
-      { kind: 'dialogue', characterId: 'dorn', text: '“Once more I stand before thee.”' },
-      { kind: 'dialogue', characterId: 'dorn', text: 'It is only right that artists should be made much of.' },
+      { kind: 'dialogue', characterId: 'dorn', text: '“Once more I stand before thee.”', continues: true },
+      { kind: 'dialogue', characterId: 'dorn', text: 'It is only right that artists should be made much of.', continues: true },
       { kind: 'direction', text: 'She takes snuff. DORN takes the snuff-box. [A pause.]' },
       { kind: 'direction', text: 'A horn is blown behind the stage.' },
       { kind: 'direction', text: 'The curtain falls.' },

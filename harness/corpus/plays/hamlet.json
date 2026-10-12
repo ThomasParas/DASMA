@@ -606,7 +606,8 @@
     {
       "kind": "dialogue",
       "characterId": "horatio",
-      "text": "But, soft, behold! Lo, where it comes again!\nI’ll cross it, though it blast me. Stay, illusion!\nIf thou hast any sound, or use of voice,\nSpeak to me.\nIf there be any good thing to be done,\nThat may to thee do ease, and grace to me,\nSpeak to me.\nIf thou art privy to thy country’s fate,\nWhich, happily, foreknowing may avoid,\nO speak!\nOr if thou hast uphoarded in thy life\nExtorted treasure in the womb of earth,\nFor which, they say, you spirits oft walk in death,\nSpeak of it. Stay, and speak!"
+      "text": "But, soft, behold! Lo, where it comes again!\nI’ll cross it, though it blast me. Stay, illusion!\nIf thou hast any sound, or use of voice,\nSpeak to me.\nIf there be any good thing to be done,\nThat may to thee do ease, and grace to me,\nSpeak to me.\nIf thou art privy to thy country’s fate,\nWhich, happily, foreknowing may avoid,\nO speak!\nOr if thou hast uphoarded in thy life\nExtorted treasure in the womb of earth,\nFor which, they say, you spirits oft walk in death,\nSpeak of it. Stay, and speak!",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -615,7 +616,8 @@
     {
       "kind": "dialogue",
       "characterId": "horatio",
-      "text": "Stop it, Marcellus!"
+      "text": "Stop it, Marcellus!",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -705,7 +707,8 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "And now, Laertes, what’s the news with you?\nYou told us of some suit. What is’t, Laertes?\nYou cannot speak of reason to the Dane,\nAnd lose your voice. What wouldst thou beg, Laertes,\nThat shall not be my offer, not thy asking?\nThe head is not more native to the heart,\nThe hand more instrumental to the mouth,\nThan is the throne of Denmark to thy father.\nWhat wouldst thou have, Laertes?"
+      "text": "And now, Laertes, what’s the news with you?\nYou told us of some suit. What is’t, Laertes?\nYou cannot speak of reason to the Dane,\nAnd lose your voice. What wouldst thou beg, Laertes,\nThat shall not be my offer, not thy asking?\nThe head is not more native to the heart,\nThe hand more instrumental to the mouth,\nThan is the throne of Denmark to thy father.\nWhat wouldst thou have, Laertes?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -1082,7 +1085,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "My father’s spirit in arms! All is not well;\nI doubt some foul play: would the night were come!\nTill then sit still, my soul: foul deeds will rise,\nThough all the earth o’erwhelm them, to men’s eyes."
+      "text": "My father’s spirit in arms! All is not well;\nI doubt some foul play: would the night were come!\nTill then sit still, my soul: foul deeds will rise,\nThough all the earth o’erwhelm them, to men’s eyes.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -1138,7 +1142,8 @@
     {
       "kind": "dialogue",
       "characterId": "laertes",
-      "text": "A double blessing is a double grace;\nOccasion smiles upon a second leave."
+      "text": "A double blessing is a double grace;\nOccasion smiles upon a second leave.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -1152,7 +1157,8 @@
     {
       "kind": "dialogue",
       "characterId": "polonius",
-      "text": "And these few precepts in thy memory\nLook thou character. Give thy thoughts no tongue,\nNor any unproportion’d thought his act.\nBe thou familiar, but by no means vulgar.\nThose friends thou hast, and their adoption tried,\nGrapple them unto thy soul with hoops of steel;\nBut do not dull thy palm with entertainment\nOf each new-hatch’d, unfledg’d comrade. Beware\nOf entrance to a quarrel; but being in,\nBear’t that th’opposed may beware of thee.\nGive every man thine ear, but few thy voice:\nTake each man’s censure, but reserve thy judgement.\nCostly thy habit as thy purse can buy,\nBut not express’d in fancy; rich, not gaudy:\nFor the apparel oft proclaims the man;\nAnd they in France of the best rank and station\nAre of a most select and generous chief in that.\nNeither a borrower nor a lender be:\nFor loan oft loses both itself and friend;\nAnd borrowing dulls the edge of husbandry.\nThis above all: to thine own self be true;\nAnd it must follow, as the night the day,\nThou canst not then be false to any man.\nFarewell: my blessing season this in thee."
+      "text": "And these few precepts in thy memory\nLook thou character. Give thy thoughts no tongue,\nNor any unproportion’d thought his act.\nBe thou familiar, but by no means vulgar.\nThose friends thou hast, and their adoption tried,\nGrapple them unto thy soul with hoops of steel;\nBut do not dull thy palm with entertainment\nOf each new-hatch’d, unfledg’d comrade. Beware\nOf entrance to a quarrel; but being in,\nBear’t that th’opposed may beware of thee.\nGive every man thine ear, but few thy voice:\nTake each man’s censure, but reserve thy judgement.\nCostly thy habit as thy purse can buy,\nBut not express’d in fancy; rich, not gaudy:\nFor the apparel oft proclaims the man;\nAnd they in France of the best rank and station\nAre of a most select and generous chief in that.\nNeither a borrower nor a lender be:\nFor loan oft loses both itself and friend;\nAnd borrowing dulls the edge of husbandry.\nThis above all: to thine own self be true;\nAnd it must follow, as the night the day,\nThou canst not then be false to any man.\nFarewell: my blessing season this in thee.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -1292,7 +1298,8 @@
     {
       "kind": "dialogue",
       "characterId": "horatio",
-      "text": "What does this mean, my lord?"
+      "text": "What does this mean, my lord?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -1394,7 +1401,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "Still am I call’d. Unhand me, gentlemen."
+      "text": "Still am I call’d. Unhand me, gentlemen.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -1403,7 +1411,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "By heaven, I’ll make a ghost of him that lets me.\nI say, away!—Go on, I’ll follow thee."
+      "text": "By heaven, I’ll make a ghost of him that lets me.\nI say, away!—Go on, I’ll follow thee.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -1557,7 +1566,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "So, uncle, there you are. Now to my word;\nIt is ‘Adieu, adieu, remember me.’\nI have sworn’t."
+      "text": "So, uncle, there you are. Now to my word;\nIt is ‘Adieu, adieu, remember me.’\nI have sworn’t.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -1940,7 +1950,8 @@
     {
       "kind": "dialogue",
       "characterId": "polonius",
-      "text": "How now, Ophelia, what’s the matter?"
+      "text": "How now, Ophelia, what’s the matter?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -2089,7 +2100,8 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "He tells me, my sweet queen, that he hath found\nThe head and source of all your son’s distemper."
+      "text": "He tells me, my sweet queen, that he hath found\nThe head and source of all your son’s distemper.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -2108,7 +2120,8 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "Welcome, my good friends!\nSay, Voltemand, what from our brother Norway?"
+      "text": "Welcome, my good friends!\nSay, Voltemand, what from our brother Norway?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -2240,7 +2253,8 @@
     {
       "kind": "dialogue",
       "characterId": "polonius",
-      "text": "How does my good Lord Hamlet?"
+      "text": "How does my good Lord Hamlet?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -2780,7 +2794,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "You are welcome, masters, welcome all. I am glad to see thee well.\nWelcome, good friends. O, my old friend! Thy face is valanc’d since I\nsaw thee last. Com’st thou to beard me in Denmark? What, my young lady\nand mistress! By’r lady, your ladyship is nearer to heaven than when I\nsaw you last, by the altitude of a chopine. Pray God your voice, like a\npiece of uncurrent gold, be not cracked within the ring. Masters, you\nare all welcome. We’ll e’en to’t like French falconers, fly at anything\nwe see. We’ll have a speech straight. Come, give us a taste of your\nquality. Come, a passionate speech."
+      "text": "You are welcome, masters, welcome all. I am glad to see thee well.\nWelcome, good friends. O, my old friend! Thy face is valanc’d since I\nsaw thee last. Com’st thou to beard me in Denmark? What, my young lady\nand mistress! By’r lady, your ladyship is nearer to heaven than when I\nsaw you last, by the altitude of a chopine. Pray God your voice, like a\npiece of uncurrent gold, be not cracked within the ring. Masters, you\nare all welcome. We’ll e’en to’t like French falconers, fly at anything\nwe see. We’ll have a speech straight. Come, give us a taste of your\nquality. Come, a passionate speech.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -2869,7 +2884,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "Dost thou hear me, old friend? Can you play _The Murder of Gonzago_?"
+      "text": "Dost thou hear me, old friend? Can you play _The Murder of Gonzago_?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -2898,7 +2914,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "[To Rosencrantz and Guildenstern] My good friends, I’ll leave you\ntill night. You are welcome to Elsinore."
+      "text": "[To Rosencrantz and Guildenstern] My good friends, I’ll leave you\ntill night. You are welcome to Elsinore.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -3227,7 +3244,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "How now, my lord?\nWill the King hear this piece of work?"
+      "text": "How now, my lord?\nWill the King hear this piece of work?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -3246,7 +3264,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "Will you two help to hasten them?"
+      "text": "Will you two help to hasten them?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -3615,7 +3634,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "This is one Lucianus, nephew to the King."
+      "text": "This is one Lucianus, nephew to the King.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -3881,7 +3901,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "O, the recorders. Let me see one.—To withdraw with you, why do you go\nabout to recover the wind of me, as if you would drive me into a toil?"
+      "text": "O, the recorders. Let me see one.—To withdraw with you, why do you go\nabout to recover the wind of me, as if you would drive me into a toil?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -3940,7 +3961,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "God bless you, sir."
+      "text": "God bless you, sir.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -4003,7 +4025,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "’Tis now the very witching time of night,\nWhen churchyards yawn, and hell itself breathes out\nContagion to this world. Now could I drink hot blood,\nAnd do such bitter business as the day\nWould quake to look on. Soft now, to my mother.\nO heart, lose not thy nature; let not ever\nThe soul of Nero enter this firm bosom:\nLet me be cruel, not unnatural.\nI will speak daggers to her, but use none;\nMy tongue and soul in this be hypocrites.\nHow in my words somever she be shent,\nTo give them seals never, my soul, consent."
+      "text": "’Tis now the very witching time of night,\nWhen churchyards yawn, and hell itself breathes out\nContagion to this world. Now could I drink hot blood,\nAnd do such bitter business as the day\nWould quake to look on. Soft now, to my mother.\nO heart, lose not thy nature; let not ever\nThe soul of Nero enter this firm bosom:\nLet me be cruel, not unnatural.\nI will speak daggers to her, but use none;\nMy tongue and soul in this be hypocrites.\nHow in my words somever she be shent,\nTo give them seals never, my soul, consent.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -4067,7 +4090,8 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "O, my offence is rank, it smells to heaven;\nIt hath the primal eldest curse upon’t,—\nA brother’s murder! Pray can I not,\nThough inclination be as sharp as will:\nMy stronger guilt defeats my strong intent,\nAnd, like a man to double business bound,\nI stand in pause where I shall first begin,\nAnd both neglect. What if this cursed hand\nWere thicker than itself with brother’s blood,\nIs there not rain enough in the sweet heavens\nTo wash it white as snow? Whereto serves mercy\nBut to confront the visage of offence?\nAnd what’s in prayer but this twofold force,\nTo be forestalled ere we come to fall,\nOr pardon’d being down? Then I’ll look up.\nMy fault is past. But O, what form of prayer\nCan serve my turn? Forgive me my foul murder!\nThat cannot be; since I am still possess’d\nOf those effects for which I did the murder,—\nMy crown, mine own ambition, and my queen.\nMay one be pardon’d and retain th’offence?\nIn the corrupted currents of this world\nOffence’s gilded hand may shove by justice,\nAnd oft ’tis seen the wicked prize itself\nBuys out the law. But ’tis not so above;\nThere is no shuffling, there the action lies\nIn his true nature, and we ourselves compell’d\nEven to the teeth and forehead of our faults,\nTo give in evidence. What then? What rests?\nTry what repentance can. What can it not?\nYet what can it, when one cannot repent?\nO wretched state! O bosom black as death!\nO limed soul, that struggling to be free,\nArt more engag’d! Help, angels! Make assay:\nBow, stubborn knees; and heart with strings of steel,\nBe soft as sinews of the new-born babe.\nAll may be well."
+      "text": "O, my offence is rank, it smells to heaven;\nIt hath the primal eldest curse upon’t,—\nA brother’s murder! Pray can I not,\nThough inclination be as sharp as will:\nMy stronger guilt defeats my strong intent,\nAnd, like a man to double business bound,\nI stand in pause where I shall first begin,\nAnd both neglect. What if this cursed hand\nWere thicker than itself with brother’s blood,\nIs there not rain enough in the sweet heavens\nTo wash it white as snow? Whereto serves mercy\nBut to confront the visage of offence?\nAnd what’s in prayer but this twofold force,\nTo be forestalled ere we come to fall,\nOr pardon’d being down? Then I’ll look up.\nMy fault is past. But O, what form of prayer\nCan serve my turn? Forgive me my foul murder!\nThat cannot be; since I am still possess’d\nOf those effects for which I did the murder,—\nMy crown, mine own ambition, and my queen.\nMay one be pardon’d and retain th’offence?\nIn the corrupted currents of this world\nOffence’s gilded hand may shove by justice,\nAnd oft ’tis seen the wicked prize itself\nBuys out the law. But ’tis not so above;\nThere is no shuffling, there the action lies\nIn his true nature, and we ourselves compell’d\nEven to the teeth and forehead of our faults,\nTo give in evidence. What then? What rests?\nTry what repentance can. What can it not?\nYet what can it, when one cannot repent?\nO wretched state! O bosom black as death!\nO limed soul, that struggling to be free,\nArt more engag’d! Help, angels! Make assay:\nBow, stubborn knees; and heart with strings of steel,\nBe soft as sinews of the new-born babe.\nAll may be well.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -4304,7 +4328,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "Save me and hover o’er me with your wings,\nYou heavenly guards! What would your gracious figure?"
+      "text": "Save me and hover o’er me with your wings,\nYou heavenly guards! What would your gracious figure?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -4453,7 +4478,8 @@
     {
       "kind": "dialogue",
       "characterId": "queen",
-      "text": "Ah, my good lord, what have I seen tonight!"
+      "text": "Ah, my good lord, what have I seen tonight!",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -4487,7 +4513,8 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "Friends both, go join you with some further aid:\nHamlet in madness hath Polonius slain,\nAnd from his mother’s closet hath he dragg’d him.\nGo seek him out, speak fair, and bring the body\nInto the chapel. I pray you haste in this."
+      "text": "Friends both, go join you with some further aid:\nHamlet in madness hath Polonius slain,\nAnd from his mother’s closet hath he dragg’d him.\nGo seek him out, speak fair, and bring the body\nInto the chapel. I pray you haste in this.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -4496,7 +4523,8 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "Come, Gertrude, we’ll call up our wisest friends,\nAnd let them know both what we mean to do\nAnd what’s untimely done, so haply slander,\nWhose whisper o’er the world’s diameter,\nAs level as the cannon to his blank,\nTransports his poison’d shot, may miss our name,\nAnd hit the woundless air. O, come away!\nMy soul is full of discord and dismay."
+      "text": "Come, Gertrude, we’ll call up our wisest friends,\nAnd let them know both what we mean to do\nAnd what’s untimely done, so haply slander,\nWhose whisper o’er the world’s diameter,\nAs level as the cannon to his blank,\nTransports his poison’d shot, may miss our name,\nAnd hit the woundless air. O, come away!\nMy soul is full of discord and dismay.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -4623,7 +4651,8 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "How now? What hath befall’n?"
+      "text": "How now? What hath befall’n?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -4774,7 +4803,8 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "And England, if my love thou hold’st at aught,—\nAs my great power thereof may give thee sense,\nSince yet thy cicatrice looks raw and red\nAfter the Danish sword, and thy free awe\nPays homage to us,—thou mayst not coldly set\nOur sovereign process, which imports at full,\nBy letters conjuring to that effect,\nThe present death of Hamlet. Do it, England;\nFor like the hectic in my blood he rages,\nAnd thou must cure me. Till I know ’tis done,\nHowe’er my haps, my joys were ne’er begun."
+      "text": "And England, if my love thou hold’st at aught,—\nAs my great power thereof may give thee sense,\nSince yet thy cicatrice looks raw and red\nAfter the Danish sword, and thy free awe\nPays homage to us,—thou mayst not coldly set\nOur sovereign process, which imports at full,\nBy letters conjuring to that effect,\nThe present death of Hamlet. Do it, England;\nFor like the hectic in my blood he rages,\nAnd thou must cure me. Till I know ’tis done,\nHowe’er my haps, my joys were ne’er begun.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -4892,7 +4922,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "How all occasions do inform against me,\nAnd spur my dull revenge. What is a man\nIf his chief good and market of his time\nBe but to sleep and feed? A beast, no more.\nSure he that made us with such large discourse,\nLooking before and after, gave us not\nThat capability and godlike reason\nTo fust in us unus’d. Now whether it be\nBestial oblivion, or some craven scruple\nOf thinking too precisely on th’event,—\nA thought which, quarter’d, hath but one part wisdom\nAnd ever three parts coward,—I do not know\nWhy yet I live to say this thing’s to do,\nSith I have cause, and will, and strength, and means\nTo do’t. Examples gross as earth exhort me,\nWitness this army of such mass and charge,\nLed by a delicate and tender prince,\nWhose spirit, with divine ambition puff’d,\nMakes mouths at the invisible event,\nExposing what is mortal and unsure\nTo all that fortune, death, and danger dare,\nEven for an eggshell. Rightly to be great\nIs not to stir without great argument,\nBut greatly to find quarrel in a straw\nWhen honour’s at the stake. How stand I then,\nThat have a father kill’d, a mother stain’d,\nExcitements of my reason and my blood,\nAnd let all sleep, while to my shame I see\nThe imminent death of twenty thousand men\nThat, for a fantasy and trick of fame,\nGo to their graves like beds, fight for a plot\nWhereon the numbers cannot try the cause,\nWhich is not tomb enough and continent\nTo hide the slain? O, from this time forth,\nMy thoughts be bloody or be nothing worth."
+      "text": "How all occasions do inform against me,\nAnd spur my dull revenge. What is a man\nIf his chief good and market of his time\nBe but to sleep and feed? A beast, no more.\nSure he that made us with such large discourse,\nLooking before and after, gave us not\nThat capability and godlike reason\nTo fust in us unus’d. Now whether it be\nBestial oblivion, or some craven scruple\nOf thinking too precisely on th’event,—\nA thought which, quarter’d, hath but one part wisdom\nAnd ever three parts coward,—I do not know\nWhy yet I live to say this thing’s to do,\nSith I have cause, and will, and strength, and means\nTo do’t. Examples gross as earth exhort me,\nWitness this army of such mass and charge,\nLed by a delicate and tender prince,\nWhose spirit, with divine ambition puff’d,\nMakes mouths at the invisible event,\nExposing what is mortal and unsure\nTo all that fortune, death, and danger dare,\nEven for an eggshell. Rightly to be great\nIs not to stir without great argument,\nBut greatly to find quarrel in a straw\nWhen honour’s at the stake. How stand I then,\nThat have a father kill’d, a mother stain’d,\nExcitements of my reason and my blood,\nAnd let all sleep, while to my shame I see\nThe imminent death of twenty thousand men\nThat, for a fantasy and trick of fame,\nGo to their graves like beds, fight for a plot\nWhereon the numbers cannot try the cause,\nWhich is not tomb enough and continent\nTo hide the slain? O, from this time forth,\nMy thoughts be bloody or be nothing worth.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -4938,7 +4969,8 @@
     {
       "kind": "dialogue",
       "characterId": "queen",
-      "text": "To my sick soul, as sin’s true nature is,\nEach toy seems prologue to some great amiss.\nSo full of artless jealousy is guilt,\nIt spills itself in fearing to be spilt."
+      "text": "To my sick soul, as sin’s true nature is,\nEach toy seems prologue to some great amiss.\nSo full of artless jealousy is guilt,\nIt spills itself in fearing to be spilt.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -5016,7 +5048,8 @@
     {
       "kind": "dialogue",
       "characterId": "ophelia",
-      "text": "Then up he rose and donn’d his clothes,\nAnd dupp’d the chamber door,\nLet in the maid, that out a maid\nNever departed more."
+      "text": "Then up he rose and donn’d his clothes,\nAnd dupp’d the chamber door,\nLet in the maid, that out a maid\nNever departed more.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -5031,7 +5064,8 @@
     {
       "kind": "dialogue",
       "characterId": "ophelia",
-      "text": "Quoth she, before you tumbled me,\nYou promis’d me to wed.\nSo would I ha’ done, by yonder sun,\nAn thou hadst not come to my bed."
+      "text": "Quoth she, before you tumbled me,\nYou promis’d me to wed.\nSo would I ha’ done, by yonder sun,\nAn thou hadst not come to my bed.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -5059,7 +5093,8 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "O, this is the poison of deep grief; it springs\nAll from her father’s death. O Gertrude, Gertrude,\nWhen sorrows come, they come not single spies,\nBut in battalions. First, her father slain;\nNext, your son gone; and he most violent author\nOf his own just remove; the people muddied,\nThick, and unwholesome in their thoughts and whispers\nFor good Polonius’ death; and we have done but greenly\nIn hugger-mugger to inter him. Poor Ophelia\nDivided from herself and her fair judgement,\nWithout the which we are pictures or mere beasts.\nLast, and as much containing as all these,\nHer brother is in secret come from France,\nFeeds on his wonder, keeps himself in clouds,\nAnd wants not buzzers to infect his ear\nWith pestilent speeches of his father’s death,\nWherein necessity, of matter beggar’d,\nWill nothing stick our person to arraign\nIn ear and ear. O my dear Gertrude, this,\nLike to a murdering piece, in many places\nGives me superfluous death."
+      "text": "O, this is the poison of deep grief; it springs\nAll from her father’s death. O Gertrude, Gertrude,\nWhen sorrows come, they come not single spies,\nBut in battalions. First, her father slain;\nNext, your son gone; and he most violent author\nOf his own just remove; the people muddied,\nThick, and unwholesome in their thoughts and whispers\nFor good Polonius’ death; and we have done but greenly\nIn hugger-mugger to inter him. Poor Ophelia\nDivided from herself and her fair judgement,\nWithout the which we are pictures or mere beasts.\nLast, and as much containing as all these,\nHer brother is in secret come from France,\nFeeds on his wonder, keeps himself in clouds,\nAnd wants not buzzers to infect his ear\nWith pestilent speeches of his father’s death,\nWherein necessity, of matter beggar’d,\nWill nothing stick our person to arraign\nIn ear and ear. O my dear Gertrude, this,\nLike to a murdering piece, in many places\nGives me superfluous death.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -5082,7 +5117,8 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "What is the matter?"
+      "text": "What is the matter?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -5228,7 +5264,8 @@
     {
       "kind": "dialogue",
       "characterId": "laertes",
-      "text": "O heat, dry up my brains. Tears seven times salt,\nBurn out the sense and virtue of mine eye.\nBy heaven, thy madness shall be paid by weight,\nTill our scale turn the beam. O rose of May!\nDear maid, kind sister, sweet Ophelia!\nO heavens, is’t possible a young maid’s wits\nShould be as mortal as an old man’s life?\nNature is fine in love, and where ’tis fine,\nIt sends some precious instance of itself\nAfter the thing it loves."
+      "text": "O heat, dry up my brains. Tears seven times salt,\nBurn out the sense and virtue of mine eye.\nBy heaven, thy madness shall be paid by weight,\nTill our scale turn the beam. O rose of May!\nDear maid, kind sister, sweet Ophelia!\nO heavens, is’t possible a young maid’s wits\nShould be as mortal as an old man’s life?\nNature is fine in love, and where ’tis fine,\nIt sends some precious instance of itself\nAfter the thing it loves.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -5278,12 +5315,14 @@
     {
       "kind": "dialogue",
       "characterId": "ophelia",
-      "text": "His beard was as white as snow,\nAll flaxen was his poll.\nHe is gone, he is gone,\nAnd we cast away moan.\nGod ha’ mercy on his soul."
+      "text": "His beard was as white as snow,\nAll flaxen was his poll.\nHe is gone, he is gone,\nAnd we cast away moan.\nGod ha’ mercy on his soul.",
+      "continues": true
     },
     {
       "kind": "dialogue",
       "characterId": "ophelia",
-      "text": "And of all Christian souls, I pray God. God b’ wi’ ye."
+      "text": "And of all Christian souls, I pray God. God b’ wi’ ye.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -5343,7 +5382,8 @@
     {
       "kind": "dialogue",
       "characterId": "horatio",
-      "text": "I do not know from what part of the world\nI should be greeted, if not from Lord Hamlet."
+      "text": "I do not know from what part of the world\nI should be greeted, if not from Lord Hamlet.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -5372,7 +5412,8 @@
     {
       "kind": "dialogue",
       "characterId": "horatio",
-      "text": "Come, I will give you way for these your letters,\nAnd do’t the speedier, that you may direct me\nTo him from whom you brought them."
+      "text": "Come, I will give you way for these your letters,\nAnd do’t the speedier, that you may direct me\nTo him from whom you brought them.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -5418,7 +5459,8 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "How now? What news?"
+      "text": "How now? What news?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -5447,12 +5489,14 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "[Reads.] ‘High and mighty, you shall know I am set naked on your\nkingdom. Tomorrow shall I beg leave to see your kingly eyes. When I\nshall, first asking your pardon thereunto, recount the occasions of my\nsudden and more strange return.\nHAMLET.’"
+      "text": "[Reads.] ‘High and mighty, you shall know I am set naked on your\nkingdom. Tomorrow shall I beg leave to see your kingly eyes. When I\nshall, first asking your pardon thereunto, recount the occasions of my\nsudden and more strange return.\nHAMLET.’",
+      "continues": true
     },
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "What should this mean? Are all the rest come back?\nOr is it some abuse, and no such thing?"
+      "text": "What should this mean? Are all the rest come back?\nOr is it some abuse, and no such thing?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -5581,7 +5625,8 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "How now, sweet Queen?"
+      "text": "How now, sweet Queen?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -5778,7 +5823,8 @@
     {
       "kind": "dialogue",
       "characterId": "first-clown",
-      "text": "In youth when I did love, did love,\nMethought it was very sweet;\nTo contract, O, the time for, a, my behove,\nO methought there was nothing meet."
+      "text": "In youth when I did love, did love,\nMethought it was very sweet;\nTo contract, O, the time for, a, my behove,\nO methought there was nothing meet.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -6094,7 +6140,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "The Queen, the courtiers. Who is that they follow?\nAnd with such maimed rites? This doth betoken\nThe corse they follow did with desperate hand\nFordo it own life. ’Twas of some estate.\nCouch we awhile and mark."
+      "text": "The Queen, the courtiers. Who is that they follow?\nAnd with such maimed rites? This doth betoken\nThe corse they follow did with desperate hand\nFordo it own life. ’Twas of some estate.\nCouch we awhile and mark.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -6245,7 +6292,8 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "[To Laertes]\nStrengthen your patience in our last night’s speech;\nWe’ll put the matter to the present push.—\nGood Gertrude, set some watch over your son.\nThis grave shall have a living monument.\nAn hour of quiet shortly shall we see;\nTill then in patience our proceeding be."
+      "text": "[To Laertes]\nStrengthen your patience in our last night’s speech;\nWe’ll put the matter to the present push.—\nGood Gertrude, set some watch over your son.\nThis grave shall have a living monument.\nAn hour of quiet shortly shall we see;\nTill then in patience our proceeding be.",
+      "continues": true
     },
     {
       "kind": "direction",
@@ -6589,7 +6637,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "He does well to commend it himself, there are no tongues else for’s\nturn."
+      "text": "He does well to commend it himself, there are no tongues else for’s\nturn.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -6807,7 +6856,8 @@
     {
       "kind": "dialogue",
       "characterId": "king",
-      "text": "Give him the cup."
+      "text": "Give him the cup.",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -6821,7 +6871,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "Come. Another hit; what say you?"
+      "text": "Come. Another hit; what say you?",
+      "continues": true
     },
     {
       "kind": "dialogue",
@@ -7037,7 +7088,8 @@
     {
       "kind": "dialogue",
       "characterId": "hamlet",
-      "text": "What warlike noise is this?"
+      "text": "What warlike noise is this?",
+      "continues": true
     },
     {
       "kind": "dialogue",
