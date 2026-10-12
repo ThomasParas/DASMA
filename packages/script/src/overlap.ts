@@ -7,7 +7,7 @@ const OVERLAP_MARK = /(?:^|\s)\/|\/(?=\s|$)/;
 const OVERLAP_MARKS = new RegExp(OVERLAP_MARK.source, 'g');
 
 /** Sorts ranges and merges those that overlap or touch, so they are strictly increasing. */
-function normalise(ranges: Array<[number, number]>): Array<[number, number]> {
+export function normaliseRanges(ranges: Array<[number, number]>): Array<[number, number]> {
   const sorted = ranges.map((r): [number, number] => [r[0], r[1]]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
   const out: Array<[number, number]> = [];
   for (const r of sorted) {
@@ -51,6 +51,6 @@ export function applyOverlapMarks(units: Unit[]): Unit[] {
     const k = Math.min(Math.max(1, total - start), tokenize(out[n].text).length);
     if (k > 0) add(n, [0, k]);
   }
-  for (const [i, ranges] of added) out[i].overlapRanges = normalise([...(out[i].overlapRanges ?? []), ...ranges]);
+  for (const [i, ranges] of added) out[i].overlapRanges = normaliseRanges([...(out[i].overlapRanges ?? []), ...ranges]);
   return out;
 }

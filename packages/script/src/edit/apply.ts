@@ -1,7 +1,8 @@
 import type { Script } from '../types';
-import { EditError, type EditOp } from './ops';
+import type { EditOp } from './ops';
 import { editAliases, mergeCharacters, moveSpeeches, newCharacter, renameCharacter, setName, speechBy, splitAlias } from './speaker-ops';
 import { confirm, editText, insertSceneBreak, remove, removeSceneBreak, setCut, setKind } from './unit-ops';
+import { join, setCutWords, setOverlap, split } from './word-ops';
 
 export interface EditOptions {
   /** Character ids never pruned: the production's cast-list keys. */
@@ -62,9 +63,18 @@ function applyOne(script: Script, op: Exclude<EditOp, { type: 'batch' }>): Scrip
       return mergeCharacters(script, op.fromId, op.intoId);
     case 'splitAlias':
       return splitAlias(script, op.characterId, op.alias, op.newId, op.unitIds);
-    default:
-      // Transitional until Tasks 3 and 4 add the remaining ops; Task 4 replaces this with an exhaustive check.
-      throw new EditError(`${op.type} is not available yet.`);
+    case 'split':
+      return split(script, op.unitId, op.atWord);
+    case 'join':
+      return join(script, op.unitId);
+    case 'setCutWords':
+      return setCutWords(script, op.unitId, op.from, op.to, op.cut);
+    case 'setOverlap':
+      return setOverlap(script, op.unitId, op.from, op.to, op.on);
+    default: {
+      const never: never = op;
+      return never;
+    }
   }
 }
 
