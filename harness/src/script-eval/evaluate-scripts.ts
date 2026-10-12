@@ -24,11 +24,26 @@ export async function evaluateScripts(specs: readonly DocSpec[], onDoc?: (s: Doc
 
 export interface LocalDoc {
   name: string;
+  /** The script's file name, for error messages. */
+  file: string;
   input: ImportInput;
   truth: TruthFile;
 }
 
 const LOCAL_FORMATS: Record<string, DocFormat> = { '.pdf': 'pdf', '.docx': 'docx', '.txt': 'text' };
+
+function readTruth(path: string): Pick<TruthFile, 'pages' | 'cast' | 'units'> {
+  let t: Partial<Pick<TruthFile, 'pages' | 'cast' | 'units'>> | null;
+  try {
+    t = JSON.parse(readFileSync(path, 'utf8')) as typeof t;
+  } catch (err) {
+    throw new Error(`${path} is not valid JSON: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
+  }
+  if (!t || typeof t.pages !== 'number' || !Array.isArray(t.cast) || !Array.isArray(t.units)) {
+    throw new Error(`${path} must hold { pages, cast, units }`);
+  }
+  return { pages: t.pages, cast: t.cast, units: t.units };
+}
 
 /** harness/local/<name>.{pdf,docx,txt}, each with a hand-written <name>.truth.json holding { pages, cast, units } (spec §6.6). */
 export function loadLocalDocs(dir: string): { docs: LocalDoc[]; skipped: string[] } {
@@ -45,10 +60,11 @@ export function loadLocalDocs(dir: string): { docs: LocalDoc[]; skipped: string[
       skipped.push(file);
       continue;
     }
-    const t = JSON.parse(readFileSync(truthPath, 'utf8')) as Pick<TruthFile, 'pages' | 'cast' | 'units'>;
+    const t = readTruth(truthPath);
     const data = readFileSync(join(dir, file));
     docs.push({
       name,
+      file,
       input: inputFor(format, format === 'text' ? data.toString('utf8') : new Uint8Array(data)),
       truth: { docId: name, family: 'local', play: name, variant: 'local', seed: 0, format, pages: t.pages, cast: t.cast, units: t.units },
     });
@@ -58,6 +74,12 @@ export function loadLocalDocs(dir: string): { docs: LocalDoc[]; skipped: string[
 
 export async function evaluateLocal(docs: readonly LocalDoc[]): Promise<DocScore[]> {
   const scores: DocScore[] = [];
-  for (const d of docs) scores.push(scoreDocument(d.truth, (await importScript(d.input)).script));
+  for (const d of docs) {
+    try {
+      scores.push(scoreDocument(d.truth, (await importScript(d.input)).script));
+    } catch (err) {
+      throw new Error(`${d.file}: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
+    }
+  }
   return scores;
 }

@@ -60,6 +60,13 @@ export function gateFailures(m: FamilyMetrics): string[] {
   return out;
 }
 
+/** The --gate decision. Scoring nothing never passes. */
+export function gateVerdict(metrics: readonly FamilyMetrics[], docCount: number): { pass: boolean; lines: string[] } {
+  if (docCount === 0) return { pass: false, lines: ['SCRIPT GATE FAIL: no documents scored'] };
+  const failing = metrics.filter((m) => gateFailures(m).length > 0);
+  return { pass: failing.length === 0, lines: [failing.length ? 'SCRIPT GATE FAIL' : 'SCRIPT GATE PASS'] };
+}
+
 const KINDS: FixKind[] = ['missedSpeech', 'inventedSpeech', 'wrongSpeaker', 'missedHeading', 'inventedHeading', 'split', 'merge'];
 const pct = (x: number, digits = 1) => `${(x * 100).toFixed(digits)}%`;
 

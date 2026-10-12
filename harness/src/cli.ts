@@ -14,7 +14,7 @@ import { fetchModels } from './models';
 import { BASELINE_FILE, CORPUS_OUT_DIR, DUMP_DIR, LOCAL_DIR, MODELS_DIR, OUT_DIR, PLAYS_DIR, SCRIPT_EVAL_DIR, TTS_CACHE_DIR } from './paths';
 import { renderDumpHtml } from './script-eval/dump';
 import { evaluateLocal, evaluateScripts, loadLocalDocs } from './script-eval/evaluate-scripts';
-import { familyMetrics, formatScriptReport, gateFailures } from './script-eval/report';
+import { familyMetrics, formatScriptReport, gateVerdict } from './script-eval/report';
 import type { DocScore } from './script-eval/score';
 import { createSherpaTts, TTS_MODEL_ID } from './tts';
 import { cachedTts } from './tts-cache';
@@ -117,9 +117,9 @@ async function runScriptEval(args: string[]): Promise<void> {
   writeFileSync(join(out, 'scores.json'), `${JSON.stringify({ metrics, scores }, null, 2)}\n`);
   console.log(`\n${md}\nWrote ${out}`);
   if (values.gate) {
-    const failing = metrics.filter((m) => gateFailures(m).length > 0);
-    console.log(failing.length ? 'SCRIPT GATE FAIL' : 'SCRIPT GATE PASS');
-    if (failing.length) process.exitCode = 1;
+    const verdict = gateVerdict(metrics, scores.length);
+    console.log(verdict.lines.join('\n'));
+    if (!verdict.pass) process.exitCode = 1;
   }
 }
 

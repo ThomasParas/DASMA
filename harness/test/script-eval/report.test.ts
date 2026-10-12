@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { familyMetrics, formatScriptReport, gateFailures } from '../../src/script-eval/report';
+import { familyMetrics, formatScriptReport, gateFailures, gateVerdict } from '../../src/script-eval/report';
 import type { DocScore, Fix } from '../../src/script-eval/score';
 
 const fixes = (flagged: boolean[]): Fix[] => flagged.map((f) => ({ kind: 'split', page: 1, flagged: f }));
@@ -50,6 +50,20 @@ describe('gate over several families', () => {
     const rows = formatScriptReport('t', metrics, [A, B, W], false).split('\n');
     expect(rows.find((r) => r.startsWith('| licensed |'))).toContain('FAIL');
     expect(rows.find((r) => r.startsWith('| word |'))).toMatch(/\| PASS \|$/);
+  });
+});
+
+describe('gateVerdict', () => {
+  it('never passes when nothing was scored', () => {
+    expect(gateVerdict([], 0)).toEqual({ pass: false, lines: ['SCRIPT GATE FAIL: no documents scored'] });
+  });
+
+  it('passes when every family meets its targets', () => {
+    expect(gateVerdict(familyMetrics([W]), 1)).toEqual({ pass: true, lines: ['SCRIPT GATE PASS'] });
+  });
+
+  it('fails when any family misses a target', () => {
+    expect(gateVerdict(familyMetrics([A, B, W]), 3)).toEqual({ pass: false, lines: ['SCRIPT GATE FAIL'] });
   });
 });
 

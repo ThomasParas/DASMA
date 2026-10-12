@@ -30,6 +30,23 @@ describe('loadLocalDocs and evaluateLocal', () => {
     expect(score).toMatchObject({ docId: 'scene', family: 'local', fixes: [], speakerRight: 4 });
   });
 
+  it('names the truth file when it is not valid JSON or lacks pages, cast or units', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'dasma-local-bad-'));
+    writeFileSync(join(dir, 'bad.txt'), 'HAMLET\nTo be.');
+    writeFileSync(join(dir, 'bad.truth.json'), '{ not json');
+    expect(() => loadLocalDocs(dir)).toThrow(join(dir, 'bad.truth.json'));
+    writeFileSync(join(dir, 'bad.truth.json'), JSON.stringify({ pages: 1, cast: [] }));
+    expect(() => loadLocalDocs(dir)).toThrow(/bad\.truth\.json must hold \{ pages, cast, units \}/);
+  });
+
+  it('names the script when it cannot be imported', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'dasma-local-broken-'));
+    writeFileSync(join(dir, 'broken.docx'), 'not a zip');
+    writeFileSync(join(dir, 'broken.truth.json'), JSON.stringify({ pages: 1, cast: [], units: [] }));
+    const { docs } = loadLocalDocs(dir);
+    await expect(evaluateLocal(docs)).rejects.toThrow(/^broken\.docx: /);
+  });
+
   it('returns nothing for a missing folder', () => {
     expect(loadLocalDocs(join(tmpdir(), 'dasma-no-such-folder-xyz'))).toEqual({ docs: [], skipped: [] });
   });
