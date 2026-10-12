@@ -40,9 +40,11 @@ export interface ShortcutBinding {
   enabled?: boolean;
   /** Also fire while a text field has focus (Esc, Cmd/Ctrl+Enter). */
   allowInFields?: boolean;
+  /** Also fire on auto-repeated keydowns (holding the key), for navigation. */
+  allowRepeat?: boolean;
 }
 
-/** Binds keys on the window; auto-repeated keydowns are ignored. Enter and Space (without Cmd/Ctrl) on a focused button or link are left to the browser's own click. */
+/** Binds keys on the window; auto-repeated keydowns fire only `allowRepeat` bindings. Enter and Space (without Cmd/Ctrl) on a focused button or link are left to the browser's own click. */
 export function useShortcuts(bindings: ShortcutBinding[], active = true): void {
   const ref = useRef(bindings);
   useLayoutEffect(() => {
@@ -51,12 +53,11 @@ export function useShortcuts(bindings: ShortcutBinding[], active = true): void {
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.repeat) return;
       const tag = (e.target as HTMLElement | null)?.tagName;
       if ((e.key === 'Enter' || e.key === ' ') && !(e.metaKey || e.ctrlKey) && (tag === 'BUTTON' || tag === 'A')) return;
       const typing = isTypingTarget(e.target);
       for (const b of ref.current) {
-        if (b.enabled === false || (typing && !b.allowInFields)) continue;
+        if (b.enabled === false || (typing && !b.allowInFields) || (e.repeat && !b.allowRepeat)) continue;
         if (b.keys.some((k) => matchesShortcut(e, k))) {
           e.preventDefault();
           b.run();

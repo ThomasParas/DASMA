@@ -179,7 +179,7 @@ export function FixWorkspace({ editor, script, production, onProductionChange }:
   const PICKER_TITLES = { speechBy: 'Speech by', setName: 'Character name', moveSpeeches: 'Move selected speeches to' } as const;
   // While the shortcut sheet is open only its toggle (and Escape, below) act, so no key changes the script under it.
   useShortcuts(
-    actions.filter((a) => panel.kind !== 'help' || a.id === 'help').map((a) => ({ keys: a.keys, run: a.run, enabled: a.enabled })),
+    actions.filter((a) => panel.kind !== 'help' || a.id === 'help').map((a) => ({ keys: a.keys, run: a.run, enabled: a.enabled, allowRepeat: a.group === 'nav' })),
     panel.kind === 'none' || panel.kind === 'help',
   );
   useShortcuts([{ keys: ['Escape'], run: () => setPanel({ kind: 'none' }), allowInFields: true }], panel.kind !== 'none');

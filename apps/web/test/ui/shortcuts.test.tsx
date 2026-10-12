@@ -6,6 +6,7 @@ import { matchesShortcut, useShortcuts } from '../../src/ui/shortcuts';
 function Harness({ log }: { log: string[] }) {
   useShortcuts([
     { keys: ['j'], run: () => log.push('j') },
+    { keys: ['ArrowDown'], run: () => log.push('down'), allowRepeat: true },
     { keys: ['J'], run: () => log.push('J') },
     { keys: ['mod+z'], run: () => log.push('undo') },
     { keys: ['mod+shift+z'], run: () => log.push('redo') },
@@ -61,13 +62,17 @@ describe('useShortcuts', () => {
     expect(log.slice(6)).toEqual(['j']);
   });
 
-  it('ignores auto-repeated keydowns', () => {
+  it('ignores auto-repeated keydowns unless the binding allows repeats', () => {
     const log: string[] = [];
     render(<Harness log={log} />);
     fireEvent.keyDown(document.body, { key: 'j' });
     fireEvent.keyDown(document.body, { key: 'j', repeat: true });
     fireEvent.keyDown(document.body, { key: 'j', repeat: true });
     expect(log).toEqual(['j']);
+    fireEvent.keyDown(document.body, { key: 'ArrowDown' });
+    fireEvent.keyDown(document.body, { key: 'ArrowDown', repeat: true });
+    fireEvent.keyDown(document.body, { key: 'ArrowDown', repeat: true });
+    expect(log).toEqual(['j', 'down', 'down', 'down']);
   });
 
   it('leaves Enter on a focused button to the browser', async () => {

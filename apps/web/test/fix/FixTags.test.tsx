@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { sampleScript } from '../fixtures';
 import { openFix } from './open-fix';
@@ -62,6 +62,18 @@ describe('Fix tags', () => {
     await user.keyboard('{Enter}');
     expect(screen.getByRole('heading', { name: 'To check (2)' })).toBeTruthy();
     expect(unitEl('u7').dataset.kind).toBe('characterName');
+  });
+
+  it('keeps stepping while a navigation key is held, but not retagging', async () => {
+    const { user, unitEl, selectedIds } = await openFix();
+    await user.click(unitEl('u4'));
+    fireEvent.keyDown(document.body, { key: 'ArrowDown' });
+    fireEvent.keyDown(document.body, { key: 'ArrowDown', repeat: true });
+    expect(selectedIds()).toEqual(['u6']);
+    fireEvent.keyDown(document.body, { key: 'j', repeat: true });
+    expect(selectedIds()).toEqual(['u7']);
+    fireEvent.keyDown(document.body, { key: 'x', repeat: true });
+    expect(unitEl('u7').classList.contains('cut')).toBe(false);
   });
 
   it('selects a range with shift-click and cuts it', async () => {
