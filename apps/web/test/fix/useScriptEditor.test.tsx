@@ -69,8 +69,31 @@ describe('useScriptEditor', () => {
     act(() => void hook.result.current.apply({ type: 'confirm', unitIds: ['u1'] }));
     await waitFor(() => expect(hook.result.current.saveState).toBe('conflict'));
     expect(hook.result.current.saveError).toBe('This script was changed in another tab. Reload to continue.');
+    const save = vi.spyOn(services.repo, 'saveScript');
     act(() => void hook.result.current.apply({ type: 'confirm', unitIds: ['u7'] }));
+    await new Promise((r) => setTimeout(r, 20));
+    expect(save).not.toHaveBeenCalled();
+    expect(hook.result.current.script!.units[6].tagConfidence).toBe(1);
     expect((await stored()).script.title).toBe('Other tab');
+  });
+
+  it('saves an edit made while a save is in flight', async () => {
+    const { services, hook, stored } = await setup();
+    const realSave = services.repo.saveScript.bind(services.repo);
+    let release!: () => void;
+    const gate = new Promise<void>((r) => (release = r));
+    vi.spyOn(services.repo, 'saveScript').mockImplementationOnce(async (...args) => {
+      await gate;
+      return realSave(...args);
+    });
+    act(() => void hook.result.current.apply({ type: 'confirm', unitIds: ['u1'] }));
+    await waitFor(() => expect(hook.result.current.saveState).toBe('saving'));
+    act(() => void hook.result.current.apply({ type: 'confirm', unitIds: ['u7'] }));
+    release();
+    await waitFor(async () => expect((await stored()).rev).toBe(2));
+    const saved = (await stored()).script;
+    expect([saved.units[0].tagConfidence, saved.units[6].tagConfidence]).toEqual([1, 1]);
+    await waitFor(() => expect(hook.result.current.saveState).toBe('saved'));
   });
 
   it('keeps edits in memory after a failed save and retries on the next change', async () => {
