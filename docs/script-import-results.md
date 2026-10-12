@@ -26,7 +26,7 @@ Classical has the most fixes per page; licensed fails the most targets and has t
 - **licensed wrongSpeaker (20), inventedSpeech (15) and merge (12):** pasted text (variant p) keeps the running title header. `A DOLL'S HOUSE` is shaped like a name and recurs, so it becomes a speaker. It also hides the real cue printed just before it, because a cue directly followed by another cue is dropped as a title block. `THE IMPORTANCE OF BEING EARNEST` (five words, too long to be a name) is read as an invented speech.
 - **classical wrongSpeaker (58):** a speaker is prefix-merged into a joint speaker. `MARCELLUS` becomes an alias of `MARCELLUS AND BARNARDO` (and `HORATIO` of `HORATIO AND MARCELLUS`, `ROSENCRANTZ` of `ROSENCRANTZ AND GUILDENSTERN`), so every later speech by Marcellus is credited to the pair. These speeches are mostly flagged, because the 0.8 alias confidence multiplies a line confidence below 1. The runs of these fixes make the worst page (9).
 - **classical split (21):** two different causes. (a) A speaker who speaks only once in the excerpt (`GHOST.`, `ALL.`, `LUCIANUS.`) has an inline cue that isn't "known", and `cueInline.primary` (1.5) is too weak to beat dialogue, so the speech joins the previous one. (b) Classical 2 sung stanzas and read letters are separate truth units of the same speaker with no cue between them, so they merge into one predicted unit. That is truth granularity, not a tagger fault.
-- **classical false flags (2.98/page):** almost all are in classical 2 (≈ 125 per document). Abbreviated cues (`HAM`, `KIN`) are prefix-merged at 0.8, so every abbreviated speech falls below the flag line. They should be cast-list merges at 0.95, but the cast list is never read: the header `Dramatis Personæ` doesn't match `CAST_LIST_HEADER`, because the regex's `\b` after `æ` fails without the `u` flag (see shortfall S3).
+- **classical false flags (2.98/page):** almost all are in classical 2 (≈ 125 per document). Abbreviated cues (`HAM`, `KIN`) are prefix-merged at 0.8, so every abbreviated speech falls below the flag line. They should be cast-list merges at 0.95, but the cast list is never read: the header `Dramatis Personæ` doesn't match `CAST_LIST_HEADER`, because the regex's trailing `\b` is ASCII-only (with or without the `u` flag), so it never matches after `æ` (see shortfall S3).
 
 ## Round 1 — tuning cycles
 
@@ -85,16 +85,18 @@ What remains on the tuning set:
 - **licensed:** 44 of its 54 fixes and nearly all its text errors are in the three pasted-text (p) documents, from the running header (S1).
 - **classical:** 57 wrongSpeaker fixes are joint-speaker merges (S2). Nine inventedHeading fixes, all unflagged, are `SCENE. Elsinore.` (S5). The false flags are the classical 2 abbreviations (S3).
 
-## Named shortfalls (need a rule change, not a constant)
+## Named shortfalls (need a code or truth change, not a constant)
 
-| Id | Shortfall | Evidence | Proposed rule |
-|---|---|---|---|
-| S1 | **Pasted-text running header.** In text input a title header with no digits survives clean-up. It becomes a speaker (`A DOLL'S HOUSE`) or an invented speech (`THE IMPORTANCE OF BEING EARNEST`). | Tune: licensed p 44 of 54 licensed fixes, licensed text accuracy 99.40%, most unflagged licensed errors. Held-out: licensed p wrongSpeaker 33, merge 11, inventedSpeech 13, worst page 9. | Recurring-header rule for pasted text: drop a non-dialogue-shaped line that recurs ≥ 3 times next to a page-number line, or at the estimated page boundaries. |
-| S2 | **Prefix merge into joint speakers.** `MARCELLUS` → `MARCELLUS AND BARNARDO`. Reviewers also noted that the prefix test isn't word-bounded (`ALL` → `ALLEN`); that wasn't seen in this corpus. | Tune: classical wrongSpeaker 57, worst page 9, speaker accuracy 95.5%. | Never merge a name into an `X AND Y` / `X & Y` token, and require a word boundary for a whole-word prefix. |
-| S3 | **`Dramatis Personæ` is not a cast-list header.** `CAST_LIST_HEADER`'s trailing `\b` fails after `æ` (no `u` flag), so Gutenberg Shakespeare has no cast list. Abbreviations merge at 0.8 instead of 0.95, and every abbreviated speech is flagged. | Tune: classical 2 ≈ 130 false flags per document (classical 4.16/page). Held-out: romeo 2 69–125 per document (classical 2.31/page). | Fix the regex (`u` flag, or a lookahead for space, punctuation or end of line). |
-| S4 | **Bracket block across two inline directions.** `(drops her cloak) Someone is coming now! (Goes to the door.)` counts as one bracketed block, because the bracket opened at the line start closes mid-line. | Tune: residual missedSpeech in licensed 2 (6) and word 2 (10). A stronger constant fix is blocked by the stand-alone-direction unit test (cycle 5). | A block only when the bracket opened at the line start is the one that closes at the line end. |
-| S5 | **Setting line read as a heading.** Gutenberg's `SCENE. Elsinore.` at the end of the cast list matches `^scene\b`. | Tune: classical inventedHeading 9, all unflagged. Held-out: classical inventedHeading 16 (15 unflagged), the main reason held-out classical flagged share is 32.6%. | A `SCENE` line with no number or ordinal that ends the front matter stays front matter. |
-| S6 | **Same-speaker units with no cue between them** (songs, letters, continuation speeches) merge into one predicted unit. | Tune: classical split 11 (classical 2). Held-out: classical 3 split 11, licensed split 12. | Accept for M2b, or split on a vertical gap / verse indent. This is truth granularity, not a misread. |
+Class, per the round-1 review: **(a)** a defect, where built code contradicts the spec's stated intent; **(b)** a truth artefact, where the corpus truth asks for something no spec-conformant importer can see; **(c)** a new rule the spec doesn't yet have. (a) and (b) were fixed before round 2 (see "Round 1 → round 2 fixes"); (c) are round-2 rule candidates.
+
+| Id | Class | Shortfall | Evidence | Proposed rule |
+|---|---|---|---|---|
+| S1 | (c) new rule | **Pasted-text running header.** In text input a title header with no digits survives clean-up. It becomes a speaker (`A DOLL'S HOUSE`) or an invented speech (`THE IMPORTANCE OF BEING EARNEST`). | Tune: licensed p 44 of 54 licensed fixes, licensed text accuracy 99.40%, most unflagged licensed errors. Held-out: licensed p wrongSpeaker 33, merge 11, inventedSpeech 13, worst page 9. | Recurring-header rule for pasted text: drop a non-dialogue-shaped line that recurs ≥ 3 times next to a page-number line, or at the estimated page boundaries. |
+| S2 | (c) new rule | **Prefix merge into joint speakers.** `MARCELLUS` → `MARCELLUS AND BARNARDO`. Reviewers also noted that the prefix test isn't word-bounded (`ALL` → `ALLEN`); that wasn't seen in this corpus. | Tune: classical wrongSpeaker 57, worst page 9, speaker accuracy 95.5%. | Never merge a name into an `X AND Y` / `X & Y` token, and require a word boundary for a whole-word prefix. |
+| S3 | (a) defect | **`Dramatis Personæ` is not a cast-list header.** `CAST_LIST_HEADER`'s trailing `\b` is ASCII-only, so it fails after `æ`, and Gutenberg Shakespeare has no cast list. Abbreviations merge at 0.8 instead of 0.95, and every abbreviated speech is flagged. | Tune: classical 2 ≈ 130 false flags per document (classical 4.16/page). Held-out: romeo 2 69–125 per document (classical 2.31/page). | Replace the trailing `\b` with a Unicode-aware end-of-word lookahead, `(?![\p{L}\p{N}_])` under `/iu`. The `u` flag alone does not help: `\b` stays ASCII-only under `/iu`. |
+| S4 | (a) defect | **Bracket block across two inline directions.** `(drops her cloak) Someone is coming now! (Goes to the door.)` counts as one bracketed block, because the bracket opened at the line start closes mid-line. | Tune: residual missedSpeech in licensed 2 (6) and word 2 (10). A stronger constant fix is blocked by the stand-alone-direction unit test (cycle 5). | A block only when the bracket opened at the line start is the one that closes at the line end. |
+| S5 | (c) new rule | **Setting line read as a heading.** Gutenberg's `SCENE. Elsinore.` at the end of the cast list matches `^scene\b`. | Tune: classical inventedHeading 9, all unflagged. Held-out: classical inventedHeading 16 (15 unflagged), the main reason held-out classical flagged share is 32.6%. | A `SCENE` line with no number or ordinal that ends the front matter stays front matter. |
+| S6 | (b) truth artefact | **Same-speaker units with no cue between them** (songs, letters, continuation speeches) merge into one predicted unit. | Tune: classical split 11 (classical 2). Held-out: classical 3 split 11, licensed split 12. | Truth granularity, not a misread: spec §5.3 ends a speech only at a cue or heading, so the truth should merge a same-speaker continuation that has nothing visible before it. |
 
 ## Round 1 — held-out
 
@@ -119,3 +121,39 @@ Run once, after freezing. Commands: `npm run harness -- build-corpus --set heldo
 - **word: 0.67 held-out vs 0.04 tune (+0.63, over the 0.3 limit). The style behind it is word 3:** mixed `Name:` and own-line cues in mixed case, leading tabs, some lines shouted in capitals. All nine word 3 documents (earnest, dolls-house and seagull) hold 116 of the family's 120 fixes, and all 114 missedSpeech. The seagull word 1, 2 and p documents have 4 fixes between them. Of the missed speeches, 112 are flagged, and eight of the nine word 3 documents lose 97–468 spoken words each. So whole speeches are being tagged as non-dialogue at low confidence, not credited to the wrong speaker. The held-out documents were not opened, to keep them clean for round 2. Two candidates follow from the style: leading tabs moving speech lines off the dialogue band toward the direction band, and mixed-case own-line names that the all-capitals own-line pattern can't match. Neither is confirmed. There is no word 3 document in the tuning set, so this style was never tuned.
 - **licensed: 0.29 vs 0.19 (+0.10, within the limit).** The worst pages (9 and 7) and 59 of the 76 fixes are in the seagull pasted-text documents. Their fix kinds (unflagged wrongSpeaker, merge and inventedSpeech) match S1, the running title header.
 - **classical: 0.22 vs 0.66 (better).** Romeo has few joint speakers (S2), so wrongSpeaker drops to 13. The classical failures are flagged share (the unflagged `SCENE.` setting line, S5, and classical 3 splits, S6) and false flags (romeo 2 abbreviations, S3).
+
+## Round 1 → round 2 fixes
+
+Task 18b fixed the two defects (a) and the truth artefact (b) before round 2. These are not tuning changes; no constant in `weights.ts` changed.
+
+- **S3 (a), `fix(script): cast-list header matches Dramatis Personæ`.** `CAST_LIST_HEADER` ends in `(?![\p{L}\p{N}_])` under `/iu` instead of `\b`. `Dramatis Personæ`, `DRAMATIS PERSONAE`, `Persons Represented`, `THE PERSONS IN THE PLAY` and `Characters` match; `Characterisation of…` and `Castle` don't.
+- **S4 (a), `fix(script): a bracket block must close at a line end`.** `bracketBlocks` tracks bracket depth character by character. A block counts only if the bracket opened at the line start first returns to depth 0 at the end of a line (only `.,;:!?` and whitespace may follow). `(drops her cloak) Someone is coming now! (Goes to the door.)` is no longer a block, nor is a two-line block that closes mid-way through its second line.
+- **S6 (b), `fix(harness): truth merges same-speaker continuations with no visible boundary`.** When a source dialogue unit continues the same speaker's dialogue with nothing between them, its leading text is appended (`\n`-joined) to the previous dialogue truth unit, and its paragraphs point at that unit. Inline directions inside the continuation still split it as usual. Rendering is unchanged: on every tuning document the paragraphs, the next rng draw and the cast are identical before and after, and only the truth changes (11 dialogue truth units merged across the tuning set).
+
+### Interactions
+
+With S3 fixed, Gutenberg Shakespeare's cast list is read and abbreviations merge at 0.95, so the classical 2 abbreviation flags shrink. What still keeps classical false flags failing is round-1 cycle 2 (weaker bracket weights): it leaves lines near `[Exit Polonius.]`-style brackets with lower line confidence, and a speech merged at 0.95 needs a line confidence of about 0.84 to stay above the flag line. Cycle 2 trades against S4: it was kept to turn silent word errors from `(a) text (b)` lines into flagged ones, and S4 now removes those errors at the source. A tune-set counterfactual after these fixes (cycle 2 reverted in-process, no file changed) gives classical false flags 2.54 → 1.51 per page and word 0.52 → 0.09, with identical fixes in every family. So cycle 2 is re-decided in round 2, now that S3, S4 and S6 have landed.
+
+### After round-1 defect fixes (tuning set)
+
+Constants unchanged from round-1 final. Command: `npm run harness -- script-eval --set tune --verbose --out harness/out/script-eval/round2-prefix-tune`. The held-out set was not run.
+
+| Family | Docs | Pages | Fixes/page (≤ 1) | Worst page (≤ 4) | Speaker acc. (≥ 98%) | Flagged share (≥ 90%) | False flags/page (≤ 2) | Text acc. (≥ 99.5%) | Gate |
+|---|---|---|---|---|---|---|---|---|---|
+| licensed | 18 | 289 | 0.17 | 3 | 99.5% | 19.1% | 0.49 | 99.44% | FAIL: flaggedShare 0.191 < 0.9; textAccuracy 0.9944 < 0.995 |
+| word | 18 | 186 | 0.00 | 0 | 100.0% | 100.0% | 0.52 | 100.00% | PASS |
+| classical | 9 | 130 | 0.59 | 9 | 95.5% | 85.5% | 2.54 | 99.87% | FAIL: worstPageFixes 9 > 4; speakerAccuracy 0.955 < 0.98; flaggedShare 0.855 < 0.9; falseFlagsPerPage 2.54 > 2 |
+
+| Family | missedSpeech | inventedSpeech | wrongSpeaker | missedHeading | inventedHeading | split | merge |
+|---|---|---|---|---|---|---|---|
+| licensed | 0 | 15 | 20 | 0 | 0 | 0 | 12 |
+| word | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| classical | 2 | 0 | 57 | 0 | 9 | 0 | 1 |
+
+Against round-1 final on the tuning set (the three fixes were measured together; each movement is attributed by its round-1 cause):
+
+- **S4:** licensed missedSpeech 7 → 0 and word missedSpeech 10 → 0. Word now has no fixes. Licensed flagged share falls 27.8% → 19.1% because the errors removed were mostly flagged ones; what is left is mostly the unflagged pasted-text header errors (S1).
+- **S3:** classical false flags 4.16 → 2.54 per page, still over 2 (see Interactions).
+- **S6:** classical split 11 → 0.
+- Still open, all (c): S1 (licensed p), S2 (classical wrongSpeaker 57, worst page 9), S5 (classical inventedHeading 9).
+
