@@ -403,6 +403,16 @@ Renderers in `harness/src/corpus/` turn a source play into a document of about 1
 - Both rounds and every held-out number go into `docs/script-import-results.md`. A NO-GO report names each shortfall and gives options.
 - M2b may start whatever the result, because the correction screen is the safety net. A NO-GO changes how much M2b's screen must carry.
 
+### 6.5a Round 2 re-scope (decided 2026-10-12)
+
+Round 1 failed the held-out gate. Its results (`docs/script-import-results.md`) named six shortfalls. Three were defects in built code or in the corpus truth (S3 cast-list header after `æ`, S4 bracket blocks, S6 invisible same-speaker boundaries), and were fixed before round 2 as defects, not tuning. The other three need rules this spec didn't have. The user decided that **round 2 may add these three rules, each with unit tests, alongside constant tuning**:
+
+- **S1, pasted-text running header.** In estimated-page input, a line that recurs at least 5 times with identical text (no digits needed), sits within 2 lines of a page-number line or at a regular spacing, and is not a recurring cue token, is a running header and is removed. The exact form is the implementer's, constrained by: speaker names that recur are never removed.
+- **S2, joint speakers.** A name never prefix-merges into a joint name (one containing ` AND ` or ` & `); a joint name stays its own character.
+- **S5, setting line in front matter.** A `SCENE` line with no number or ordinal (e.g. `SCENE. Elsinore.`) inside or at the end of the cast list stays front matter rather than ending it as a heading.
+
+Everything else in §6.5 stands: tune on the tuning set only, at most 8 measure-and-change loops in round 2, then one held-out measurement and the GO/NO-GO verdict. Round 2 also re-decides round 1's cycle-2 bracket weights now that S3/S4 are fixed.
+
 ### 6.6 Harness commands
 
 | Command | What it does |
