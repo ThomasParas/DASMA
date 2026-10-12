@@ -8,6 +8,7 @@ import { useShortcuts } from '../ui/shortcuts';
 import { buildFixActions, liveSelection, liveWords, pickOp, type FixContext, type Panel, type Selection, type WordSel } from './actions';
 import { CharacterList } from './CharacterList';
 import { CharacterPicker } from './CharacterPicker';
+import { EditTextPanel } from './EditTextPanel';
 import { CheckList } from './CheckList';
 import { FixHeader } from './FixHeader';
 import { FixPanel } from './FixPanel';
@@ -171,6 +172,14 @@ export function FixWorkspace({ editor, script, production, onProductionChange }:
           {panel.kind === 'picker' && sel && (
             <CharacterPicker script={script} anchorId={sel.anchor} title={PICKER_TITLES[panel.purpose]} onPick={onPick} onCreate={onCreate} onClose={() => setPanel({ kind: 'none' })} />
           )}
+          {panel.kind === 'editText' &&
+            sel?.unitIds.length === 1 &&
+            (() => {
+              const unit = script.units.find((u) => u.id === sel.anchor);
+              return unit ? (
+                <EditTextPanel key={unit.id} unit={unit} onSave={(text) => void apply({ type: 'editText', unitId: unit.id, text })} onCancel={() => setPanel({ kind: 'none' })} />
+              ) : null;
+            })()}
         </FixPanel>
       </div>
       {panel.kind === 'help' && <ShortcutSheet actions={actions} onClose={() => setPanel({ kind: 'none' })} />}

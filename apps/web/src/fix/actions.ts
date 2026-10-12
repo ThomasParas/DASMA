@@ -117,6 +117,7 @@ export function buildFixActions(ctx: FixContext): FixAction[] {
   const sel = ctx.sel;
   const has = !!sel && sel.unitIds.length > 0;
   const selected = sel ? ctx.script.units.filter((u) => sel.unitIds.includes(u.id)) : [];
+  const one = sel && sel.unitIds.length === 1 ? (ctx.script.units.find((u) => u.id === sel.anchor) ?? null) : null;
   const wordsUnit = ctx.words ? (ctx.script.units.find((u) => u.id === ctx.words!.unitId) ?? null) : null;
   const ids = () => targetIds(ctx);
   const kind = (k: 'direction' | 'heading' | 'frontMatter') => () => void ctx.apply({ type: 'setKind', unitIds: ids(), kind: k });
@@ -147,6 +148,23 @@ export function buildFixActions(ctx: FixContext): FixAction[] {
     { id: 'direction', label: 'Direction', keys: ['d'], group: 'tag', enabled: has, run: kind('direction') },
     { id: 'heading', label: 'Heading', keys: ['h'], group: 'tag', enabled: has, run: kind('heading') },
     { id: 'frontMatter', label: 'Front matter', keys: ['f'], group: 'tag', enabled: has, run: kind('frontMatter') },
+    { id: 'editText', label: 'Edit text', keys: ['e'], group: 'edit', enabled: !!one, run: () => ctx.openPanel({ kind: 'editText' }) },
+    {
+      id: 'split',
+      label: 'Split here',
+      keys: ['/'],
+      group: 'edit',
+      enabled: !!ctx.words && ctx.words.from > 0,
+      run: () => void ctx.apply({ type: 'split', unitId: ctx.words!.unitId, atWord: ctx.words!.from }),
+    },
+    {
+      id: 'join',
+      label: 'Join to previous',
+      keys: ['J'],
+      group: 'edit',
+      enabled: !!one && ctx.script.units[0]?.id !== one.id,
+      run: () => void ctx.apply({ type: 'join', unitId: one!.id }),
+    },
     {
       id: 'cut',
       label: wordsUnit ? 'Cut words' : 'Cut',
@@ -156,6 +174,17 @@ export function buildFixActions(ctx: FixContext): FixAction[] {
       run: () => {
         if (ctx.words && wordsUnit) ctx.apply({ type: 'setCutWords', unitId: ctx.words.unitId, from: ctx.words.from, to: ctx.words.to, cut: !wordsUnit.cut });
         else ctx.apply({ type: 'setCut', unitIds: sel!.unitIds, cut: !selected.every((u) => u.cut) });
+      },
+    },
+    {
+      id: 'overlap',
+      label: 'Overlap',
+      keys: ['o'],
+      group: 'edit',
+      enabled: !!ctx.words && wordsUnit?.kind === 'dialogue',
+      run: () => {
+        const w = ctx.words!;
+        ctx.apply({ type: 'setOverlap', unitId: w.unitId, from: w.from, to: w.to, on: !coveredBy(wordsUnit!.overlapRanges, w.from, w.to) });
       },
     },
     { id: 'sceneBreak', label: 'Scene break before', keys: ['b'], group: 'edit', enabled: has, run: () => void ctx.apply({ type: 'insertSceneBreak', beforeUnitId: sel!.anchor }) },
