@@ -17,7 +17,12 @@ export function parseHash(hash: string): Route {
   if (path === '/new') return { name: 'new' };
   const m = /^\/p\/([^/]+)(?:\/(import|fix|reimport))?$/.exec(path);
   if (!m) return { name: 'notFound' };
-  const id = decodeURIComponent(m[1]);
+  let id: string;
+  try {
+    id = decodeURIComponent(m[1]);
+  } catch {
+    return { name: 'notFound' };
+  }
   return m[2] ? { name: m[2] as 'import' | 'fix' | 'reimport', id } : { name: 'production', id };
 }
 

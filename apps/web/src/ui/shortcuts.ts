@@ -42,7 +42,7 @@ export interface ShortcutBinding {
   allowInFields?: boolean;
 }
 
-/** Binds keys on the window. Enter and Space on a focused button or link are left to the browser's own click. */
+/** Binds keys on the window. Enter and Space (without Cmd/Ctrl) on a focused button or link are left to the browser's own click. */
 export function useShortcuts(bindings: ShortcutBinding[], active = true): void {
   const ref = useRef(bindings);
   useLayoutEffect(() => {
@@ -52,7 +52,7 @@ export function useShortcuts(bindings: ShortcutBinding[], active = true): void {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement | null)?.tagName;
-      if ((e.key === 'Enter' || e.key === ' ') && (tag === 'BUTTON' || tag === 'A')) return;
+      if ((e.key === 'Enter' || e.key === ' ') && !(e.metaKey || e.ctrlKey) && (tag === 'BUTTON' || tag === 'A')) return;
       const typing = isTypingTarget(e.target);
       for (const b of ref.current) {
         if (b.enabled === false || (typing && !b.allowInFields)) continue;

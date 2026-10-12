@@ -12,6 +12,7 @@ function Harness({ log }: { log: string[] }) {
     { keys: ['Escape'], run: () => log.push('esc'), allowInFields: true },
     { keys: ['Enter'], run: () => log.push('enter') },
     { keys: ['d'], run: () => log.push('d'), enabled: false },
+    { keys: ['mod+Enter'], run: () => log.push('save'), allowInFields: true },
   ]);
   return (
     <>
@@ -67,5 +68,14 @@ describe('useShortcuts', () => {
     screen.getByRole('button', { name: 'Btn' }).focus();
     await user.keyboard('{Enter}');
     expect(log).toEqual([]);
+  });
+
+  it('fires Cmd/Ctrl+Enter while a button has focus', async () => {
+    const log: string[] = [];
+    render(<Harness log={log} />);
+    const user = userEvent.setup();
+    screen.getByRole('button', { name: 'Btn' }).focus();
+    await user.keyboard('{Meta>}{Enter}{/Meta}');
+    expect(log).toEqual(['save']);
   });
 });

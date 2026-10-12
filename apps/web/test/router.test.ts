@@ -12,6 +12,8 @@ describe('router', () => {
     expect(parseHash('#/p/abc/reimport')).toEqual({ name: 'reimport', id: 'abc' });
     expect(parseHash('#/p/abc/zzz')).toEqual({ name: 'notFound' });
     expect(parseHash('#/elsewhere')).toEqual({ name: 'notFound' });
+    expect(parseHash('#/p/%')).toEqual({ name: 'notFound' });
+    expect(parseHash('#/p/%E0%A4%A')).toEqual({ name: 'notFound' });
   });
 
   it('builds hrefs that parse back', () => {
