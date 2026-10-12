@@ -42,6 +42,15 @@ function readTruth(path: string): Pick<TruthFile, 'pages' | 'cast' | 'units'> {
   if (!t || typeof t.pages !== 'number' || !Array.isArray(t.cast) || !Array.isArray(t.units)) {
     throw new Error(`${path} must hold { pages, cast, units }`);
   }
+  t.units.forEach((u: unknown, i: number) => {
+    const unit = u as Partial<Record<'kind' | 'text' | 'page', unknown>> | null;
+    const bad = (field: string, want: string): never => {
+      throw new Error(`${path}: unit ${i} must have ${field} as ${want}`);
+    };
+    if (typeof unit?.kind !== 'string') bad('kind', 'a string');
+    if (typeof unit?.text !== 'string') bad('text', 'a string');
+    if (!Number.isInteger(unit?.page) || (unit?.page as number) < 1) bad('page', 'a positive integer');
+  });
   return { pages: t.pages, cast: t.cast, units: t.units };
 }
 

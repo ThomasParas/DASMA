@@ -39,6 +39,22 @@ describe('loadLocalDocs and evaluateLocal', () => {
     expect(() => loadLocalDocs(dir)).toThrow(/bad\.truth\.json must hold \{ pages, cast, units \}/);
   });
 
+  it('names the truth file and unit index when a unit lacks kind, text or a positive integer page', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'dasma-local-unit-'));
+    writeFileSync(join(dir, 'u.txt'), 'HAMLET\nTo be.');
+    const ok = { kind: 'dialogue', text: 'To be.', page: 1 };
+    const check = (unit: unknown, message: RegExp) => {
+      writeFileSync(join(dir, 'u.truth.json'), JSON.stringify({ pages: 1, cast: [], units: [ok, unit] }));
+      expect(() => loadLocalDocs(dir)).toThrow(message);
+    };
+    check({ text: 'x', page: 1 }, /u\.truth\.json: unit 1 must have kind as a string/);
+    check({ kind: 'dialogue', page: 1 }, /unit 1 must have text as a string/);
+    check({ kind: 'dialogue', text: 'x' }, /unit 1 must have page as a positive integer/);
+    check({ kind: 'dialogue', text: 'x', page: 0 }, /unit 1 must have page as a positive integer/);
+    check({ kind: 'dialogue', text: 'x', page: 1.5 }, /unit 1 must have page as a positive integer/);
+    check(null, /unit 1 must have kind as a string/);
+  });
+
   it('names the script when it cannot be imported', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'dasma-local-broken-'));
     writeFileSync(join(dir, 'broken.docx'), 'not a zip');
