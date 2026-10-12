@@ -166,6 +166,8 @@ The rules run in this order:
      A page number counts up, so it goes. "SERVANT 2" stays the same, so it is kept.
 
      A digit-free running header in this input is removed by rule S1 (§6.5a).
+
+     Lines that are headings (§5.2) or speaker cues (§5.1) are never removed by the running-line rules, so `Scene 1` … `Scene 4` and numbered speakers such as `GUARD 1` / `GUARD 2` are kept even though their digits differ (this restores the "SERVANT 2 is kept" intent above, and matches §6.5a). A page counter never repeats a value, so a masked line whose digit values repeat across copies is a speaker, not a page number. In real-page input, only headings are exempt from the edge-zone rule: an all-capitals running title is cue-shaped, and a cue that also speaks away from the edge zone is already kept because it recurs inside the page.
 2. **Page numbers.** A line is removed when its whole text matches `^(page\s+)?[-–—]?\s*\d{1,4}\s*[-–—]?$` (case-insensitive) or a Roman numeral up to `xl`.
 3. **Line numbers.** A number `n` is removed when both conditions hold:
    - `n` is a multiple of 5;
@@ -206,7 +208,7 @@ interface DocProfile {
 
 | Convention | A line matches when |
 |---|---|
-| `ownLine` | the whole line is 1–4 words; at least 80% of its letters are capitals; it is optionally followed by `.` or `:` or a parenthetical, such as `HAMLET (aside)`; and the next line is not like that. |
+| `ownLine` | the whole line is 1–4 words, optionally followed by a 1–2 digit number (`GUARD 1`); at least 80% of its letters are capitals; it is optionally followed by `.` or `:` or a parenthetical, such as `HAMLET (aside)`; and the next line is not like that. |
 | `inlinePeriod` | the line starts `^[A-Z][A-Z'’ .-]{1,30}\.\s+\S`, with at least 80% capitals in the name. |
 | `inlineColon` | the line starts `^[A-Za-z][A-Za-z'’ .-]{1,30}:\s*\S`. |
 | `classicalAbbrev` | the line starts `^[A-Z][a-z]{1,5}\.\s+\S`, such as `Ham. `. |
@@ -215,7 +217,7 @@ interface DocProfile {
 
 - A token counts toward `cueTokens` only if it occurs in speaker position at least 2 times. Comparison ignores case and trailing punctuation.
 - `primary` is the convention with the most matches among recurring tokens.
-- A cast list is a block starting with a line that matches `^(dramatis person(ae|æ)|characters|cast( of characters)?|(the )?persons (in|of) the play|persons represented)\b` (case-insensitive). The block ends at the first heading, the first line longer than 12 words, or after 40 lines. A setting line (rule S5, §6.5a) neither ends the block nor adds a name. A setting line names a place, so a bare `SCENE` stays a heading. Each name is the text before the first `,`, `:` or ` — `, uppercased, without a trailing `.`.
+- A cast list is a block starting with a line that matches `^(dramatis person(ae|æ)|characters|cast( of characters)?|(the )?persons (in|of) the play|persons represented)(?![\p{L}\p{N}_])` (case-insensitive, with the `u` flag; the end-of-word check is a Unicode lookahead because `\b` stays ASCII-only and never matches after `æ`). The block ends at the first heading, the first line longer than 12 words, or after 40 lines. A setting line (rule S5, §6.5a) neither ends the block nor adds a name. A setting line names a place, so a bare `SCENE` stays a heading. Each name is the text before the first `,`, `:` or ` — `, uppercased, without a trailing `.`.
 - `frontMatterEnd` is the first line that is either a heading (§5.2) or the first of three consecutive speeches that use the primary convention. A setting line inside or at the end of the cast list is not that heading (rule S5, §6.5a).
 
 ### 5.2 Line states and scoring (`tag.ts`, `weights.ts`)
@@ -410,9 +412,9 @@ Renderers in `harness/src/corpus/` turn a source play into a document of about 1
 
 Round 1 failed the held-out gate. Its results (`docs/script-import-results.md`) named six shortfalls. Three were defects in built code or in the corpus truth (S3 cast-list header after `æ`, S4 bracket blocks, S6 invisible same-speaker boundaries), and were fixed before round 2 as defects, not tuning. The other three need rules this spec didn't have. The user decided that **round 2 may add these three rules, each with unit tests, alongside constant tuning**:
 
-- **S1, pasted-text running header.** In estimated-page input, a line that recurs at least 5 times with identical text (no digits needed), sits within 2 lines of a page-number line or at a regular spacing, and is not a recurring cue token, is a running header and is removed. The exact form is the implementer's, constrained by: speaker names that recur are never removed. Because spacing alone can't tell a running title from a minor speaker who enters at regular intervals, the regular-spacing route never removes a cue-shaped line.
+- **S1, pasted-text running header.** In estimated-page input, a line that recurs at least 5 times with identical text (no digits needed), sits within 2 lines of a page-number line or at a regular spacing, and is not a recurring cue token, is a running header and is removed. The exact form is the implementer's, constrained by: speaker names that recur are never removed. (Clarified after round 2, from review, not part of the 2026-10-12 decision: Because spacing alone can't tell a running title from a minor speaker who enters at regular intervals, the regular-spacing route never removes a cue-shaped line.)
 - **S2, joint speakers.** A name never prefix-merges into a joint name (one containing ` AND ` or ` & `); a joint name stays its own character.
-- **S5, setting line in front matter.** A `SCENE` line with no number or ordinal (e.g. `SCENE. Elsinore.`) inside or at the end of the cast list stays front matter rather than ending it as a heading. A setting line names a place, so a bare `SCENE` (Earnest's scene heading) stays a heading.
+- **S5, setting line in front matter.** A `SCENE` line with no number or ordinal (e.g. `SCENE. Elsinore.`) inside or at the end of the cast list stays front matter rather than ending it as a heading. (Clarified after round 2, not part of the 2026-10-12 decision: A setting line names a place, so a bare `SCENE` (Earnest's scene heading) stays a heading.)
 
 Everything else in §6.5 stands: tune on the tuning set only, at most 8 measure-and-change loops in round 2, then one held-out measurement and the GO/NO-GO verdict. Round 2 also re-decides round 1's cycle-2 bracket weights now that S3/S4 are fixed.
 

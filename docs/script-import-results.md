@@ -14,7 +14,7 @@ Spec: docs/superpowers/specs/2026-10-11-script-import-design.md (§1 targets, §
 
 A unit whose boundary shifts scores a merge and a split (spec-literal), so fixes/page counts one misplaced boundary twice.
 
-The held-out set was measured once, at `0d1ca20`. One fix (`ce0833e`, an S1 guard) was made after that measurement to honour §6.5a; the tuning numbers are unchanged and the verdict stands (see "Post-run fix").
+The held-out set was measured once, at `0d1ca20`. Two fixes (`ce0833e`, an S1 guard, and `dae6251`, the running-line rules keeping headings and speaker cues) were made after that measurement; the tuning numbers are unchanged and the verdict stands (see "Post-run fix").
 
 ### Shortfalls
 
@@ -46,6 +46,17 @@ These fix kinds are still common on held-out documents:
 - **wrongSpeaker (15, 13 unflagged):** mostly a whole character merged into another (`CAPULET` → `CAPULET'S COUSIN`). The screen needs character split and alias editing ("these speeches belong to CAPULET"), not only per-unit retagging, and it should show each character's aliases so a wrong merge is visible without a flag.
 - **inventedHeading (12, 11 unflagged):** front-matter text read as a heading. A retag from heading to front matter.
 - **merge, split and inventedSpeech (7):** unit boundary edits (split a unit at a line, join two units) and text editing (spec §6, item 4).
+
+## Real-script risks
+
+Risks the synthetic corpus structurally cannot measure. Each is one line with a repro sketch and a proposed remedy. They are decisions for the user (M2a.1 or M2b), not changes made on this branch, except C1, which is fixed. Before M2b's screen design, score a few real scripts with `--set local` (spec §6.6) to see which of these occur in the scripts DASMA's users import.
+
+- **C1, running-line rules deleted headings and numbered speakers (fixed, `dae6251`).** Repro: pasted text with `Scene 1` … `Scene 4`, or `GUARD 1` / `GUARD 2` cueing three speeches each; a real-page document whose `SCENE 2` / `SCENE 3` start pages. Remedy applied: headings and cue-shaped lines are exempt from the running-line rules.
+- **I1, prefix merge between two distinct cast-list names (open).** Repro: a cast list naming `MAX` and `MAXINE`, then speeches cued `MAX` and `MAXINE`; `MAX` merges into `MAXINE` at 0.92, above the flag line, so it is silent. Same mechanism as `CAPULET` → `CAPULET'S COUSIN` (H4 ii). Remedy: a token that is itself a cast-list name never prefix-merges into another cast-list name.
+- **I2, `classicalAbbrev` matches ordinary capitalised words (open).** Repro: continuation paragraphs that start `Okay.`, `Sorry.`, `Right.` or `Fine.` in a script that already has a few such lines. Each reads as a cue and invents a character, flagged at 0.60, or unflagged at 0.97 once `classicalAbbrev` reaches the secondary share of cues. Remedy: accept a classical cue only for a token on a cast list or a known-abbreviation list, or require its speaker to recur in the primary convention too.
+- **I3, `NAME<tab>dialogue` and unpunctuated `NAME dialogue` layouts are unrecognised (open, loud).** Repro: `ANNA<tab>Where is the car?` as a docx or pasted line. No speaker is found and import warns `noSpeakers`, so the failure is visible. Remedy: add a tab-separated and a caps-name-then-text convention, or point the user at paste with colons.
+- **I4, shallow docx styles (open).** Repro: a docx whose paragraphs have no `basedOn` chain, use only the default paragraph style, or style runs with `rStyle`. The corpus's docx files never do this, so how much indent, italic and bold evidence is lost is unmeasured. A docx with a single explicit page break puts nearly every unit on page 2 and skips the running-header rule. Remedy: resolve `rStyle` and the default style, and treat one page break as no real pages.
+- **Numbered speakers in pasted text (fixed with C1).** `GUARD 1` / `GUARD 2` now survive clean-up and tag as separate characters.
 
 ## Round 1 — tuning baseline
 
@@ -293,3 +304,5 @@ A unit whose boundary shifts scores a merge and a split (spec-literal), so one m
 ### Post-run fix
 
 The held-out set was measured once, at `0d1ca20`, and was not re-run. After that measurement, review found that S1's regular-spacing route could remove a minor speaker who enters at regular intervals: in pasted text with no page numbers, a `MESSENGER` cue recurring at gaps of 27–33 lines lost 5 of its 6 cues, so those speeches would silently join the previous speaker. That breaks §6.5a ("speaker names that recur are never removed"). Commit `ce0833e` makes the spacing route skip any cue-shaped line (the page-number route is unchanged) and adds the regression test. The tuning set is unchanged: `npm run harness -- script-eval --set tune --verbose --out harness/out/script-eval/round2-tune-postfix` gives a `scores.json` byte-identical to round2-tune-final. The verdict is unchanged: **NO-GO**.
+
+**Second post-held-out fix (`dae6251`, whole-branch review, ruling R22).** The clean-up rule for estimated pages removed any line that, with digits masked, recurred 3 or more times with differing digits. That deleted `Scene 1` … `Scene 4` and numbered own-line speakers such as `GUARD 1` / `GUARD 2`: the scene headings vanished from the import, and the guards' speeches joined the previous speaker. The real-page edge-zone rule had the same hole for scene headings that start pages. The synthetic corpus never exercises either case, which is why neither run saw it. Headings and cue-shaped lines are now exempt from the digits rule, a masked line whose digit values repeat across copies is a speaker rather than a page counter, and the edge-zone rule keeps headings (an all-capitals running title is cue-shaped, and a cue that also speaks mid-page is already kept by its inner-count test). The own-line cue grammar also accepts a 1–2 digit number after the name (`GUARD 1`), so the kept lines tag as their own characters. The tuning set is unchanged: `npm run harness -- script-eval --set tune --verbose --out harness/out/script-eval/final-fix-tune` gives a `scores.json` byte-identical to round2-tune-final. The held-out set was not re-run. The verdict is unchanged: **NO-GO**.
