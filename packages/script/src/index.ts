@@ -22,3 +22,4 @@ export { UNTITLED, importScript, sniffUnsupported } from './import';
 export { DASMA_EXTENSION, DASMA_FORMAT, DASMA_FORMAT_VERSION, DASMA_MIME, readDasma, writeDasma } from './format';
 export { SAME_UNIT_SIMILARITY, carryOver, diffScripts, similarity } from './diff';
 export type { ScriptDiff } from './diff';
+export { wordSpans } from './words';

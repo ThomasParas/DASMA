@@ -4,9 +4,9 @@ import { extractDocx } from './extract/docx';
 import { extractPdf } from './extract/pdf';
 import { extractText } from './extract/text';
 import { applyOverlapMarks } from './overlap';
-import { profileDoc } from './profile';
+import { nearestBand, profileDoc } from './profile';
 import { tagLines } from './tag';
-import type { ImportInput, ImportResult, ImportWarning, RawDoc } from './types';
+import type { CleanLine, ImportInput, ImportResult, ImportWarning, RawDoc, UnitHint } from './types';
 import { buildUnits } from './units';
 import { FLAG_BELOW, MANY_FLAGGED_SHARE } from './weights';
 
@@ -41,5 +41,19 @@ export async function importScript(input: ImportInput, opts: { title?: string } 
   if (units.length && flagged / units.length > MANY_FLAGGED_SHARE) warnings.push({ code: 'manyFlagged', share: flagged / units.length });
 
   const title = opts.title ?? units.find((u) => u.kind === 'frontMatter')?.text.split('\n')[0] ?? UNTITLED;
-  return { script: { title, characters: built.cast.characters, units }, profile, warnings, pages: doc.pages };
+  const lineAt = new Map<string, CleanLine>();
+  for (const l of doc.lines) for (const s of l.source) lineAt.set(`${s.page}:${s.line}`, l);
+  const unitHints: Record<string, UnitHint> = {};
+  for (const u of units) {
+    const first = u.source[0];
+    const l = first ? lineAt.get(`${first.page}:${first.line}`) : undefined;
+    const cue = built.cues[u.id];
+    unitHints[u.id] = {
+      band: l && !l.centered ? nearestBand(profile.bands, l.left) : null,
+      italic: l?.italic ?? false,
+      ...(cue ? { cue } : {}),
+    };
+  }
+
+  return { script: { title, characters: built.cast.characters, units }, profile, warnings, pages: doc.pages, unitHints };
 }

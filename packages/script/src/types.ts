@@ -112,9 +112,20 @@ export type ImportWarning =
   | { code: 'manyFlagged'; share: number }
   | { code: 'ambiguousAlias'; token: string; candidates: string[] };
 
+/** Layout facts about a unit's first line, kept beside a script version (not in `Script` or `.dasma`). */
+export interface UnitHint {
+  /** Indent band (`nearestBand`) of the unit's first line; null when it is centred. */
+  band: number | null;
+  italic: boolean;
+  /** The normalised cue token that started this unit's speech, or the token of a characterName unit. */
+  cue?: string;
+}
+
 export interface ImportResult {
   script: Script;
   profile: DocProfile;
   warnings: ImportWarning[];
   pages: number;
+  /** Keyed by unit id. */
+  unitHints: Record<string, UnitHint>;
 }

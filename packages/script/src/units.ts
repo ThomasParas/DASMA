@@ -1,4 +1,5 @@
 import { buildCast, type Cast } from './characters';
+import { normalizeCueToken } from './cues';
 import { SCENE_BREAK } from './patterns';
 import { CATEGORY, type TaggedLine } from './tag';
 import type { CleanDoc, CleanLine, DocProfile, ImportWarning, SourceRef, Unit, UnitKind } from './types';
@@ -18,8 +19,10 @@ interface Speaker {
   /** min(cue line confidence, …) × alias confidence. */
   factor: number;
   cap: number;
+  /** Normalised cue token, for `UnitHint.cue`. */
+  token?: string;
 }
-type Draft = Omit<Unit, 'id'>;
+type Draft = Omit<Unit, 'id'> & { cue?: string };
 
 /** Per-character italic mask of a line's text, from its spans. */
 function italicMask(l: CleanLine): boolean[] {
@@ -93,7 +96,15 @@ function splitSpeech(lines: SpeechLine[], speaker: Speaker): Draft[] {
     const source = touched.flatMap((i) => lines[i].source);
     if (kind === 'dialogue') {
       const tagConfidence = Math.min(Math.min(confidence, speaker.cap) * speaker.factor, speaker.characterId ? 1 : AMBIGUOUS_CONFIDENCE);
-      drafts.push({ kind, ...(speaker.characterId ? { characterId: speaker.characterId } : {}), text: body, cut: false, tagConfidence, source });
+      drafts.push({
+        kind,
+        ...(speaker.characterId ? { characterId: speaker.characterId } : {}),
+        text: body,
+        cut: false,
+        tagConfidence,
+        source,
+        ...(speaker.token ? { cue: speaker.token } : {}),
+      });
     } else drafts.push({ kind, text: body, cut: false, tagConfidence: confidence, source });
   };
   let cursor = 0;
@@ -108,7 +119,11 @@ function splitSpeech(lines: SpeechLine[], speaker: Speaker): Draft[] {
 }
 
 /** Spec §5.3: tagged lines → units with speakers, kinds, confidence, ids. */
-export function buildUnits(doc: CleanDoc, tagged: TaggedLine[], profile: DocProfile): { units: Unit[]; cast: Cast; warnings: ImportWarning[] } {
+export function buildUnits(
+  doc: CleanDoc,
+  tagged: TaggedLine[],
+  profile: DocProfile,
+): { units: Unit[]; cast: Cast; warnings: ImportWarning[]; cues: Record<string, string> } {
   const tokens = tagged.flatMap((t) => ((t.state === 'cue' || t.state === 'cueInline') && t.cue ? [t.cue.token] : []));
   const cast = buildCast(tokens, profile.castList);
   const drafts: Draft[] = [];
@@ -139,8 +154,11 @@ export function buildUnits(doc: CleanDoc, tagged: TaggedLine[], profile: DocProf
     flushDirections();
   };
   const startSpeaker = (t: TaggedLine): Speaker => {
+    const token = t.cue ? normalizeCueToken(t.cue.token) : undefined;
     const r = t.cue ? cast.resolve(t.cue.token) : null;
-    return r ? { characterId: r.characterId, factor: r.confidence, cap: t.confidence } : { factor: 1, cap: Math.min(t.confidence, AMBIGUOUS_CONFIDENCE) };
+    return r
+      ? { characterId: r.characterId, factor: r.confidence, cap: t.confidence, token }
+      : { factor: 1, cap: Math.min(t.confidence, AMBIGUOUS_CONFIDENCE), token };
   };
 
   doc.lines.forEach((l, i) => {
@@ -170,7 +188,14 @@ export function buildUnits(doc: CleanDoc, tagged: TaggedLine[], profile: DocProf
       case 'cue':
         flush();
         speaker = startSpeaker(t);
-        drafts.push({ kind: 'characterName', text: l.text, cut: false, tagConfidence: t.confidence, source: l.source });
+        drafts.push({
+          kind: 'characterName',
+          text: l.text,
+          cut: false,
+          tagConfidence: t.confidence,
+          source: l.source,
+          ...(speaker.token ? { cue: speaker.token } : {}),
+        });
         break;
       case 'cueInline':
         flush();
@@ -190,7 +215,13 @@ export function buildUnits(doc: CleanDoc, tagged: TaggedLine[], profile: DocProf
   });
   flush();
 
-  const units: Unit[] = drafts.map((d, k) => ({ id: `u${k + 1}`, ...d }));
+  const units: Unit[] = [];
+  const cues: Record<string, string> = {};
+  drafts.forEach(({ cue, ...d }, k) => {
+    const id = `u${k + 1}`;
+    units.push({ id, ...d });
+    if (cue) cues[id] = cue;
+  });
   const warnings: ImportWarning[] = cast.ambiguous.map((a) => ({ code: 'ambiguousAlias', token: a.token, candidates: a.candidates }));
-  return { units, cast, warnings };
+  return { units, cast, warnings, cues };
 }

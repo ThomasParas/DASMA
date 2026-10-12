@@ -25,6 +25,7 @@ const RESULT: ImportResult = {
   },
   warnings: [{ code: 'noSpeakers' }],
   pages: 1,
+  unitHints: {},
 };
 
 describe('renderDumpHtml', () => {
