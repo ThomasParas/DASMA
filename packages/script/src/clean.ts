@@ -1,3 +1,4 @@
+import { matchCue } from './cues';
 import { TEXT_COLUMN } from './extract/text';
 import { isHeading } from './patterns';
 import type { CleanDoc, CleanLine, RawDoc, RawSpan, SourceKind } from './types';
@@ -56,8 +57,9 @@ function onSpacing(idxs: number[]): number[] {
 /**
  * Rule S1 (spec §6.5a), estimated pages: indices of running-header copies. A line recurring with identical text is a
  * header when enough copies sit next to a page-number line (or, failing that, at a regular spacing) and it is not a
- * recurring cue token: a speaker name also recurs away from page boundaries, so it is never removed. Copies before
- * the first header position (a title page) stay.
+ * recurring cue token: a speaker name also recurs away from page boundaries, so it is never removed. Without page
+ * numbers, spacing alone can't tell a running title from a minor speaker who enters at regular intervals, so the
+ * spacing route never removes a cue-shaped line. Copies before the first header position (a title page) stay.
  */
 function textRunningHeaders(lines: CleanLine[]): Set<number> {
   const pageNumber = lines.map((l) => isPageNumber(l.text));
@@ -75,7 +77,7 @@ function textRunningHeaders(lines: CleanLine[]): Set<number> {
   for (const idxs of copies.values()) {
     if (idxs.length < TEXT_HEADER_MIN_COPIES) continue;
     let placed = idxs.filter(nearPage);
-    if (placed.length < TEXT_HEADER_MIN_COPIES) placed = onSpacing(idxs);
+    if (placed.length < TEXT_HEADER_MIN_COPIES) placed = matchCue(lines[idxs[0]].text) ? [] : onSpacing(idxs);
     if (placed.length < TEXT_HEADER_MIN_COPIES) continue;
     const at = new Set(placed);
     const stray = idxs.filter((i) => i > placed[0] && !at.has(i)).length;

@@ -66,6 +66,34 @@ describe('pasted-text running header (rule S1)', () => {
     const texts = textDoc(out.join('\n')).lines.map((l) => l.text);
     expect(texts.filter((t) => t === 'NINA')).toHaveLength(12);
   });
+
+  it('never removes a regularly spaced minor speaker when there are no page numbers (review repro)', () => {
+    const out: string[] = [];
+    let n = 0;
+    const filler = (count: number) => {
+      for (let k = 0; k < count; k++) out.push(k % 2 ? `Speech line ${tag(n++)} said.` : k % 4 ? 'HORATIO' : 'HAMLET');
+    };
+    for (const gap of [28, 31, 27, 33, 30, 29]) {
+      filler(gap - 2);
+      out.push('MESSENGER', `News ${tag(n++)}.`);
+    }
+    const texts = textDoc(out.join('\n')).lines.map((l) => l.text);
+    expect(texts.filter((t) => t === 'MESSENGER')).toHaveLength(6);
+  });
+
+  it('still removes a header with exactly TEXT_HEADER_MAX_STRAY copies elsewhere in the body', () => {
+    const lines = pastedPages("A DOLL'S HOUSE", { pageNumbers: true }).split('\n');
+    lines.splice(15, 0, "A DOLL'S HOUSE");
+    const texts = textDoc(lines.join('\n')).lines.map((l) => l.text);
+    expect(texts.filter((t) => t === "A DOLL'S HOUSE")).toHaveLength(2);
+  });
+
+  it('keeps a header with fewer than TEXT_HEADER_MIN_COPIES copies next to page numbers', () => {
+    const lines = pastedPages("A DOLL'S HOUSE", { pageNumbers: true }).split('\n');
+    const short = lines.slice(0, lines.lastIndexOf("A DOLL'S HOUSE", lines.lastIndexOf("A DOLL'S HOUSE") - 1) - 1);
+    const texts = textDoc(short.join('\n')).lines.map((l) => l.text);
+    expect(texts.filter((t) => t === "A DOLL'S HOUSE")).toHaveLength(5);
+  });
 });
 
 describe('isPageNumber', () => {
