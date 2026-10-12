@@ -1,7 +1,7 @@
 // Every hand-set scoring constant of the tagger (spec §5.2). Tuned in the measure-and-tune rounds (spec §6.5); never trained.
 
 /** A unit is flagged for review when its tagConfidence is below this. */
-export const FLAG_BELOW = 0.8;
+export const FLAG_BELOW = 0.84;
 /** The manyFlagged warning fires when more than this share of units is flagged. */
 export const MANY_FLAGGED_SHARE = 0.3;
 
