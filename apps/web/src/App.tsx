@@ -7,6 +7,7 @@ import { ImportScreen } from './screens/ImportScreen';
 import { Library } from './screens/Library';
 import { NotFound } from './screens/NotFound';
 import { Production } from './screens/Production';
+import { ReimportReview } from './screens/ReimportReview';
 import { ServicesContext, type Services } from './services';
 
 function Screen({ route }: { route: Route }) {
@@ -21,6 +22,8 @@ function Screen({ route }: { route: Route }) {
       return <Production id={route.id} />;
     case 'fix':
       return <FixTags key={route.id} productionId={route.id} />;
+    case 'reimport':
+      return <ReimportReview productionId={route.id} />;
     default:
       return <NotFound />;
   }

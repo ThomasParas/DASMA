@@ -3,6 +3,7 @@ import type { ProductionSummary } from '../db/repo';
 import { href } from '../router';
 import { useServices } from '../services';
 import { Button } from '../ui/Button';
+import { OpenDasma } from './OpenDasma';
 
 export const STORAGE_WARNING = "Your browser may clear DASMA's data when disk space is low. Export a .dasma file after big changes.";
 
@@ -48,11 +49,12 @@ export function Library() {
           <span>{STORAGE_WARNING}</span> <Button onClick={dismiss}>Dismiss</Button>
         </div>
       )}
-      <p>
+      <div className="tabs">
         <a className="btn btn-primary" href={href({ name: 'new' })}>
           New production
         </a>
-      </p>
+        <OpenDasma />
+      </div>
       {items === null ? (
         <p>Loading…</p>
       ) : items.length === 0 ? (
