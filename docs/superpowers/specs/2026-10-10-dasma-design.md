@@ -161,7 +161,7 @@ interface AlignOptions {
 
 All persisted in IndexedDB; all exportable.
 
-- **Production** — `id, title, cast: {characterId → actorName}[]` (an actor may play several characters), `settings: {noAudioClips: boolean, autoDeleteDays: number | null, defaultStrictness, defaultPatience}`.
+- **Production** — `id, title, cast: Record<characterId, actorName[]>` (the `.dasma` shape; an actor may play several characters), `origin: 'created' | 'dasma'`, `createdAt`, `updatedAt`. Run settings (`noAudioClips`, `autoDeleteDays`, `defaultStrictness`, `defaultPatience`) arrive with M3/M4. See the [M2b spec](2026-10-12-script-screens-design.md) §4.
 - **Script** — `id, productionId, version, characters[] (with aliases), units[]` where each unit is `{id, kind: 'dialogue' | 'direction' | 'characterName' | 'heading' | 'sceneBreak' | 'frontMatter', characterId?, text, cut: boolean, overlapRanges?: [number, number][], tagConfidence, source: {page, line}[]}`. Previous versions retained for diffing.
 - **Run** — `id, productionId, scriptVersion, mode: 'solo' | 'director', range, settings snapshot, startedAt, endedAt, status: 'running' | 'complete' | 'interrupted'`.
 - **Event** — append-only `AlignEvent` + session events (quick-mark, pause, mic status, poor-audio spans), keyed by run; written as they occur.
@@ -188,8 +188,8 @@ Implemented by `packages/script`; the import rules are in [`2026-10-11-script-im
    - Scene headings: `ACT` / `SCENE` patterns.
    - Overlap marks: `/` inside dialogue marks the point where the next speaker begins → following text in that line, and the overlapping start of the next line, become `overlap` zones.
    - Character aliases merged (e.g. `HAM.` ≈ `HAMLET`) by prefix match, user-confirmable.
-4. **Tag-correction screen** — low-confidence units listed first; click to retag; edit a unit's text; range-select to mark cut / overlap; character merge/rename; scene breaks.
-5. **Re-import** — line-level diff against the previous version (by text similarity); summary "N lines changed"; notes on changed lines get `lineChangedSinceNote`.
+4. **Tag-correction screen** — low-confidence units listed first; click to retag; edit a unit's text; range-select to mark cut / overlap; character merge/rename; scene breaks. "Range-select" means click then shift-click (no drag), for units and for words; a partial cut splits the unit (M2b spec §6).
+5. **Re-import** — line-level diff against the previous version (by text similarity); summary "N lines changed"; notes on changed lines get `lineChangedSinceNote`. A `.dasma` update replaces the script as is and also counts retagged or re-cut lines (M2b spec §5.5).
 
 Tag accuracy target is "fast to fix," not perfect — the correction screen is the safety net.
 
@@ -260,7 +260,7 @@ Poor audio therefore lowers the confidence of the notes that have no other evide
 ## 8. Run experience (`session`, `cue`, `ui`)
 
 ### 8.1 Screens
-1. **Library** — productions, scripts, import, backup/export, engine status; first-run model download with progress; persistent-storage request (warn if denied).
+1. **Library** — productions, scripts, import, backup/export, engine status; first-run model download with progress; persistent-storage request (warn if denied). (Engine status and model download: M3. The persistent-storage request: M2b.)
 2. **Import & tag** — see §6.
 3. **Run setup** — mode, scene range; solo: character(s), cue style, hide-my-lines; director: buzz toggle, quick-mark key, no-audio-clips; both: Patience + Strictness. **Mic check:** level meter + "read a line aloud"; warns if too quiet/noisy.
 4. **Solo run** — current line large (shown / first letters / hidden-until-said); cue displayed and played (local TTS voice per character where available, or recorded cue); cue length full or last few words; words light as matched; confirmed errors red; optional alert tone.
@@ -334,7 +334,7 @@ Each milestone gets its own implementation plan.
 2. **M1 — Engine & harness (go/no-go):** `align` built test-first with the scenario DSL and property tests; sherpa-onnx in Node; synthetic scene generator + room simulation; metrics + baselines. **Checkpoint:** review numbers against §10 targets before building UI.
    - **Engine-change pass** ([pass spec](2026-10-10-engine-pass-design.md)): M3 starts only on GO in [`docs/engine-pass-results.md`](../../engine-pass-results.md). Outcome: **NO-GO**. After two rounds, `solo-close-mic` passes false alerts only (core recall 0.313 against ≥ 0.90, false notes 1.604 against ≤ 1, alert latency p50 1.035 s against < 0.5 s). The results doc lists the options for the user to decide; M3 remains blocked until that decision.
 3. **M2 — Scripts:** import (PDF, docx, paste), clean-up, auto-tag, tag-correction screen, cuts/overlaps, `.dasma` export/import, re-import diff.
-   - M2a (script engine) done — see [`docs/script-import-results.md`](../../script-import-results.md); M2b (screens) next. Held-out gate outcome: **NO-GO** after two rounds (licensed passes; word misses worst page, speaker and text accuracy on its leading-tab style; classical misses flagged share). The results doc lists the options for the user to decide.
+   - M2a (script engine) done — see [`docs/script-import-results.md`](../../script-import-results.md). Held-out gate outcome: **NO-GO** after two rounds (licensed passes; word misses worst page, speaker and text accuracy on its leading-tab style; classical misses flagged share). The results doc lists the options for the user to decide. M2b (screens) done — see [`docs/script-screens-results.md`](../../script-screens-results.md); it also brought in the cast list (from M4) and the persistent-storage request (from M5).
 4. **M3 — Solo mode:** browser recognizer worker + model download/caching, mic pipeline, run setup + mic check, solo run screen, cues (local TTS + recorded), alerts, report, "lines to work on."
 5. **M4 — Director mode:** director run screen, lost/re-anchor UI, manual jump, on-book "Line!" prompting, quick-mark, clips + retention settings, cast list, per-actor PDF export.
 6. **M5 — Hardening & release:** full error-handling table (§9), persistent storage + backup, PWA offline install, Playwright E2E on Chrome/Edge, manual checklist, first public release.

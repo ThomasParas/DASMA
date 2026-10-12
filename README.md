@@ -2,7 +2,7 @@
 
 DASMA listens to a live rehearsal and compares what is said against the script, entirely offline. It produces stage-manager-style line notes (dropped lines, wrong words, paraphrases, jumped cues, called-for-line) per actor, and can optionally alert immediately on a wrong word.
 
-**Status:** early development. The matching engine (`packages/align`), the recognizer wrapper (`packages/asr`, sherpa-onnx streaming Zipformer), the script importer (`packages/script`) and a synthetic-rehearsal test harness (`harness/`) exist. There is no app UI yet. See the results of the latest engine pass in [docs/engine-pass-results.md](docs/engine-pass-results.md).
+**Status:** early development. The matching engine (`packages/align`), the recognizer wrapper (`packages/asr`, sherpa-onnx streaming Zipformer), the script importer (`packages/script`) and a synthetic-rehearsal test harness (`harness/`) exist. The browser app (`apps/web`) prepares a production: import, tag correction, cast list, cuts and overlaps, `.dasma` files. See the results of the latest engine pass in [docs/engine-pass-results.md](docs/engine-pass-results.md).
 
 ## Repository layout
 
@@ -12,7 +12,7 @@ DASMA listens to a live rehearsal and compares what is said against the script, 
 | `packages/asr` | Recognizer interface, stabilizer, sherpa-onnx Node binding |
 | `packages/script` | Script import: PDF, Word and pasted text into tagged scripts; `.dasma` files; re-import diff |
 | `harness/` | Generates labelled synthetic rehearsals (Piper TTS + room simulation), runs the engine, scores it |
-| `apps/web` | Placeholder for the browser app |
+| `apps/web` | The browser app (React): library, import, tag correction, cast list, `.dasma` files |
 | `docs/` | Decisions, design specs, plans and results |
 
 ## Getting started
@@ -39,6 +39,14 @@ To score your own scripts (kept out of git in `harness/local/`), draft an answer
 npm run harness -- script-truth-draft <file>
 npm run harness -- script-eval --set local
 ```
+
+## Running the app
+
+```bash
+npm run dev -w apps/web
+```
+
+Open the printed address in Chrome or Edge. Scripts are stored in the browser (IndexedDB) and never leave the machine. To score the importer on one of your own scripts, turn on **Show developer tools** in the library, open the production, and use **Export answer key**; save the file in `harness/local/` beside the script and run `npm run harness -- script-eval --set local`.
 
 ## Design documents
 
