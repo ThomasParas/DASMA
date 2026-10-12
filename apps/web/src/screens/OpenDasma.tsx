@@ -1,5 +1,5 @@
 import { ScriptFormatError, type FormatErrorReason } from '@dasma/script';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ProductionRow } from '../db/schema';
 import type { DasmaContents } from '../import/importer';
 import { navigate } from '../router';
@@ -21,6 +21,24 @@ type State = { kind: 'idle' } | { kind: 'error'; message: string } | { kind: 'cl
 export function OpenDasma() {
   const services = useServices();
   const [state, setState] = useState<State>({ kind: 'idle' });
+  const [busy, setBusy] = useState(false);
+  const working = useRef(false);
+
+  const message = (err: unknown) => (err instanceof Error ? err.message : String(err));
+  /** Runs one write at a time; a failure is shown instead of thrown. */
+  const guarded = async (work: () => Promise<void>) => {
+    if (working.current) return;
+    working.current = true;
+    setBusy(true);
+    try {
+      await work();
+    } catch (err) {
+      setState({ kind: 'error', message: `Could not open this file: ${message(err)}` });
+    } finally {
+      working.current = false;
+      setBusy(false);
+    }
+  };
 
   const createNew = async (contents: DasmaContents, fileName: string) => {
     const { production } = await services.repo.createProduction({
@@ -52,13 +70,15 @@ export function OpenDasma() {
     try {
       contents = await services.importer.readDasma(await file.text());
     } catch (err) {
-      setState({ kind: 'error', message: err instanceof ScriptFormatError ? DASMA_ERROR_TEXT[err.reason] : err instanceof Error ? err.message : String(err) });
+      setState({ kind: 'error', message: err instanceof ScriptFormatError ? DASMA_ERROR_TEXT[err.reason] : message(err) });
       return;
     }
-    const title = contents.script.title.trim().toLowerCase();
-    const existing = (await services.repo.listProductions()).find((s) => s.production.title.trim().toLowerCase() === title)?.production;
-    if (existing) setState({ kind: 'clash', contents, fileName: file.name, existing });
-    else await createNew(contents, file.name);
+    await guarded(async () => {
+      const title = contents.script.title.trim().toLowerCase();
+      const existing = (await services.repo.listProductions()).find((s) => s.production.title.trim().toLowerCase() === title)?.production;
+      if (existing) setState({ kind: 'clash', contents, fileName: file.name, existing });
+      else await createNew(contents, file.name);
+    });
   };
 
   return (
@@ -84,11 +104,11 @@ export function OpenDasma() {
       {state.kind === 'clash' && (
         <div className="banner" role="dialog" aria-label="Production already exists">
           <p>A production called "{state.existing.title}" already exists.</p>
-          <Button variant="primary" onClick={() => update(state.contents, state.fileName, state.existing)}>
+          <Button variant="primary" disabled={busy} onClick={() => update(state.contents, state.fileName, state.existing)}>
             Update "{state.existing.title}"
           </Button>{' '}
-          <Button onClick={() => void createNew(state.contents, state.fileName)}>Import as a new production</Button>{' '}
-          <Button onClick={() => setState({ kind: 'idle' })}>Cancel</Button>
+          <Button disabled={busy} onClick={() => void guarded(() => createNew(state.contents, state.fileName))}>Import as a new production</Button>{' '}
+          <Button disabled={busy} onClick={() => setState({ kind: 'idle' })}>Cancel</Button>
         </div>
       )}
     </>

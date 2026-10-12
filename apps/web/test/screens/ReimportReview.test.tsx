@@ -26,6 +26,47 @@ describe('Re-import review', () => {
     expect(services.pending.has(production.id)).toBe(false);
   });
 
+  it('shows a save failure, re-enables the button and saves on retry', async () => {
+    const { services, production, user } = await reviewWith('file');
+    const addVersion = services.repo.addVersion.bind(services.repo);
+    let calls = 0;
+    services.repo.addVersion = async (...args) => {
+      if (calls++ === 0) throw new Error('disk full');
+      return addVersion(...args);
+    };
+    await user.click(screen.getByRole('button', { name: 'Keep as version 2' }));
+    expect((await screen.findByRole('alert')).textContent).toBe('Not saved: disk full');
+    expect((screen.getByRole('button', { name: 'Keep as version 2' }) as HTMLButtonElement).disabled).toBe(false);
+    expect(await services.repo.listVersions(production.id)).toHaveLength(1);
+    await user.click(screen.getByRole('button', { name: 'Keep as version 2' }));
+    await waitFor(() => expect(window.location.hash).toBe(`#/p/${production.id}/fix`));
+    expect((await services.repo.listVersions(production.id)).map((v) => v.version)).toEqual([1, 2]);
+  });
+
+  it('does not add a second version when retrying after the cast update failed', async () => {
+    const { services, production, user } = await reviewWith('dasma', { lane: ['Ann'] });
+    const updateProduction = services.repo.updateProduction.bind(services.repo);
+    let calls = 0;
+    services.repo.updateProduction = async (...args) => {
+      if (calls++ === 0) throw new Error('blocked');
+      return updateProduction(...args);
+    };
+    await user.click(screen.getByRole('button', { name: 'Keep as version 2' }));
+    expect((await screen.findByRole('alert')).textContent).toBe('Not saved: blocked');
+    expect(services.pending.has(production.id)).toBe(true);
+    await user.click(screen.getByRole('button', { name: 'Keep as version 2' }));
+    await waitFor(() => expect(window.location.hash).toBe(`#/p/${production.id}/fix`));
+    expect((await services.repo.listVersions(production.id)).map((v) => v.version)).toEqual([1, 2]);
+    expect((await services.repo.getProduction(production.id))!.cast).toEqual({ lane: ['Ann'] });
+  });
+
+  it('saves once when Keep is double clicked', async () => {
+    const { services, production, user } = await reviewWith('file');
+    await user.dblClick(screen.getByRole('button', { name: 'Keep as version 2' }));
+    await waitFor(() => expect(window.location.hash).toBe(`#/p/${production.id}/fix`));
+    expect((await services.repo.listVersions(production.id)).map((v) => v.version)).toEqual([1, 2]);
+  });
+
   it('cancels without saving', async () => {
     const { services, production, user } = await reviewWith('file');
     await user.click(screen.getByRole('button', { name: 'Cancel' }));

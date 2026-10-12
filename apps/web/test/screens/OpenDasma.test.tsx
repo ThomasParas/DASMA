@@ -50,4 +50,26 @@ describe('Opening a .dasma file', () => {
     await user.upload(input, dasma(earnest().replace('"kind": "heading"', '"kind": "song"')));
     expect((await screen.findByRole('alert')).textContent).toBe("This DASMA file is damaged and can't be opened.");
   });
+
+  it('shows a failure to create the production', async () => {
+    const { services, input, user } = await openLibrary();
+    services.repo.createProduction = async () => {
+      throw new Error('disk full');
+    };
+    await user.upload(input, dasma(earnest()));
+    expect((await screen.findByRole('alert')).textContent).toBe('Could not open this file: disk full');
+  });
+
+  it('creates one production when the new-production button is double clicked', async () => {
+    const { services, input, user } = await openLibrary(true);
+    const create = services.repo.createProduction.bind(services.repo);
+    services.repo.createProduction = async (...args) => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      return create(...args);
+    };
+    await user.upload(input, dasma(earnest()));
+    await user.dblClick(await screen.findByRole('button', { name: 'Import as a new production' }));
+    await waitFor(() => expect(window.location.hash).toMatch(/^#\/p\/[^/]+$/));
+    expect(await services.repo.listProductions()).toHaveLength(2);
+  });
 });

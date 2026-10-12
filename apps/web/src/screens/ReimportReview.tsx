@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ProductionRow, ScriptVersionRow } from '../db/schema';
 import { href, navigate } from '../router';
 import { useServices } from '../services';
@@ -20,6 +20,9 @@ export function ReimportReview({ productionId }: { productionId: string }) {
   const [loaded, setLoaded] = useState<{ production: ProductionRow; live: ScriptVersionRow } | 'missing' | null>(null);
   const [filter, setFilter] = useState<RowType | 'all'>('all');
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const saving = useRef(false);
+  const versionAdded = useRef(false);
 
   useEffect(() => {
     let live = true;
@@ -54,11 +57,25 @@ export function ReimportReview({ productionId }: { productionId: string }) {
   const rows = review.rows.filter((r) => filter === 'all' || r.type === filter);
 
   const keep = async () => {
+    if (saving.current) return;
+    saving.current = true;
     setBusy(true);
-    await repo.addVersion(productionId, { script: review.result, pages: p.pages, unitHints: review.unitHints, importedFrom: p.importedFrom, warnings: p.warnings });
-    if (dasma && p.cast) await repo.updateProduction(productionId, { cast: p.cast });
-    pending.delete(productionId);
-    navigate({ name: 'fix', id: productionId });
+    setError(null);
+    try {
+      // Skip the version write on a retry after the cast update failed, so a retry cannot add a duplicate version.
+      if (!versionAdded.current) {
+        await repo.addVersion(productionId, { script: review.result, pages: p.pages, unitHints: review.unitHints, importedFrom: p.importedFrom, warnings: p.warnings });
+        versionAdded.current = true;
+      }
+      if (dasma && p.cast) await repo.updateProduction(productionId, { cast: p.cast });
+      pending.delete(productionId);
+      navigate({ name: 'fix', id: productionId });
+    } catch (err) {
+      setError(`Not saved: ${err instanceof Error ? err.message : String(err)}`);
+    } finally {
+      saving.current = false;
+      setBusy(false);
+    }
   };
   const cancel = () => {
     pending.delete(productionId);
@@ -103,6 +120,11 @@ export function ReimportReview({ productionId }: { productionId: string }) {
             ))}
           </tbody>
         </table>
+      )}
+      {error && (
+        <p role="alert" className="alert">
+          {error}
+        </p>
       )}
       <p className="tabs">
         <Button variant="primary" disabled={busy} onClick={() => void keep()}>
