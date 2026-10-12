@@ -43,6 +43,9 @@ interface WorkspaceProps {
   onProductionChange(p: ProductionRow): void;
 }
 
+/** The edit-text panel belongs to one unit, so a selection change closes it (a draft is dropped, never moved to another unit). */
+const closeEditText = (p: Panel): Panel => (p.kind === 'editText' ? { kind: 'none' } : p);
+
 export function FixWorkspace({ editor, script, production, onProductionChange }: WorkspaceProps) {
   const { repo } = useServices();
   const hints = editor.version!.unitHints;
@@ -83,6 +86,7 @@ export function FixWorkspace({ editor, script, production, onProductionChange }:
     setWords(null);
     setMessage(null);
     setSimilar(false);
+    setPanel(closeEditText);
     document.getElementById(`unit-${unitId}`)?.scrollIntoView?.({ block: 'nearest' });
   }, []);
 
@@ -90,6 +94,7 @@ export function FixWorkspace({ editor, script, production, onProductionChange }:
     setWords(null);
     setMessage(null);
     setSimilar(false);
+    setPanel(closeEditText);
     setSel((prev) => {
       if (!shift || !prev) return { unitIds: [unitId], anchor: unitId };
       const units = scriptRef.current.units;

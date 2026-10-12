@@ -61,4 +61,29 @@ describe('Fix tags: text, split, join, overlap', () => {
     await user.click(screen.getByRole('button', { name: /^Overlap/ }));
     await waitFor(async () => expect((await stored()).units[3].overlapRanges).toBeUndefined());
   });
+
+  it('closes the editor when the selection moves to another unit, dropping the draft', async () => {
+    const { user, unitEl, stored } = await openFix();
+    await user.click(unitEl('u4'));
+    await user.keyboard('e');
+    await user.type(screen.getByLabelText('Unit text'), ' extra');
+    await user.click(unitEl('u6'));
+    expect(screen.queryByLabelText('Unit text')).toBeNull();
+    expect((await stored()).units[3].text).toBe('Did you hear what I was playing, Lane?');
+  });
+
+  it('closes the editor on a range selection so shortcuts work again', async () => {
+    const { user, unitEl, stored } = await openFix();
+    await user.click(unitEl('u4'));
+    await user.keyboard('e');
+    await user.keyboard('{Shift>}');
+    await user.click(unitEl('u6'));
+    await user.keyboard('{/Shift}');
+    expect(screen.queryByLabelText('Unit text')).toBeNull();
+    await user.keyboard('x');
+    await waitFor(async () => {
+      const units = (await stored()).units;
+      expect(['u4', 'u5', 'u6'].every((id) => units.find((u) => u.id === id)!.cut)).toBe(true);
+    });
+  });
 });
