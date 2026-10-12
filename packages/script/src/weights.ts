@@ -27,7 +27,7 @@ export const EMISSION = {
   temperature: 1,
   base: { cue: -3, cueInline: -3, dialogue: 0, direction: -1, heading: -5, front: -2 },
   cue: { shape: 2, known: 3, inCast: 1, primary: 1.5, speakerBand: 1.5, bold: 0.5, nextCueShaped: -3, notShape: -12 },
-  cueInline: { shape: 2, known: 3, inCast: 1, primary: 1.5, notShape: -12 },
+  cueInline: { shape: 2, known: 3, inCast: 1, primary: 3, notShape: -12 },
   dialogue: { dialogueBand: 1, italic: 0.5, italicPerMark: 0.5, bracketBlock: 0.5, bracketPerMark: 1, offBandPerMark: 1, knownCueShape: -2 },
   direction: { italic: 0.5, italicPerMark: 0.5, bracketBlock: 0.5, bracketPerMark: 1, directionBand: 1, directionBandPerMark: 1.5 },
   heading: { pattern: 8, notPattern: -10 },
