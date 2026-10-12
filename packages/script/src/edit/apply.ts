@@ -1,5 +1,6 @@
 import type { Script } from '../types';
 import { EditError, type EditOp } from './ops';
+import { editAliases, mergeCharacters, moveSpeeches, newCharacter, renameCharacter, setName, speechBy, splitAlias } from './speaker-ops';
 import { confirm, editText, insertSceneBreak, remove, removeSceneBreak, setCut, setKind } from './unit-ops';
 
 export interface EditOptions {
@@ -45,6 +46,22 @@ function applyOne(script: Script, op: Exclude<EditOp, { type: 'batch' }>): Scrip
       return insertSceneBreak(script, op.beforeUnitId);
     case 'removeSceneBreak':
       return removeSceneBreak(script, op.unitId);
+    case 'speechBy':
+      return speechBy(script, op.unitIds, op.characterId);
+    case 'newCharacter':
+      return newCharacter(script, op.id, op.name);
+    case 'setName':
+      return setName(script, op.unitId, op.characterId);
+    case 'moveSpeeches':
+      return moveSpeeches(script, op.unitIds, op.characterId);
+    case 'renameCharacter':
+      return renameCharacter(script, op.characterId, op.name);
+    case 'editAliases':
+      return editAliases(script, op.characterId, op.aliases);
+    case 'mergeCharacters':
+      return mergeCharacters(script, op.fromId, op.intoId);
+    case 'splitAlias':
+      return splitAlias(script, op.characterId, op.alias, op.newId, op.unitIds);
     default:
       // Transitional until Tasks 3 and 4 add the remaining ops; Task 4 replaces this with an exhaustive check.
       throw new EditError(`${op.type} is not available yet.`);

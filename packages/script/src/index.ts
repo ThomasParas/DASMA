@@ -29,3 +29,4 @@ export { applyEdit, pruneCharacters } from './edit/apply';
 export type { EditOptions } from './edit/apply';
 export { maxUnitNumber, nextUnitId, uniqueCharacterId } from './edit/ids';
 export { SCENE_BREAK_TEXT } from './edit/unit-ops';
+export { aliasSpeeches, speechReach } from './edit/speaker-ops';
