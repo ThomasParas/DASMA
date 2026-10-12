@@ -215,7 +215,7 @@ interface DocProfile {
 
 - A token counts toward `cueTokens` only if it occurs in speaker position at least 2 times. Comparison ignores case and trailing punctuation.
 - `primary` is the convention with the most matches among recurring tokens.
-- A cast list is a block starting with a line that matches `^(dramatis person(ae|æ)|characters|cast( of characters)?|(the )?persons (in|of) the play|persons represented)\b` (case-insensitive). The block ends at the first heading, the first line longer than 12 words, or after 40 lines. A setting line (rule S5, §6.5a) neither ends the block nor adds a name. Each name is the text before the first `,`, `:` or ` — `, uppercased, without a trailing `.`.
+- A cast list is a block starting with a line that matches `^(dramatis person(ae|æ)|characters|cast( of characters)?|(the )?persons (in|of) the play|persons represented)\b` (case-insensitive). The block ends at the first heading, the first line longer than 12 words, or after 40 lines. A setting line (rule S5, §6.5a) neither ends the block nor adds a name. A setting line names a place, so a bare `SCENE` stays a heading. Each name is the text before the first `,`, `:` or ` — `, uppercased, without a trailing `.`.
 - `frontMatterEnd` is the first line that is either a heading (§5.2) or the first of three consecutive speeches that use the primary convention. A setting line inside or at the end of the cast list is not that heading (rule S5, §6.5a).
 
 ### 5.2 Line states and scoring (`tag.ts`, `weights.ts`)
@@ -410,9 +410,9 @@ Renderers in `harness/src/corpus/` turn a source play into a document of about 1
 
 Round 1 failed the held-out gate. Its results (`docs/script-import-results.md`) named six shortfalls. Three were defects in built code or in the corpus truth (S3 cast-list header after `æ`, S4 bracket blocks, S6 invisible same-speaker boundaries), and were fixed before round 2 as defects, not tuning. The other three need rules this spec didn't have. The user decided that **round 2 may add these three rules, each with unit tests, alongside constant tuning**:
 
-- **S1, pasted-text running header.** In estimated-page input, a line that recurs at least 5 times with identical text (no digits needed), sits within 2 lines of a page-number line or at a regular spacing, and is not a recurring cue token, is a running header and is removed. The exact form is the implementer's, constrained by: speaker names that recur are never removed.
+- **S1, pasted-text running header.** In estimated-page input, a line that recurs at least 5 times with identical text (no digits needed), sits within 2 lines of a page-number line or at a regular spacing, and is not a recurring cue token, is a running header and is removed. The exact form is the implementer's, constrained by: speaker names that recur are never removed. Because spacing alone can't tell a running title from a minor speaker who enters at regular intervals, the regular-spacing route never removes a cue-shaped line.
 - **S2, joint speakers.** A name never prefix-merges into a joint name (one containing ` AND ` or ` & `); a joint name stays its own character.
-- **S5, setting line in front matter.** A `SCENE` line with no number or ordinal (e.g. `SCENE. Elsinore.`) inside or at the end of the cast list stays front matter rather than ending it as a heading.
+- **S5, setting line in front matter.** A `SCENE` line with no number or ordinal (e.g. `SCENE. Elsinore.`) inside or at the end of the cast list stays front matter rather than ending it as a heading. A setting line names a place, so a bare `SCENE` (Earnest's scene heading) stays a heading.
 
 Everything else in §6.5 stands: tune on the tuning set only, at most 8 measure-and-change loops in round 2, then one held-out measurement and the GO/NO-GO verdict. Round 2 also re-decides round 1's cycle-2 bracket weights now that S3/S4 are fixed.
 

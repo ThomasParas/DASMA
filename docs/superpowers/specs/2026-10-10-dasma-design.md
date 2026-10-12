@@ -179,7 +179,7 @@ Implemented by `packages/script`; the import rules are in [`2026-10-11-script-im
 
 1. **Extract**
    - PDF via pdf.js: text items with position and font name (italic/bold fonts hint at stage directions). If a PDF has no text layer → "scanned PDFs aren't supported yet; paste the text instead."
-   - docx via mammoth (Google Docs: user exports as .docx): paragraphs with italic/bold runs.
+   - docx read from `word/document.xml` via fflate (Google Docs: user exports as .docx): paragraphs with italic/bold runs, alignment and indentation.
    - Pasted text: plain lines.
 2. **Clean** — remove repeated headers/footers (text recurring at the same position across pages), page numbers, line numbers (e.g. Folger-style), de-hyphenate words split across lines, normalize ligatures and quotes.
 3. **Auto-tag** with heuristics, each producing a `tagConfidence`:
@@ -355,5 +355,5 @@ Each milestone gets its own implementation plan.
 
 ## 13. Licensing notes
 - sherpa-onnx: Apache-2.0. Zipformer English models: check each model's license at selection time (M1).
-- pdf.js: Apache-2.0. mammoth: BSD-2. pdf-lib: MIT. Dexie: Apache-2.0. Double Metaphone implementations: choose an MIT/BSD-licensed one.
+- pdfjs-dist (pdf.js): Apache-2.0. fflate: MIT. pdf-lib: MIT. Dexie: Apache-2.0. Double Metaphone implementations: choose an MIT/BSD-licensed one.
 - DASMA's own license: to be decided before first public release (open source vs. source-available affects the future premium option).

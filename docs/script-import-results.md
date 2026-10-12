@@ -14,6 +14,8 @@ Spec: docs/superpowers/specs/2026-10-11-script-import-design.md (§1 targets, §
 
 A unit whose boundary shifts scores a merge and a split (spec-literal), so fixes/page counts one misplaced boundary twice.
 
+The held-out set was measured once, at `0d1ca20`. One fix (`ce0833e`, an S1 guard) was made after that measurement to honour §6.5a; the tuning numbers are unchanged and the verdict stands (see "Post-run fix").
+
 ### Shortfalls
 
 | Id | Family | Target | Measured | Cause |
@@ -209,7 +211,7 @@ The user re-scoped round 2 (spec §6.5a): rules S1, S2 and S5 are added, each wi
 |---|---|---|---|
 | S2 | `2e3414a` | `buildCast` never takes a joint name (one containing ` AND ` or ` & `) as a prefix-merge target, so the joint name stays its own character. `ROS` still merges into `ROSENCRANTZ`, not into `ROSENCRANTZ AND GUILDENSTERN`. | classical wrongSpeaker 57 → 0, fixes/page 0.59 → 0.09, worst page 9 → 2, speaker accuracy 95.5% → 99.8%. Flagged share 85.5% → 16.7%, because the errors left were the unflagged S5 headings. |
 | S5 | `55a4fa5` | A `SCENE` line that names a place but has no number or ordinal (`SCENE. Elsinore.`) inside or at the end of the cast list neither ends the cast list nor the front matter. The tagger drops its heading feature before `frontMatterEnd`. A bare `SCENE` names no place and stays a heading: Earnest's scene heading is a bare `SCENE`, and a first version that treated it as a setting line invented 8 missedHeading fixes on the tuning set. | classical inventedHeading 9 → 0, fixes/page 0.09 → 0.02, flagged share 16.7% → 66.7%. |
-| S1 | `baaa87f` | Estimated-page input: an identical line is a running header when at least 5 copies sit within 2 lines of a page-number line, or (when page numbers place too few) at a regular spacing: at least 20 lines after the previous copy and within 20% of the median gap. A line with more than one copy away from those positions after the first header recurs as content, so a speaker name is never removed. Title-page copies before the first header stay front matter. The thresholds are new exported constants in `clean.ts`. | licensed fixes/page 0.17 → 0.02, worst page 3 → 1, inventedSpeech 15 → 0, wrongSpeaker 20 → 0, merge 12 → 5, text accuracy 99.44% → 99.99%, flagged share 19.1% → 80.0%. |
+| S1 | `baaa87f` | Estimated-page input: an identical line is a running header when at least 5 copies sit within 2 lines of a page-number line, or (when page numbers place too few) at a regular spacing: at least 20 lines after the previous copy and within 20% of the median gap. A line with more than one copy away from those positions after the first header recurs as content, so a speaker name is never removed. Title-page copies before the first header stay front matter. The thresholds are new exported constants in `clean.ts`. After the held-out run, `ce0833e` stopped the spacing route removing a cue-shaped line (see "Post-run fix"). | licensed fixes/page 0.17 → 0.02, worst page 3 → 1, inventedSpeech 15 → 0, wrongSpeaker 20 → 0, merge 12 → 5, text accuracy 99.44% → 99.99%, flagged share 19.1% → 80.0%. |
 
 ## Round 2 — tuning cycles
 
@@ -269,7 +271,7 @@ Run once, after freezing at `0d1ca20`. Command: `npm run harness -- script-eval 
 | word | 114 | 0 | 1 | 0 | 0 | 1 | 0 |
 | classical | 0 | 2 | 13 | 0 | 12 | 1 | 1 |
 
-Against round 1 held-out: licensed goes from FAIL to PASS (fixes/page 0.29 → 0.01, worst page 9 → 2, flagged share 17.1% → 100%), from S1. Word is unchanged in fixes (word 3; its false flags fall 1.20 → 0.22/page). Classical improves in fixes/page (0.22 → 0.14) and false flags (2.31 → 0.37/page, from S3 and loop 1), but its flagged share falls 32.6% → 10.3%: S6 removed most of round 1's flagged classical errors, and S3 made one wrong merge confident (below).
+Against round 1 held-out: licensed goes from FAIL to PASS (fixes/page 0.29 → 0.01, worst page 9 → 2, flagged share 17.1% → 100%), from S1. Word is essentially unchanged (0.67 → 0.64 fixes/page; still word 3; its false flags fall 1.20 → 0.22/page). Classical improves in fixes/page (0.22 → 0.14) and false flags (2.31 → 0.37/page, from S3 and loop 1), but its flagged share falls 32.6% → 10.3%: S6 removed most of round 1's flagged classical errors, and S3 made one wrong merge confident (below).
 
 ### Causes, read after the final run
 
@@ -287,3 +289,7 @@ The held-out documents were opened only after the run above, to name causes for 
 - **licensed: 0.01 vs 0.02.**
 
 A unit whose boundary shifts scores a merge and a split (spec-literal), so one misplaced boundary counts as two fixes when reading fixes/page.
+
+### Post-run fix
+
+The held-out set was measured once, at `0d1ca20`, and was not re-run. After that measurement, review found that S1's regular-spacing route could remove a minor speaker who enters at regular intervals: in pasted text with no page numbers, a `MESSENGER` cue recurring at gaps of 27–33 lines lost 5 of its 6 cues, so those speeches would silently join the previous speaker. That breaks §6.5a ("speaker names that recur are never removed"). Commit `ce0833e` makes the spacing route skip any cue-shaped line (the page-number route is unchanged) and adds the regression test. The tuning set is unchanged: `npm run harness -- script-eval --set tune --verbose --out harness/out/script-eval/round2-tune-postfix` gives a `scores.json` byte-identical to round2-tune-final. The verdict is unchanged: **NO-GO**.

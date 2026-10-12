@@ -2,7 +2,7 @@
 
 DASMA listens to a live rehearsal and compares what is said against the script, entirely offline. It produces stage-manager-style line notes (dropped lines, wrong words, paraphrases, jumped cues, called-for-line) per actor, and can optionally alert immediately on a wrong word.
 
-**Status:** early development. The matching engine (`packages/align`), the recognizer wrapper (`packages/asr`, sherpa-onnx streaming Zipformer) and a synthetic-rehearsal test harness (`harness/`) exist. There is no app UI yet. See the results of the latest engine pass in [docs/engine-pass-results.md](docs/engine-pass-results.md).
+**Status:** early development. The matching engine (`packages/align`), the recognizer wrapper (`packages/asr`, sherpa-onnx streaming Zipformer), the script importer (`packages/script`) and a synthetic-rehearsal test harness (`harness/`) exist. There is no app UI yet. See the results of the latest engine pass in [docs/engine-pass-results.md](docs/engine-pass-results.md).
 
 ## Repository layout
 
