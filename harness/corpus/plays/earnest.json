@@ -47,6 +47,16 @@
       "id": "merriman",
       "name": "MERRIMAN",
       "aliases": []
+    },
+    {
+      "id": "gwendolen-and-cecily",
+      "name": "GWENDOLEN AND CECILY",
+      "aliases": []
+    },
+    {
+      "id": "jack-and-algernon",
+      "name": "JACK AND ALGERNON",
+      "aliases": []
     }
   ],
   "units": [
@@ -1928,7 +1938,8 @@
       "text": "I have never met any really wicked person before. I feel rather frightened. I am so afraid he will look just like every one else."
     },
     {
-      "kind": "direction",
+      "kind": "dialogue",
+      "characterId": "cecily",
       "text": "[Enter Algernon, very gay and debonnair.] He does!"
     },
     {
@@ -2676,7 +2687,8 @@
       "text": "I think it has been a great success. I’m in love with Cecily, and that is everything."
     },
     {
-      "kind": "direction",
+      "kind": "dialogue",
+      "characterId": "algernon",
       "text": "[Enter Cecily at the back of the garden. She picks up the can and begins to water the flowers.] But I must see her before I go, and make arrangements for another Bunbury. Ah, there she is."
     },
     {
@@ -3957,12 +3969,14 @@
       "text": "Certainly. [Gwendolen beats time with uplifted finger.]"
     },
     {
-      "kind": "direction",
-      "text": "GWENDOLEN and CECILY [Speaking together.] Your Christian names are still an insuperable barrier. That is all!"
+      "kind": "dialogue",
+      "characterId": "gwendolen-and-cecily",
+      "text": "[Speaking together.] Your Christian names are still an insuperable barrier. That is all!"
     },
     {
-      "kind": "direction",
-      "text": "JACK and ALGERNON [Speaking together.] Our Christian names! Is that all? But we are going to be christened this afternoon."
+      "kind": "dialogue",
+      "characterId": "jack-and-algernon",
+      "text": "[Speaking together.] Our Christian names! Is that all? But we are going to be christened this afternoon."
     },
     {
       "kind": "dialogue",

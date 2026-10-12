@@ -517,7 +517,8 @@
       "text": "[Sings]"
     },
     {
-      "kind": "direction",
+      "kind": "dialogue",
+      "characterId": "dorn",
       "text": "“Oh, tell me not that youth is wasted.”"
     },
     {
@@ -551,11 +552,13 @@
       "text": "[Sings]"
     },
     {
-      "kind": "direction",
+      "kind": "dialogue",
+      "characterId": "dorn",
       "text": "“Once more I stand before thee.”"
     },
     {
-      "kind": "direction",
+      "kind": "dialogue",
+      "characterId": "dorn",
       "text": "It is only right that artists should be made much of by society and treated differently from, let us say, merchants. It is a kind of idealism."
     },
     {
@@ -627,7 +630,8 @@
       "text": "[Quoting from Hamlet] My son,"
     },
     {
-      "kind": "direction",
+      "kind": "dialogue",
+      "characterId": "arkadina",
       "text": "“Thou turn’st mine eyes into my very soul; And there I see such black grained spots As will not leave their tinct.”"
     },
     {
@@ -1214,7 +1218,8 @@
       "text": "[Sings softly]"
     },
     {
-      "kind": "direction",
+      "kind": "dialogue",
+      "characterId": "dorn",
       "text": "“Tell her, oh flowers--”"
     },
     {
@@ -1431,7 +1436,8 @@
       "text": "[Sings]"
     },
     {
-      "kind": "direction",
+      "kind": "dialogue",
+      "characterId": "dorn",
       "text": "“Tell her, oh flowers---”"
     },
     {
@@ -3592,7 +3598,8 @@
       "text": "Nothing at all; probably one of my medicine bottles has blown up. Don’t worry. [He goes out through the door on the right, and comes back in a few moments] It is as I thought, a flask of ether has exploded. [He sings]"
     },
     {
-      "kind": "direction",
+      "kind": "dialogue",
+      "characterId": "dorn",
       "text": "“Spellbound once more I stand before thee.”"
     },
     {
