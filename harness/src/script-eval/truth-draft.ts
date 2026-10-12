@@ -1,35 +1,23 @@
-import { FLAG_BELOW, type Character, type ImportResult, type UnitKind } from '@dasma/script';
+import { FLAG_BELOW, toAnswerKey, type AnswerKey, type AnswerKeyUnit, type ImportResult } from '@dasma/script';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
-export interface DraftTruthUnit {
-  kind: UnitKind;
-  characterId?: string;
-  text: string;
-  page: number;
+export interface DraftTruthUnit extends AnswerKeyUnit {
   /** The importer was unsure of this unit (tagConfidence below FLAG_BELOW): check it first. */
   check?: true;
 }
 
 /** A local answer key (`<name>.truth.json`, the shape `script-eval --set local` reads) with `check` marks. */
-export interface DraftTruth {
-  pages: number;
-  cast: Character[];
+export interface DraftTruth extends AnswerKey {
   units: DraftTruthUnit[];
 }
 
 /** The importer's own tags as a starting answer key for a real script; the user corrects it by hand. */
 export function draftTruth(result: ImportResult): DraftTruth {
+  const key = toAnswerKey(result.script, result.pages);
   return {
-    pages: Math.max(1, result.pages),
-    cast: result.script.characters.map((c) => ({ id: c.id, name: c.name, aliases: [...c.aliases] })),
-    units: result.script.units.map((u) => ({
-      kind: u.kind,
-      ...(u.characterId !== undefined ? { characterId: u.characterId } : {}),
-      text: u.text,
-      page: Math.max(1, u.source[0]?.page ?? 1),
-      ...(u.tagConfidence < FLAG_BELOW ? { check: true as const } : {}),
-    })),
+    ...key,
+    units: key.units.map((u, i) => (result.script.units[i].tagConfidence < FLAG_BELOW ? { ...u, check: true as const } : u)),
   };
 }
 

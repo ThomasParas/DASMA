@@ -34,3 +34,5 @@ export { checkQueue, speechCounts } from './edit/check';
 export type { CheckItem, CheckReason } from './edit/check';
 export { effectiveHints, similarUnits } from './edit/similar';
 export { appendScripts } from './edit/append';
+export { toAnswerKey } from './answer-key';
+export type { AnswerKey, AnswerKeyUnit } from './answer-key';
