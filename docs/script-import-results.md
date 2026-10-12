@@ -157,3 +157,90 @@ Against round-1 final on the tuning set (the three fixes were measured together;
 - **S6:** classical split 11 → 0.
 - Still open, all (c): S1 (licensed p), S2 (classical wrongSpeaker 57, worst page 9), S5 (classical inventedHeading 9).
 
+
+## Round 2 — rules S1, S2, S5
+
+The user re-scoped round 2 (spec §6.5a): rules S1, S2 and S5 are added, each with unit tests, alongside constant tuning. Each rule was committed on its own and measured on the tuning set with the constants unchanged. The held-out set was not run until after freezing.
+
+| Rule | Commit | What it does | Tune movement |
+|---|---|---|---|
+| S2 | `2e3414a` | `buildCast` never takes a joint name (one containing ` AND ` or ` & `) as a prefix-merge target, so the joint name stays its own character. `ROS` still merges into `ROSENCRANTZ`, not into `ROSENCRANTZ AND GUILDENSTERN`. | classical wrongSpeaker 57 → 0, fixes/page 0.59 → 0.09, worst page 9 → 2, speaker accuracy 95.5% → 99.8%. Flagged share 85.5% → 16.7%, because the errors left were the unflagged S5 headings. |
+| S5 | `55a4fa5` | A `SCENE` line that names a place but has no number or ordinal (`SCENE. Elsinore.`) inside or at the end of the cast list neither ends the cast list nor the front matter. The tagger drops its heading feature before `frontMatterEnd`. A bare `SCENE` names no place and stays a heading: Earnest's scene heading is a bare `SCENE`, and a first version that treated it as a setting line invented 8 missedHeading fixes on the tuning set. | classical inventedHeading 9 → 0, fixes/page 0.09 → 0.02, flagged share 16.7% → 66.7%. |
+| S1 | `baaa87f` | Estimated-page input: an identical line is a running header when at least 5 copies sit within 2 lines of a page-number line, or (when page numbers place too few) at a regular spacing: at least 20 lines after the previous copy and within 20% of the median gap. A line with more than one copy away from those positions after the first header recurs as content, so a speaker name is never removed. Title-page copies before the first header stay front matter. The thresholds are new exported constants in `clean.ts`. | licensed fixes/page 0.17 → 0.02, worst page 3 → 1, inventedSpeech 15 → 0, wrongSpeaker 20 → 0, merge 12 → 5, text accuracy 99.44% → 99.99%, flagged share 19.1% → 80.0%. |
+
+## Round 2 — tuning cycles
+
+Two measure-and-change loops of the eight permitted, plus one flag-line sweep. The sweep is an analysis of the tagger's output at several thresholds, with no retagging and no file change (the same method as round 1).
+
+| Loop | Change | Tune movement | Result |
+|---|---|---|---|
+| 1 | Revert round-1 cycle 2: `EMISSION.dialogue.bracketBlock` 0.5 → 1, `.bracketPerMark` 1 → 3; `EMISSION.direction.bracketBlock` 0.5 → 1.5, `.bracketPerMark` 1 → 3 | false flags/page classical 2.54 → 1.51, word 0.52 → 0.09, licensed 0.47 → 0.45; fixes identical in every family | kept, `d94cab9`. Cycle 2 was kept in round 1 to flag the `(a) text (b)` word errors; S4 removed those at the source, so it no longer buys anything |
+| sweep | `FLAG_BELOW` at 0.80–0.95 | licensed flagged share reaches 100% from 0.82; false flags rise slowly to 0.84 (classical 1.59/page) and step up from 0.85 (classical 1.82 at 0.86, 3.21 at 0.90). Classical's one unflagged tune error sits at 0.91 and needs 0.92, where classical false flags are 5.59/page | analysis only |
+| 2 | `FLAG_BELOW` 0.8 → 0.84 | licensed flagged share 80% → 100%; false flags/page licensed 0.45 → 0.63, word 0.09 → 0.11, classical 1.51 → 1.59 | kept, `0d1ca20` |
+
+Tuning stopped there. The only tune target still failing is classical flagged share, 2 of 3 errors flagged. The unflagged one is a letter signed `HAMLET.` on its own line in classical 2, which reads exactly like a cue; no constant separates it. One further candidate was considered and not tried: lowering `EMISSION.cueInline.known` while raising `.primary` would stop a vocative `Nora.` at a line start reading as a classical cue (the 5 licensed merges, all flagged), but it weakens every cue outside the primary and secondary conventions, which is the risk for mixed-convention styles the tuning set doesn't hold.
+
+### Constants changed in round 2
+
+| Constant | Old | New | Justifying tune movement |
+|---|---|---|---|
+| `EMISSION.dialogue.bracketBlock` | 0.5 | 1 | loop 1: classical false flags 2.54 → 1.51/page, word 0.52 → 0.09 |
+| `EMISSION.dialogue.bracketPerMark` | 1 | 3 | loop 1 |
+| `EMISSION.direction.bracketBlock` | 0.5 | 1.5 | loop 1 |
+| `EMISSION.direction.bracketPerMark` | 1 | 3 | loop 1 |
+| `FLAG_BELOW` | 0.8 | 0.84 | loop 2: licensed flagged share 80% → 100% |
+
+New constants from the rules (not tuned): `TEXT_HEADER_MIN_COPIES` 5, `TEXT_HEADER_NEAR_LINES` 2, `TEXT_HEADER_MIN_SPACING` 20, `TEXT_HEADER_SPACING_TOLERANCE` 0.2 and `TEXT_HEADER_MAX_STRAY` 1, all in `clean.ts`.
+
+## Round 2 — tuning, final
+
+Frozen at `0d1ca20`. Command: `npm run harness -- script-eval --set tune --verbose --out harness/out/script-eval/round2-tune-final`.
+
+| Family | Docs | Pages | Fixes/page (≤ 1) | Worst page (≤ 4) | Speaker acc. (≥ 98%) | Flagged share (≥ 90%) | False flags/page (≤ 2) | Text acc. (≥ 99.5%) | Gate |
+|---|---|---|---|---|---|---|---|---|---|
+| licensed | 18 | 289 | 0.02 | 1 | 100.0% | 100.0% | 0.63 | 99.99% | PASS |
+| word | 18 | 186 | 0.00 | 0 | 100.0% | 100.0% | 0.11 | 100.00% | PASS |
+| classical | 9 | 130 | 0.02 | 2 | 99.8% | 66.7% | 1.59 | 99.87% | FAIL: flaggedShare 0.667 < 0.9 |
+
+| Family | missedSpeech | inventedSpeech | wrongSpeaker | missedHeading | inventedHeading | split | merge |
+|---|---|---|---|---|---|---|---|
+| licensed | 0 | 0 | 0 | 0 | 0 | 0 | 5 |
+| word | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| classical | 2 | 0 | 0 | 0 | 0 | 0 | 1 |
+
+## Round 2 — held-out
+
+Run once, after freezing at `0d1ca20`. Command: `npm run harness -- script-eval --set heldout --gate --verbose --out harness/out/script-eval/round2-heldout`.
+
+**Gate line: `SCRIPT GATE FAIL`**
+
+| Family | Docs | Pages | Fixes/page (≤ 1) | Worst page (≤ 4) | Speaker acc. (≥ 98%) | Flagged share (≥ 90%) | False flags/page (≤ 2) | Text acc. (≥ 99.5%) | Gate |
+|---|---|---|---|---|---|---|---|---|---|
+| licensed | 18 | 255 | 0.01 | 2 | 100.0% | 100.0% | 0.60 | 99.99% | PASS |
+| word | 18 | 186 | 0.64 | 6 | 97.1% | 98.3% | 0.22 | 97.11% | FAIL: worstPageFixes 6 > 4; speakerAccuracy 0.971 < 0.98; textAccuracy 0.9711 < 0.995 |
+| classical | 15 | 197 | 0.14 | 3 | 99.4% | 10.3% | 0.37 | 99.93% | FAIL: flaggedShare 0.103 < 0.9 |
+
+| Family | missedSpeech | inventedSpeech | wrongSpeaker | missedHeading | inventedHeading | split | merge |
+|---|---|---|---|---|---|---|---|
+| licensed | 0 | 0 | 1 | 0 | 0 | 0 | 2 |
+| word | 114 | 0 | 1 | 0 | 0 | 1 | 0 |
+| classical | 0 | 2 | 13 | 0 | 12 | 1 | 1 |
+
+Against round 1 held-out: licensed goes from FAIL to PASS (fixes/page 0.29 → 0.01, worst page 9 → 2, flagged share 17.1% → 100%), from S1. Word is unchanged in fixes (word 3; its false flags fall 1.20 → 0.22/page). Classical improves in fixes/page (0.22 → 0.14) and false flags (2.31 → 0.37/page, from S3 and loop 1), but its flagged share falls 32.6% → 10.3%: S6 removed most of round 1's flagged classical errors, and S3 made one wrong merge confident (below).
+
+### Causes, read after the final run
+
+The held-out documents were opened only after the run above, to name causes for the verdict. Nothing was changed after the run. Word 3 was inspected with the importer's own profile and line tags; classical with the per-fix listing of truth and predicted units.
+
+- **word 3 (114 missedSpeech, all flagged; 116 of the family's 116 fixes are in word 3 documents).** The cause is the leading tabs. A tab indents a line by 36 pt, and word 3 puts one before some lines at random. The profile then finds two bands, 0 and 36, takes 36 as the direction band (95% of direction-like lines are off the dialogue band, but only 10% carry a parenthesis and none are italic), and an own-line speech whose text line is tab-indented scores as a direction inside the speech (posterior ≈ 0.68). The speech is lost to the speaker, so speaker and text accuracy fall, and the worst page holds 6 such speeches. Round 1's second candidate, mixed-case own-line names, is not the cause: word 3's own-line names are capitals, and its mixed-case `Name:` cues are all found (confidence ≈ 0.99). The other two word fixes (seagull 3, seed 12) are an unflagged wrongSpeaker and split.
+- **classical, inventedHeading (12, 11 unflagged), one per Romeo document.** Romeo's cast list ends with a setting line that wraps: `SCENE. During the greater part of the Play in Verona; once, in` / `the` / `Fifth Act, at Mantua.`. S5 keeps the first line as front matter, but the wrapped `Fifth Act, at Mantua.` matches the `^(first|…|fifth|last)\s+act\b` heading pattern and is tagged a heading, with confidence ≈ 1 in all but one document.
+- **classical, wrongSpeaker (10, unflagged), Romeo 2 seed 11.** `CAPULET` prefix-merges into `CAPULET'S COUSIN`. Both are cast-list names, so the merge gets the cast-list confidence 0.95 and every Capulet speech is credited to his cousin without a flag. In round 1 the cast list wasn't read (S3), so the same merge sat at 0.8 and was flagged. The same document also reads the cast-list line `CHORUS.` as a cue (an unflagged inventedSpeech that swallows the rest of the cast list).
+- **classical, Hamlet 3 (6 fixes, 4 unflagged).** Hamlet 3 uses classical abbreviations (`Ham.`). A speaker who speaks once in another convention, such as `SECOND CLOWN.` inline or `ROSENCRANTZ AND GUILDENSTERN.` on its own line, isn't a cue token, and the speech joins the previous one at a confidence of about 0.86, just above the flag line.
+
+### Held-out against tuning
+
+- **word: 0.64 held-out vs 0.00 tune (+0.64, over the 0.3 limit).** The style behind it is word 3 (leading tabs, above). There is no word 3 document in the tuning set by design (spec §6.3), so this style was never tuned.
+- **classical: 0.14 vs 0.02 (+0.12, within the limit).** Romeo's wrapped setting line, and the `CAPULET'S COUSIN` merge in one document.
+- **licensed: 0.01 vs 0.02.**
+
+A unit whose boundary shifts scores a merge and a split (spec-literal), so one misplaced boundary counts as two fixes when reading fixes/page.
