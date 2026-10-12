@@ -5,6 +5,7 @@ import { useRoute, type Route } from './router';
 import { ImportScreen } from './screens/ImportScreen';
 import { Library } from './screens/Library';
 import { NotFound } from './screens/NotFound';
+import { Production } from './screens/Production';
 import { ServicesContext, type Services } from './services';
 
 function Screen({ route }: { route: Route }) {
@@ -15,6 +16,8 @@ function Screen({ route }: { route: Route }) {
       return <ImportScreen />;
     case 'import':
       return <ImportScreen productionId={route.id} />;
+    case 'production':
+      return <Production id={route.id} />;
     default:
       return <NotFound />;
   }
