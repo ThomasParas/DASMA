@@ -58,4 +58,12 @@ describe('bracketBlocks', () => {
       true,
     ]);
   });
+
+  it('does not count a bracket that closes mid-line, even when another bracket ends the line', () => {
+    expect(bracketBlocks(['(drops her cloak) Someone is coming now! (Goes to the door.)'])).toEqual([false]);
+  });
+
+  it('does not count a two-line block that closes mid-way through its second line', () => {
+    expect(bracketBlocks(['(He crosses to the window', 'and looks out) and calls to her.', 'Hello.'])).toEqual([false, false, false]);
+  });
 });

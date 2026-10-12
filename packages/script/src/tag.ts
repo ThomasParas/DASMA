@@ -28,29 +28,38 @@ export interface TaggedLine {
 
 const BRACKET_BLOCK_MAX_LINES = 12;
 
-/** Lines that belong to a bracketed block opening at a line start and closing at a line end. */
+/**
+ * Lines that belong to a bracketed block opening at a line start and closing at a line end.
+ * Depth is tracked character by character: the opening bracket must first return to depth 0 at
+ * the end of a line (only `.,;:!?` and whitespace may follow), so `(a) text (b)` is not a block.
+ */
 export function bracketBlocks(texts: readonly string[]): boolean[] {
   const out = texts.map(() => false);
   for (let i = 0; i < texts.length; i++) {
     const open = texts[i][0];
     if (open !== '(' && open !== '[') continue;
     const close = open === '(' ? ')' : ']';
-    let depth = 0;
-    for (let j = i; j < Math.min(texts.length, i + BRACKET_BLOCK_MAX_LINES); j++) {
-      for (const ch of texts[j]) {
-        if (ch === open) depth++;
-        else if (ch === close) depth--;
-      }
-      if (depth <= 0) {
-        if (/[)\]][.,;:!?]?$/.test(texts[j].trim())) {
-          for (let k = i; k <= j; k++) out[k] = true;
-          i = j;
-        }
-        break;
-      }
-    }
+    const end = closingLine(texts, i, open, close);
+    if (end < 0) continue;
+    for (let k = i; k <= end; k++) out[k] = true;
+    i = end;
   }
   return out;
+}
+
+/** The line where the bracket opening line `start` closes at a line end, or -1. */
+function closingLine(texts: readonly string[], start: number, open: string, close: string): number {
+  let depth = 0;
+  for (let j = start; j < Math.min(texts.length, start + BRACKET_BLOCK_MAX_LINES); j++) {
+    const text = texts[j];
+    for (let c = 0; c < text.length; c++) {
+      if (text[c] === open) depth++;
+      else if (text[c] === close) depth--;
+      else continue;
+      if (depth === 0) return /^[\s.,;:!?]*$/.test(text.slice(c + 1)) ? j : -1;
+    }
+  }
+  return -1;
 }
 
 interface Features {
