@@ -114,6 +114,40 @@ describe('buildParas', () => {
     expect(text.filter((t) => /HORATIO/i.test(t))).toHaveLength(1);
   });
 
+  it.each([
+    ['licensed 1 (own-line cues)', STYLES.licensed['1']],
+    ['word 1 (inline cues)', STYLES.word['1']],
+  ])('merges a same-speaker continuation with no visible boundary into one dialogue truth unit: %s', (_, style) => {
+    const play = {
+      ...MINI_PLAY,
+      units: [
+        { kind: 'heading' as const, text: 'ACT I' },
+        { kind: 'dialogue' as const, characterId: 'hamlet', text: 'Speak to me,\nmy friend.' },
+        { kind: 'dialogue' as const, characterId: 'hamlet', text: 'Go on, [Aside.] I pray.', continues: true },
+        { kind: 'dialogue' as const, characterId: 'hamlet', text: 'Once more.', continues: true },
+        { kind: 'dialogue' as const, characterId: 'horatio', text: 'Stay. [Exit.]' },
+        { kind: 'dialogue' as const, characterId: 'horatio', text: 'Again.', continues: true },
+      ],
+    };
+    const { paras, truth } = buildParas(play, play.units, style, mulberry32(1));
+    const units = truth.filter((t) => t.kind !== 'heading' && t.kind !== 'characterName');
+    expect(units.map((t) => [t.kind, t.characterId ?? '', t.text.replace(/[()]/g, '')])).toEqual([
+      ['dialogue', 'hamlet', 'Speak to me,\nmy friend.\nGo on,'],
+      ['direction', '', 'Aside.'],
+      // Only a leading text piece merges; after an inline direction the speech splits as usual.
+      ['dialogue', 'hamlet', 'I pray.\nOnce more.'],
+      ['dialogue', 'horatio', 'Stay.'],
+      ['direction', '', 'Exit.'],
+      // The previous speech ended in a direction, so the continuation is its own unit.
+      ['dialogue', 'horatio', 'Again.'],
+    ]);
+    // The continuation's paragraphs point at the unit they merged into.
+    const first = truth.indexOf(units[0]);
+    const goOn = paras.find((p) => runs(p).startsWith('Go on,'))!;
+    expect(goOn.truth[0]).toBe(first);
+    expect(paras.find((p) => runs(p) === 'Once more.')!.truth).toEqual([truth.indexOf(units[2])]);
+  });
+
   it('puts a direction that opens a speech between the cue and the dialogue', () => {
     const { truth } = buildParas(MINI_PLAY, MINI_PLAY.units, STYLES.licensed['1'], mulberry32(1));
     const clown = truth.findIndex((t) => t.kind === 'characterName' && t.text === 'FIRST CLOWN');

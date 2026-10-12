@@ -91,6 +91,13 @@ export function buildParas(play: SourcePlay, units: readonly SourceUnit[], style
 
     // Truth pieces, in order: dialogue text between inline directions, and the directions.
     const pieces: Array<{ kind: 'dialogue' | 'direction'; raw: string; truth: number }> = [];
+    // A same-speaker continuation straight after that speaker's dialogue shows no boundary (no cue, no heading),
+    // so its leading text extends the previous dialogue truth unit instead of starting a new one.
+    const lastTruth = truth[truth.length - 1];
+    const mergeInto =
+      u.continues === true && prev?.kind === 'dialogue' && prev.characterId === id && lastTruth?.kind === 'dialogue' && lastTruth.characterId === id
+        ? truth.length - 1
+        : -1;
     let last = 0;
     // Newlines at a piece's edges are kept so a verse line that starts with a direction starts a new paragraph.
     const textPiece = (raw: string): void => {
@@ -102,6 +109,11 @@ export function buildParas(play: SourcePlay, units: readonly SourceUnit[], style
         .filter(Boolean)
         .join('\n');
       if (!hasWords(truthText)) return;
+      if (mergeInto >= 0 && pieces.length === 0) {
+        truth[mergeInto].text += `\n${truthText}`;
+        pieces.push({ kind: 'dialogue', raw: t, truth: mergeInto });
+        return;
+      }
       pieces.push({ kind: 'dialogue', raw: t, truth: addTruth({ kind: 'dialogue', characterId: id, text: truthText }) });
     };
     for (const m of u.text.matchAll(/\[([^\]]*)\]/g)) {
