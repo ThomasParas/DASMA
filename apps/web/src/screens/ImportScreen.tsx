@@ -68,6 +68,7 @@ export function ImportScreen({ productionId }: { productionId?: string }) {
   };
 
   async function finish(outcome: ImportOutcome) {
+    setStatus({ phase: 'running', message: 'Saving…' });
     try {
       if (productionId) {
         services.pending.set(productionId, { mode: 'file', ...outcome });
@@ -129,7 +130,7 @@ export function ImportScreen({ productionId }: { productionId?: string }) {
         <section className="dropzone" onDragOver={(e) => e.preventDefault()} onDrop={onDrop}>
           <p>Drop PDF or Word files here, or</p>
           <label className="btn btn-plain">
-            Choose files
+            {files.length > 0 ? 'Add another file' : 'Choose files'}
             <input
               type="file"
               multiple
@@ -159,7 +160,7 @@ export function ImportScreen({ productionId }: { productionId?: string }) {
                   </li>
                 ))}
               </ol>
-              <p className="muted">To add another file, choose it too. Files are joined in this order.</p>
+              <p className="muted">Files are joined in this order.</p>
             </>
           )}
         </section>

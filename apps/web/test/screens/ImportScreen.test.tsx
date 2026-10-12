@@ -63,6 +63,8 @@ describe('Import screen', () => {
     renderApp('#/new', makeServices({ importer }));
     const user = userEvent.setup();
     await user.upload(await screen.findByLabelText('Choose files'), [txt('act1.txt'), txt('act2.txt')]);
+    expect(screen.queryByLabelText('Choose files')).toBeNull();
+    expect(screen.getByLabelText('Add another file')).toBeTruthy();
     expect((screen.getByLabelText('Title') as HTMLInputElement).value).toBe('act1');
     await user.click(screen.getByRole('button', { name: 'Move act2.txt up' }));
     await user.click(screen.getByRole('button', { name: 'Import' }));
@@ -82,5 +84,20 @@ describe('Import screen', () => {
     await waitFor(() => expect(window.location.hash).toBe(`#/p/${production.id}/reimport`));
     expect(services.pending.get(production.id)?.mode).toBe('file');
     expect((await services.repo.listVersions(production.id)).length).toBe(1);
+  });
+
+  it('creates only one production when Continue is clicked twice', async () => {
+    const importer = new FakeImporter(outcomeFor(undefined, undefined, [{ code: 'noSpeakers' }]));
+    const { services } = renderApp('#/new', makeServices({ importer }));
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Paste text' }));
+    await user.click(screen.getByLabelText('Script text'));
+    await user.paste('anything');
+    await user.click(screen.getByRole('button', { name: 'Import' }));
+    const cont = await screen.findByRole('button', { name: 'Continue' });
+    fireEvent.click(cont);
+    fireEvent.click(cont);
+    await waitFor(() => expect(window.location.hash).toMatch(/\/fix$/));
+    expect(await services.repo.listProductions()).toHaveLength(1);
   });
 });
