@@ -1,6 +1,6 @@
 import type { Script } from '@dasma/script';
 import { screen, waitFor, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { sampleScript } from '../fixtures';
 import { openFix } from './open-fix';
 
@@ -70,8 +70,8 @@ describe('Fix tags: speakers and characters', () => {
   it('moves selected speeches to another character', async () => {
     const { user, unitEl, stored } = await openFix();
     await user.click(unitEl('u10'));
-    await user.click(screen.getByRole('button', { name: 'Move speeches to…' }));
-    await user.click(within(screen.getByRole('region', { name: 'Move speeches to' })).getByRole('button', { name: /^LANE/ }));
+    await user.click(screen.getByRole('button', { name: 'Move selected speeches to…' }));
+    await user.click(within(screen.getByRole('region', { name: 'Move selected speeches to' })).getByRole('button', { name: /^LANE/ }));
     await waitFor(async () => expect((await stored()).units[9].characterId).toBe('lane'));
   });
 
@@ -81,7 +81,7 @@ describe('Fix tags: speakers and characters', () => {
     await user.click(within(panel).getAllByRole('button', { name: 'Rename' })[2]);
     await user.clear(screen.getByLabelText('New name for OKAY'));
     await user.type(screen.getByLabelText('New name for OKAY'), 'Okay Man{Enter}');
-    await user.click(within(panel).getAllByRole('button', { name: 'Aliases' })[0]);
+    await user.click(within(panel).getAllByRole('button', { name: 'Edit aliases' })[0]);
     await user.clear(screen.getByLabelText('Aliases for ALGERNON'));
     await user.type(screen.getByLabelText('Aliases for ALGERNON'), 'ALGY, MONCRIEFF{Enter}');
     await waitFor(async () => {
@@ -104,6 +104,17 @@ describe('Fix tags: speakers and characters', () => {
     await user.click(screen.getByRole('button', { name: 'Merge' }));
     await waitFor(async () => expect((await stored()).characters.map((c) => c.id)).toEqual(['algernon', 'lane']));
     await waitFor(async () => expect((await services.repo.getProduction(production.id))!.cast).toEqual({ lane: ['Ann', 'Sam'] }));
+  });
+
+  it('says so when the cast list cannot be updated after a merge', async () => {
+    const { user, services, stored } = await openFix(sampleScript(), { okay: ['Sam'], lane: ['Ann'] });
+    vi.spyOn(services.repo, 'updateProduction').mockRejectedValue(new Error('disk full'));
+    const panel = screen.getByRole('region', { name: 'Characters' });
+    await user.click(within(panel).getAllByRole('button', { name: 'Merge into…' })[2]);
+    await user.selectOptions(screen.getByLabelText('Merge OKAY into'), 'lane');
+    await user.click(screen.getByRole('button', { name: 'Merge' }));
+    expect((await screen.findByRole('alert')).textContent).toBe('The merge was applied, but the cast list could not be updated: disk full');
+    await waitFor(async () => expect((await stored()).characters.map((c) => c.id)).toEqual(['algernon', 'lane']));
   });
 
   it('splits a silently merged alias out (CAPULET → CAPULET’S COUSIN)', async () => {

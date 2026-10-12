@@ -123,9 +123,13 @@ export function FixWorkspace({ editor, script, production, onProductionChange }:
     const cast = { ...production.cast };
     cast[intoId] = [...new Set([...(cast[intoId] ?? []), ...cast[fromId]])];
     delete cast[fromId];
-    onProductionChange(await repo.updateProduction(production.id, { cast }));
+    try {
+      onProductionChange(await repo.updateProduction(production.id, { cast }));
+    } catch (e) {
+      setMessage(`The merge was applied, but the cast list could not be updated: ${e instanceof Error ? e.message : String(e)}`);
+    }
   };
-  const PICKER_TITLES = { speechBy: 'Speech by', setName: 'Character name', moveSpeeches: 'Move speeches to' } as const;
+  const PICKER_TITLES = { speechBy: 'Speech by', setName: 'Character name', moveSpeeches: 'Move selected speeches to' } as const;
   useShortcuts(
     actions.map((a) => ({ keys: a.keys, run: a.run, enabled: a.enabled })),
     panel.kind === 'none' || panel.kind === 'help',

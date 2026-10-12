@@ -50,7 +50,7 @@ function CharacterRow({ c, script, hints, count, highlighted, onHighlight, apply
             setValue(c.aliases.join(', '));
           }}
         >
-          Aliases
+          Edit aliases
         </Button>
         <Button
           disabled={others.length === 0}

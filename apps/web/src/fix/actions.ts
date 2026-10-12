@@ -138,7 +138,7 @@ export function buildFixActions(ctx: FixContext): FixAction[] {
     },
     {
       id: 'moveSpeeches',
-      label: 'Move speeches to…',
+      label: 'Move selected speeches to…',
       keys: [],
       group: 'tag',
       enabled: has && selected.every((u) => u.kind === 'dialogue'),
